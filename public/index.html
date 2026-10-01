@@ -647,6 +647,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .av.zgast{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--chip);color:var(--tx);font-weight:800;flex-shrink:0}
 .zpre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:14px;margin:6px 0 0}
 .pfopt[disabled]{opacity:.5;cursor:not-allowed}
+.ortrow{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-bottom:1px solid var(--line2)}.ortrow:last-child{border-bottom:0}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -659,7 +660,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.23";
+const APP_VERSION = "Beta 2.24";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -1127,23 +1128,17 @@ A.meineDatenAuf = el => { const rid=el.dataset.rid; if(rid!==S.rid) setTrip(rid)
 function pastCard(r,m){ const a=art(r); return `<div class="card tight"><div class="row"><span style="color:var(--mut)">${ic(a.icon,24)}</span><button style="all:unset;cursor:pointer" class="grow" data-act="openTrip" data-rid="${r.id}"><div class="ttl">${esc(r.titel)}</div><div class="small mut">${fRange(r.von,r.bis)}${r.ort?` · ${esc(r.ort)}`:''}</div></button><button class="btn xs sec" data-act="nochmal" data-rid="${r.id}">Nochmal zusammen?</button></div>${canMod(r)?`<div class="row" style="gap:8px"><button class="btn xs ghost" data-act="reiseBearbeiten" data-rid="${r.id}">${ic('pencil',14)} Bearbeiten</button><button class="btn xs ghost" style="color:var(--pinktx)" data-act="reiseLoeschen" data-rid="${r.id}">${ic('trash',14)} Löschen</button></div>`:''}</div>`; }
 function inviteText(r,code){ const abst=r.status==='abstimmung'; const link = FB ? `${APP_LINK}/?code=${code}` : APP_LINK;
   return [
-    'Hallo!',
-    `${nm(S.uid)} lädt dich ${abst?'zur Koffer-Konferenz':'zur Reise'} „${r.titel}“ ein.`,
-    abst ? 'Wir planen unseren nächsten gemeinsamen Urlaub. In der App stimmen alle ab, wann und wohin es geht.'
-         : `Es geht${r.ort?` nach ${r.ort}`:''}${r.von?` vom ${fD(r.von)} bis ${fDY(r.bis)}`:''}.`,
-    'Poolposition ist unsere App für den gemeinsamen Urlaub: Tagesplan mit Terminen und Treffpunkten, Gruppenchat, gemeinsames Fotoalbum und ein bisschen Wettbewerb um gelbes Trikot und Sektflasche.',
-    ...(FB ? [
-      'So kommst du rein: Link öffnen und ggf. ein kostenloses Konto anlegen.',
-      link,
-      'Der Code ist dann schon eingetragen.',
-      `Falls nicht, tippe „Mit Einladungscode beitreten“ und gib folgenden Code ein: ${code}`
-    ] : [
-      'So kommst du rein: Link öffnen, anmelden, „Beitreten“ tippen und folgenden Code eingeben:',
-      link,
-      code
-    ]),
+    abst ? 'Hey Leute, ich habe angefangen, unsere Reise zu planen. Jetzt müsst ihr sagen, wie es weiter geht. Eure Stimme ist erforderlich! 🗳️'
+         : `Hey Leute, unsere Reise${r.ort?` nach ${r.ort}`:''} nimmt Gestalt an${r.von?` (${fD(r.von)} bis ${fDY(r.bis)})`:''}. Seid dabei, eure Stimme und eure Ideen zählen! 🌴`,
     '',
-    `Die Einladung gilt ${EINL_TAGE} Tage.`
+    `👉 Klickt den Link an: ${link}`,
+    '',
+    `Oder wenn ihr schon bei Poolposition angemeldet seid, gebt den Code ein: ${code}`,
+    '',
+    'Die Reise nimmt Fahrt auf. 🚀',
+    '',
+    `Beste Grüße von eurer Reiseleitung`,
+    nm(S.uid)
   ].join('\n'); }
 A.openTrip = async el => { const rid=el.dataset.rid; const m=myM(rid);
   if(m && m.status==='eingeladen'){ try{ await mDoc(rid,S.uid).update({status:'teilnehmer', seit:now()}); }catch(e){ fail(e,'Beitreten'); return; } }
@@ -1195,7 +1190,7 @@ A.createReise = async el => { const f=S.form; const abst=f.modus==='abst'; const
     for(const o of orte) await S.db.collection('vorschlaege').add({rid, typ:'ort', name:o.name, link:o.link, by:S.uid, createdAt:now()});
     for(const u of (f.invite||[])) if(u!==S.uid) await mDoc(rid,u).set({rid, uid:u, status:'eingeladen', seit:now(), eingeladenVon:S.uid});
     if(!abst) await S.db.collection('nachrichten').add({rid, typ:'system', text:`${nm(S.uid)} hat die Reise angelegt.`, by:S.uid, createdAt:now()});
-    S.reisen[rid]={id:rid,...doc}; toast(abst?'Koffer-Konferenz gestartet':'Reise angelegt'); openTrip(rid);
+    S.reisen[rid]={id:rid,...doc}; toast(abst?'Koffer-Konferenz gestartet':'Reise angelegt'); einlNachAnlegen(rid);
   }catch(e){ fail(e,'Anlegen'); el.disabled=false; }
 };
 A.nochmal = el => { const r=S.reisen[el.dataset.rid]; if(!r) return;
@@ -2022,22 +2017,28 @@ function einlStatus(e){ if(e.widerrufen) return {k:'aus', t:'zurückgezogen'}; i
 function codeRow(r){
   if(r.admin!==S.uid) return `<p class="small mut">${ic('ticket',16,'style="vertical-align:-3px"')} Neue Leute einladen kann nur ${esc(nm(r.admin))} als Admin der ${r.status==='abstimmung'?'Koffer-Konferenz':'Reise'}.</p>`;
   return `<button class="btn sm" style="align-self:flex-start" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',16)} Leute einladen</button>`; }
-A.einladenOeffnen = el => { const rid=el.dataset.rid; if(rid && rid!==S.rid) setTrip(rid); S.ui.einl=null; S.ui.einlListe=null; go('einladen'); };
+/* Nach dem Anlegen: Schritt „Leute einladen“, dann erst in die Reise */
+function einlNachAnlegen(rid){ setTrip(rid); S.ui.einl=null; S.ui.einlListe=null; S.ui.einlStart=rid; go('einladen',{form:{einlAnz:8}}); }
+A.einlFertig = el => { const rid=S.ui.einlStart||S.rid; const spaeter=el.dataset.spaeter==='1'; S.ui.einlStart=null; S.ui.einl=null; toast(spaeter?'Du kannst jederzeit später einladen.':'Einladungen verschickt'); openTrip(rid); };
+A.einladenOeffnen = el => { const rid=el.dataset.rid; if(rid && rid!==S.rid) setTrip(rid); S.ui.einl=null; S.ui.einlListe=null; S.ui.einlStart=null; go('einladen'); };
 
 /* Seite „Leute einladen“ */
 V.einladen = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(r.admin!==S.uid && !istGlobal()) return `${hdrPlain('Einladen')}${backBtn()}<div class="warn">Nur der Admin kann Leute einladen.</div>`;
   if(S.ui.einlListe===null || S.ui.einlListe===undefined || S.ui.einlRid!==r.id) ladeEinladungen(r.id);
   const e=S.ui.einl; const anz=+S.form.einlAnz||1;
   const liste=(S.ui.einlListe||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  return `${hdrPlain('Einladen')}${backBtn()}<h1>Leute einladen</h1><p class="small mut">Für „${esc(r.titel)}“. Jede Einladung bekommt einen eigenen Code. Er gilt ${EINL_TAGE} Tage und nur für so viele Personen, wie du auswählst. Weitergeleitete Codes funktionieren danach nicht mehr.</p>
+  const st0=S.ui.einlStart===r.id;
+  return `${hdrPlain('Einladen')}${st0?'':backBtn()}${st0?'<span class="tag"><span class="dot"></span>NÄCHSTER SCHRITT</span>':''}<h1>Leute zur Reise einladen</h1><p class="small mut">Für „${esc(r.titel)}“. Jede Einladung bekommt einen eigenen Code. Er gilt ${EINL_TAGE} Tage und nur für so viele Personen, wie du auswählst. Weitergeleitete Codes funktionieren danach nicht mehr.</p>
   ${e?`<div class="card hot"><div class="row between"><span class="tag"><span class="dot"></span>NEUE EINLADUNG</span><span class="small" style="color:var(--redtx)">für ${e.max} ${e.max===1?'Person':'Personen'}</span></div>
       <div class="code">${e.code.split('').map(c=>`<span>${esc(c)}</span>`).join('')}</div>
       <div class="row"><button class="btn sm sec grow" data-act="einlKopieren">${ic('copy',16)} Kopieren</button><a class="btn sm wa grow" href="https://wa.me/?text=${encodeURIComponent(inviteText(r,e.code))}" target="_blank" rel="noopener" data-act-link="einlVerschickt">Per WhatsApp</a></div>
+      <div class="small" style="white-space:pre-wrap;background:var(--card2,rgba(255,255,255,.06));border-radius:12px;padding:10px">${esc(inviteText(r,e.code))}</div>
       <span class="tiny" style="color:var(--redtx)">Gültig bis ${fStamp(e.bis)}.${e.verschickt?' Verschickt.':''}</span>
       ${e.verschickt?`<button class="btn block yel" data-act="einlNeu">Nächste Einladung erstellen</button>`:''}</div>`
    :`<div class="card"><label class="f">Für wie viele Personen?<select class="in" id="f_einlAnz">${[1,2,3,4,5,6,8,10].map(n=>`<option value="${n}" ${n===anz?'selected':''}>${n} ${n===1?'Person':'Personen'}${n===1?' (empfohlen)':''}</option>`).join('')}</select></label>
       <span class="tiny mut">Für eine WhatsApp-Gruppe wählst du die Zahl der Leute darin. Sobald so viele beigetreten sind, ist der Code verbraucht.</span>
       <button class="btn block" data-act="einlErstellen">${ic('plus',18)} Einladung erstellen</button></div>`}
+  ${st0?`<div class="col" style="gap:8px"><button class="btn block yel" data-act="einlFertig">Einladungen verschickt</button><button class="btn block sec" data-act="einlFertig" data-spaeter="1">Einladungen später verschicken</button></div>`:''}
   <h2>Einladungen</h2>
   ${S.ui.einlListe==null?'<p class="small mut">Wird geladen …</p>':liste.length?`<div class="list">${liste.map(x=>{ const st=einlStatus(x); return `<div class="li"><span class="num" style="font-weight:800;letter-spacing:.12em;${st.k==='offen'?'':'opacity:.5'}">${esc(x.id)}</span><span class="grow col" style="gap:2px"><span class="small">${x.used||0} von ${x.max||1} genutzt</span><span class="tiny mut">${st.k==='offen'?`gültig bis ${fD(isoDay(new Date(x.bis)))}`:''}</span></span>${st.k==='offen'?`<button class="btn xs ghost" data-act="einlWiderruf" data-code="${esc(x.id)}">Zurückziehen</button>`:`<span class="chip">${st.t}</span>`}</div>`; }).join('')}</div>`:'<div class="empty small">Noch keine Einladungen erstellt.</div>'}`; };
 async function ladeEinladungen(rid){ S.ui.einlRid=rid; S.ui.einlListe=null; try{ const s=await S.db.collection('einladungen').where('rid','==',rid).get(); S.ui.einlListe=snapDocs(s); }catch(e){ console.warn(e); S.ui.einlListe=[]; } render(); }
@@ -3366,6 +3367,7 @@ V.konferenz = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'
   const stepper = `<div class="stepper">${RD.map((rd,i)=>{ const s=rd.status==='fertig'?S.rt.vorschlaege.find(o=>o.id===rd.sieger):null; return `<div class="step ${rd.status}"><span class="stepnr">${rd.status==='fertig'?ic('check',14):i+1}</span><span class="col" style="gap:0;min-width:0"><b class="small">${RUNDEN[rd.typ].kurz}</b><span class="tiny ell">${s?esc(optLabel(s)):rd.status==='offen'?'läuft':''}</span></span></div>`; }).join('<span class="stepline"></span>')}<span class="stepline"></span><div class="step ziel"><span class="stepnr">${ic('suitcase',14)}</span><span class="col" style="gap:0"><b class="small">Reise</b><span class="tiny">steht</span></span></div></div>`;
   return `${kopf}
   ${stepper}
+  ${adm?`<button class="btn block sec" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',18)} Einladung zur Reise verschicken</button>`:''}
   ${offen.length?standKarte(r, mem, abgestimmt):''}${eingeladen?`<span class="tiny mut" style="margin-top:-6px">${eingeladen} eingeladen, noch nicht beigetreten</span>`:''}
   ${offen.length ? offen.map(rd=>rundeKarte(r,rd,adm)).join('')+frageDazuHtml(r,adm) : `<div class="card gold"><div class="ttl">Alle Runden sind entschieden</div><p class="small" style="color:var(--goldtx)">${adm?'Jetzt nur noch die Reise festlegen.':`${esc(nm(r.admin))} legt die Reise gleich fest.`}</p>${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">Reise festlegen</button>`:''}</div>`}
   ${adm?`<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">${ic('gear',14)} Konferenz verwalten</summary>
@@ -3382,7 +3384,7 @@ function rundeKarte(r, rd, adm){ const opts=optionen(r,rd); const lead=vorn(opts
   <h2 style="margin:0">${RUNDEN[rd.typ].frage}${monat?` <span class="mut" style="font-weight:600">im ${esc(monatLabel(monat.monat))}</span>`:''}</h2>
   <p class="small mut" style="margin:0">Tippe bei jedem Vorschlag, ob er dir passt.</p>
   ${opts.length?`<div class="col" style="gap:8px">${opts.map(o=>{ const w=wertung(o); const v=my(o); const n=w.ja.length+w.vl.length+w.ne.length;
-    return `<div class="opt ${lead===o?'vorn':''}"><div class="row between" style="gap:8px"><div class="col" style="gap:1px;min-width:0"><b class="ell">${esc(optLabel(o))}${lead===o?' <span class="chip yel" style="height:22px;font-size:11.5px">vorn</span>':''}</b>${optInfo(o)?`<span class="tiny mut">${optInfo(o)}</span>`:''}</div>
+    return `<div class="opt ${lead===o?'vorn':''}"><div class="row between" style="gap:8px"><div class="col" style="gap:1px;min-width:0"><b class="ell">${esc(optLabel(o))}${lead===o?' <span class="chip yel" style="height:22px;font-size:11.5px">vorn</span>':''}</b>${optInfo(o)?`<span class="tiny mut">${optInfo(o)}</span>`:''}${o.typ==='ort'&&(o.by===S.uid||canMod(r))&&!r.geschlossen?`<button class="link tiny" style="align-self:flex-start;color:var(--mut)" data-act="ortLinkAuf" data-id="${o.id}">${o.link?'Link ändern':'Link hinzufügen'}</button>`:''}</div>
       ${(o.by===S.uid||adm)?`<button class="icbtn sm0" data-act="delVorschlag" data-id="${o.id}" aria-label="Vorschlag entfernen">${ic('x',16)}</button>`:''}</div>
       <div class="vote3" role="group" aria-label="Deine Antwort zu ${esc(optLabel(o))}"><button class="ja" aria-pressed="${v==='ja'}" data-act="waehle" data-id="${o.id}" data-val="ja">Passt</button><button class="vl" aria-pressed="${v==='vl'}" data-act="waehle" data-id="${o.id}" data-val="vl">Notfalls</button><button class="ne" aria-pressed="${v==='ne'}" data-act="waehle" data-id="${o.id}" data-val="ne">Geht nicht</button></div>
       ${n?`<div class="balken" aria-label="${w.ja.length} passt, ${w.vl.length} notfalls, ${w.ne.length} geht nicht"><i class="ja" style="flex:${w.ja.length}"></i><i class="vl" style="flex:${w.vl.length}"></i><i class="ne" style="flex:${w.ne.length}"></i></div>
@@ -3413,7 +3415,7 @@ A.addSpeichern = async el => { const r=cur(); const rd=runden(r).find(x=>x.id===
   const neu=[];
   if(rd.typ==='monat'){ Object.keys(f).filter(k=>k.startsWith('m_')&&f[k]).forEach(k=>neu.push({...base, monat:k.slice(2)})); if(!neu.length) return toast('Bitte mindestens einen Monat antippen.'); }
   else if(rd.typ==='zeit'){ if(!f.nvon||!f.nbis) return toast('Bitte Beginn und Ende wählen.'); if(f.nbis<f.nvon) return toast('Das Ende liegt vor dem Beginn.'); neu.push({...base, von:f.nvon, bis:f.nbis}); }
-  else { const n=(f.nort||'').trim(); if(!n) return toast('Bitte einen Ort eingeben.'); neu.push({...base, name:n, link:(f.nlink||'').trim()}); }
+  else { const n=(f.nort||'').trim(); if(!n) return toast('Bitte einen Ort eingeben.'); neu.push({...base, name:n, link:ortLinkFix(f.nlink)}); }
   try{ await vorRundeSichern(r); for(const d of neu) await S.db.collection('vorschlaege').add(d); S.ui.addRunde=null; S.form={}; toast(neu.length>1?`${neu.length} Vorschläge hinzugefügt`:'Vorschlag hinzugefügt'); render(); }catch(e){ fail(e,'Vorschlagen'); } };
 /* Ältere Konferenzen: Runden beim ersten Bearbeiten fest speichern */
 async function vorRundeSichern(r){ if(Array.isArray(r.runden) && r.runden.length) return; if(!isAdmin(r)) return; const rd=runden(r).map(({alt,...x})=>x); await S.db.doc(`reisen/${r.id}`).update({runden:rd}); r.runden=rd; }
@@ -3476,8 +3478,11 @@ const altNeu = V.neu, altCreate = A.createReise;
 const fragenVon = f => f.fragen || (f.start ? {[f.start]:true} : {zeit:true, ort:true});
 A.frageWahl = el => { const fr={...fragenVon(S.form)}; fr[el.dataset.k]=!fr[el.dataset.k]; S.form.fragen=fr; render(); };
 A.zeitDazu = ()=>{ const f=S.form; if(!f.nvon||!f.nbis) return toast('Bitte im Kalender Anreise und Abreise antippen.'); f.zlist=[...(f.zlist||[]), {von:f.nvon, bis:f.nbis}].filter((z,i,a)=>a.findIndex(y=>y.von===z.von&&y.bis===z.bis)===i); f.nvon=''; f.nbis=''; render(); };
-A.ortDazu = ()=>{ const f=S.form; const n=(f.nort||'').trim(); if(!n) return toast('Bitte einen Ort eingeben.'); f.olist=[...(f.olist||[]), {name:n, link:(f.nlink||'').trim()}]; f.nort=''; f.nlink=''; render(); };
-A.listeWeg = el => { const l=el.dataset.l; S.form[l]=(S.form[l]||[]).filter((x,i)=>i!==+el.dataset.i); render(); };
+/* Links der bereits übernommenen Orte aus den Eingabefeldern sichern */
+const ortLinkFix = l => { l=String(l||'').trim(); return l && !/^https?:\/\//i.test(l) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(l) ? 'https://'+l : l; };
+function olistSync(){ const f=S.form; f.olist=(f.olist||[]).map((o,i)=>({...o, link:ortLinkFix(f['olk'+i]!==undefined?f['olk'+i]:o.link)})); Object.keys(f).filter(k=>k.startsWith('olk')).forEach(k=>delete f[k]); }
+A.ortDazu = ()=>{ olistSync(); const f=S.form; const n=(f.nort||'').trim(); if(!n) return toast('Bitte einen Ort eingeben.'); f.olist=[...(f.olist||[]), {name:n, link:ortLinkFix(f.nlink)}]; f.nort=''; f.nlink=''; render(); };
+A.listeWeg = el => { const l=el.dataset.l; if(l==='olist') olistSync(); S.form[l]=(S.form[l]||[]).filter((x,i)=>i!==+el.dataset.i); render(); };
 V.neu = ()=>{ const f=S.form; if(f.modus!=='abst') return altNeu(); const a=f.art||'strand'; const fr=fragenVon(f);
   return `${hdrPlain('Neue Reise')}<button class="back" data-act="setForm" data-k="modus" data-val="">${ic('back',20)} Zurück</button>
   <h1>Koffer-Konferenz starten</h1>
@@ -3491,8 +3496,8 @@ V.neu = ()=>{ const f=S.form; if(f.modus!=='abst') return altNeu(); const a=f.ar
   ${fr.monat?`<div class="card tight"><b>Welche Monate kommen infrage?</b><div class="row wrap" style="gap:6px">${naechsteMonate().map(m=>`<button class="chip ${f['m_'+m]?'yel':''}" style="border:0;cursor:pointer;height:34px" data-act="formToggle" data-k="m_${m}">${esc(monatLabel(m))}</button>`).join('')}</div></div>`:''}
   ${fr.zeit?`<div class="card tight"><b>Welche Zeiträume kommen infrage?</b>${(f.zlist||[]).length?`<div class="col" style="gap:6px">${f.zlist.map((z,i)=>`<div class="blk">${ic('check',14)}<span class="grow">${WD[parseDay(z.von).getDay()]} ${fD(z.von)} – ${WD[parseDay(z.bis).getDay()]} ${fDY(z.bis)}</span><span class="tiny mut">${dauerText(z.von,z.bis)}</span><button class="icbtn sm0" data-act="listeWeg" data-l="zlist" data-i="${i}" aria-label="Entfernen">${ic('x',14)}</button></div>`).join('')}</div>`:''}
     ${kalender('n')}<button class="btn sm sec" data-act="zeitDazu" ${f.nvon&&f.nbis?'':'disabled'}>${ic('plus',16)} Zeitraum übernehmen</button></div>`:''}
-  ${fr.ort?`<div class="card tight"><b>Welche Orte kommen infrage?</b>${(f.olist||[]).length?`<div class="col" style="gap:6px">${f.olist.map((o,i)=>`<div class="blk">${ic('pin',14)}<span class="grow">${esc(o.name)}</span><button class="icbtn sm0" data-act="listeWeg" data-l="olist" data-i="${i}" aria-label="Entfernen">${ic('x',14)}</button></div>`).join('')}</div>`:''}
-    <input class="in" id="f_nort" maxlength="50" placeholder="Ort, z. B. Kreta" data-enter="ortDazu"><input class="in" id="f_nlink" maxlength="300" placeholder="Link oder Notiz (freiwillig)"><button class="btn sm sec" data-act="ortDazu">${ic('plus',16)} Ort übernehmen</button></div>`:''}
+  ${fr.ort?`<div class="card tight"><b>Welche Orte kommen infrage?</b>${(f.olist||[]).length?`<div class="col" style="gap:6px">${f.olist.map((o,i)=>`<div class="ortrow"><div class="blk">${ic('pin',14)}<b class="grow ell">${esc(o.name)}</b><button class="icbtn sm0" data-act="listeWeg" data-l="olist" data-i="${i}" aria-label="${esc(o.name)} entfernen">${ic('x',14)}</button></div><input class="in" id="f_olk${i}" maxlength="300" inputmode="url" placeholder="Link zu ${esc(o.name)} (freiwillig, z. B. das Hotel)" value="${esc(o.link||'')}" aria-label="Link zu ${esc(o.name)}"></div>`).join('')}</div>`:''}
+    <span class="small mut" style="font-weight:600">Weiterer Ort</span><input class="in" id="f_nort" maxlength="50" placeholder="Ort, z. B. Kreta" data-enter="ortDazu"><input class="in" id="f_nlink" maxlength="300" inputmode="url" placeholder="Link zu diesem Ort (freiwillig, z. B. das Hotel)"><button class="btn sm sec" data-act="ortDazu">${ic('plus',16)} Ort übernehmen</button></div>`:''}
   <label class="f">Abstimmen bis (freiwillig)<input class="in" type="date" id="f_deadline" min="${today()}"></label>
   <label class="toggle"><input type="checkbox" id="f_offen" ${f.offen===false?'':'checked'}> Alle dürfen Vorschläge ergänzen</label>
   <button class="btn block" data-act="createReise">Koffer-Konferenz starten</button>`; };
@@ -3501,7 +3506,7 @@ A.createReise = async el => { const f=S.form; if(f.modus!=='abst') return altCre
   const typen=['monat','zeit','ort'].filter(t=>fr[t]); if(!typen.length) return toast('Worüber wollt ihr abstimmen? Bitte mindestens eine Frage wählen.');
   // noch nicht übernommene Eingaben mitnehmen
   const zl=[...(f.zlist||[])]; if(f.nvon&&f.nbis&&!zl.some(z=>z.von===f.nvon&&z.bis===f.nbis)) zl.push({von:f.nvon, bis:f.nbis});
-  const ol=[...(f.olist||[])]; if((f.nort||'').trim()) ol.push({name:f.nort.trim(), link:(f.nlink||'').trim()});
+  olistSync(); const ol=[...(f.olist||[])]; if((f.nort||'').trim()) ol.push({name:f.nort.trim(), link:ortLinkFix(f.nlink)});
   const ml=Object.keys(f).filter(k=>k.startsWith('m_')&&f[k]).sort().map(k=>({monat:k.slice(2)}));
   const opts={monat:ml, zeit:zl, ort:ol};
   for(const t of typen) if(!opts[t].length) return toast(t==='monat'?'Bitte mindestens einen Monat antippen.':t==='zeit'?'Bitte mindestens einen Zeitraum im Kalender wählen.':'Bitte mindestens einen Ort eingeben.');
@@ -3513,11 +3518,19 @@ A.createReise = async el => { const f=S.form; if(f.modus!=='abst') return altCre
     await mDoc(rid,S.uid).set({rid, uid:S.uid, status:'teilnehmer', seit:now()});
     for(const rd of RD) for(const o of opts[rd.typ]) await S.db.collection('vorschlaege').add({rid, typ:rd.typ, runde:rd.id, ...o, by:S.uid, createdAt:now()});
     for(const u of (f.invite||[])) if(u!==S.uid) await mDoc(rid,u).set({rid, uid:u, status:'eingeladen', seit:now(), eingeladenVon:S.uid});
-    S.reisen[rid]={id:rid,...doc}; toast('Koffer-Konferenz gestartet'); openTrip(rid);
+    S.reisen[rid]={id:rid,...doc}; toast('Koffer-Konferenz gestartet'); einlNachAnlegen(rid);
   }catch(e){ fail(e,'Anlegen'); el.disabled=false; } };
 /* „Eigene Koffer-Konferenz“ nach einer Absage: mit den übrigen Zeiträumen weitermachen */
 A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.find(v=>v.typ==='zeit'&&v.id!==r.zeitId);
   go('neu',{form:{modus:'abst', art:r.reiseart, titel:`${r.titel} – Plan B`, start:z?'zeit':'monat', nvon:z?.von||'', nbis:z?.bis||'', invite:S.rt.mitglied.filter(m=>m.status==='abgesagt'&&m.uid!==S.uid).map(m=>m.uid)}}); };
+
+/* Link zu einem vorgeschlagenen Ort nachträglich setzen oder ändern (Vorschlagender oder Admin) */
+A.ortLinkAuf = el => { const o=S.rt.vorschlaege.find(x=>x.id===el.dataset.id); if(!o) return; S.form.olinkId=o.id; S.form.olinkWert=o.link||''; openOv('ortlink',{}); };
+OV.ortlink = ()=>{ const o=S.rt.vorschlaege.find(x=>x.id===S.form.olinkId); return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Link zum Ort"><h2>Link zu ${esc(o?.name||'Ort')}</h2><p class="small mut">Zum Beispiel das Hotel oder die Unterkunft. Alle in der Abstimmung können den Link antippen.</p>
+  <label class="f">Link<input class="in" id="f_olinkWert" maxlength="300" inputmode="url" placeholder="https://…" value="${esc(S.form.olinkWert||'')}"></label>
+  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ortLinkSpeichern">Speichern</button></div></div>`; };
+A.ortLinkSpeichern = async ()=>{ const id=S.form.olinkId; const l=ortLinkFix(S.form.olinkWert);
+  try{ await S.db.doc(`vorschlaege/${id}`).update({link:l}); closeOv(); toast(l?'Link gespeichert':'Link entfernt'); }catch(e){ fail(e,'Speichern'); } };
 /* ===================== Kalender zum Auswählen eines Zeitraums =====================
    Erster Tipp = Anreise, zweiter Tipp = Abreise. Die Auswahl landet in S.form[<prefix>von/bis],
    damit die bestehenden Formulare sie direkt übernehmen. Angezeigt wird, wie viele Tage gewählt sind. */
@@ -6687,6 +6700,11 @@ const zimmerWahlFeld = f => `<label class="toggle" style="align-items:flex-start
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 2.24', t:'Einladen nach dem Anlegen, Link pro Ort', p:[
+    'Nach dem Anlegen einer Reise geht es gleich weiter mit „Leute einladen“: Code und Link mit fertigem Einladungstext, bequem per WhatsApp.',
+    'In der Abstimmung gibt es dafür einen eigenen Button.',
+    'In der Koffer-Konferenz bekommt jeder vorgeschlagene Ort seinen eigenen Link, zum Beispiel zum Hotel.',
+    'Den Link kannst du später ändern oder hinzufügen.'] },
   { v:'Beta 2.23', t:'Willkommen, Assistent und Gruppenprofil', p:[
     'Neue Mitglieder werden Schritt für Schritt zur ersten Reise geführt.',
     'Das Gruppenprofil schlägt passende Funktionen vor: Herzen, Barometer und Herde lassen sich pro Reise ein- und ausschalten.',

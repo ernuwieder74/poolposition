@@ -97,6 +97,7 @@ service cloud.firestore {
     match /vorschlaege/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
       allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me();
+      allow update: if (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()) && onlyChanges(['link']);
       allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
     }
     match /stimmen/{id} {
