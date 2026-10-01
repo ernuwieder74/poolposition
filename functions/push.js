@@ -132,6 +132,8 @@ exports.zimmerBudgetZaehler = onDocumentWritten({ ...TRIG, document: 'zimmerbudg
   const rid = (ev.data?.after?.data() || ev.data?.before?.data() || {}).rid; if (!rid) return;
   const s = await db.collection('zimmerbudget').where('rid', '==', rid).get();
   const l = s.docs.map(d => +d.data().betrag).filter(x => x > 0);
-  const info = l.length >= 3 ? { n: l.length, min: Math.min(...l), max: Math.max(...l), avg: Math.round(l.reduce((a, b) => a + b, 0) / l.length) } : null;
+  // Wer eine Angabe gemacht hat (ohne Betrag) und wie viele „Egal“ gewählt haben, sieht die Gruppe immer; Spanne und Schnitt erst ab 3 Beträgen
+  const info = { abgegeben: s.docs.map(d => d.data().uid).filter(Boolean), egal: s.docs.filter(d => d.data().egal === true).length,
+    ...(l.length >= 3 ? { n: l.length, min: Math.min(...l), max: Math.max(...l), avg: Math.round(l.reduce((a, b) => a + b, 0) / l.length) } : {}) };
   return db.doc(`reisen/${rid}`).update({ zimmerBudget: info }).catch(e => logger.warn('zimmerBudget', rid, e.message));
 });
