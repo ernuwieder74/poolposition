@@ -107,7 +107,12 @@ service cloud.firestore {
     match /aktivitaeten/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin() || isGast(id);
       allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me();
-      allow update: if isMember(resource.data.rid) || isAdmin() || (recht('ausblenden') && onlyChanges(['ausgeblendet']));
+      // Ändern darf nur, wer den Termin angelegt hat, der Admin der Reise und die Badeaufsicht.
+      // Alle anderen Mitglieder dürfen ausschließlich ihre eigene Antwort „dabei“ ändern, sonst nichts.
+      allow update: if isAdmin() || resource.data.by == me() || isTripAdmin(resource.data.rid)
+        || (recht('ausblenden') && onlyChanges(['ausgeblendet']))
+        || (isMember(resource.data.rid) && onlyChanges(['dabei'])
+            && request.resource.data.get('dabei', {}).diff(resource.data.get('dabei', {})).affectedKeys().hasOnly([me()]));
       allow delete: if resource.data.by == me() || isAdmin();
     }
     match /nachrichten/{id} {
@@ -292,6 +297,22 @@ service cloud.firestore {
       allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
     }
     // Aufgaben, Einkaufsliste und Musik der Gruppe
+    /* Ansagen: nur der Admin der Reise schreibt, Mitglieder lesen und tragen ausschließlich ihr eigenes „gelesen“ ein */
+    match /rundnachrichten/{id} {
+      allow read: if isMember(resource.data.rid) || isAdmin();
+      allow create: if isTripAdmin(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'createdAt', 'gelesen']) && request.resource.data.text.size() <= 280;
+      allow update: if isMember(resource.data.rid) && onlyChanges(['gelesen']) && request.resource.data.get('gelesen', {}).diff(resource.data.get('gelesen', {})).affectedKeys().hasOnly([me()]);
+      allow delete: if isTripAdmin(resource.data.rid) || isAdmin();
+    }
+    /* Ideen-Pool der Koffer-Konferenz: alle Mitglieder werfen Ideen ein; jeder ändert nur seine eigene Stimme */
+    match /ideen/{id} {
+      allow read: if isMember(resource.data.rid) || isAdmin();
+      allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.titel.size() <= 60
+        && request.resource.data.keys().hasOnly(['rid', 'titel', 'notiz', 'link', 'by', 'createdAt', 'stimmen']);
+      allow update: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()
+        || (isMember(resource.data.rid) && onlyChanges(['stimmen']) && request.resource.data.get('stimmen', {}).diff(resource.data.get('stimmen', {})).affectedKeys().hasOnly([me()]));
+      allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
+    }
     match /aufgaben/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
       allow create: if isTripAdmin(request.resource.data.rid) || isAdmin()
@@ -315,6 +336,13 @@ service cloud.firestore {
       allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
     }
     // Anreise: jede Person für sich, für Begleitpersonen deren Ersteller, der Admin für alle. Sichtbar für alle Mitglieder.
+    /* Notfallpass: nur die Person selbst und die von ihr gewählten Mitglieder der Reise (an = ['alle'] oder Liste von UIDs). Auch die Badeaufsicht liest ihn nicht. */
+    match /notfallpass/{id} {
+      allow read: if signedIn() && (resource.data.uid == me() || (isMember(resource.data.rid) && (me() in resource.data.an || 'alle' in resource.data.an)));
+      allow create, update: if signedIn() && isMember(request.resource.data.rid) && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
+        && request.resource.data.keys().hasOnly(['rid', 'uid', 'an', 'daten', 'mitCode', 'at']) && request.resource.data.an.size() > 0 && request.resource.data.an.size() <= 60;
+      allow delete: if signedIn() && resource.data.uid == me();
+    }
     match /anreisewunsch/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
       allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'art', 'abflug', 'ziel', 'zugZumFlug', 'bahnhof', 'startort', 'hinweis', 'gast', 'name', 'selbstAlles', 'by', 'at'])

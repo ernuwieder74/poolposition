@@ -130,3 +130,4 @@ exports.supportZurueck = onCall(CALL, async req => {
 
 /* Push-Benachrichtigungen */
 Object.assign(exports, require('./push'));
+Object.assign(exports, require('./konto'));

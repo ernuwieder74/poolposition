@@ -661,6 +661,21 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .ka span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
 .ka:active{transform:scale(.97)}.ka:focus-visible{outline:3px solid var(--yel,#f5c518);outline-offset:2px}
 .ka.gef{color:var(--pinktx)}
+.aufchip{border:0;cursor:pointer;font-weight:800}.aufchip.fertig{opacity:.75}.aufchip.warn{background:var(--red,#d7262c);color:#fff}.aufchip:focus-visible{outline:3px solid var(--yel,#f5c518);outline-offset:2px}
+.hkpills{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.hkpills>span{padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.26);font-size:11px;line-height:1.5;font-weight:700;white-space:nowrap}.hkpills b{font-variant-numeric:tabular-nums;font-weight:800}
+.rbgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rbz{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 6px;border-radius:16px;background:rgba(127,127,127,.13);text-align:center}
+.rbz b{font-size:22px;line-height:1.1}.rbzi{font-size:20px}
+.swbuehne{position:relative;display:flex;justify-content:center;padding:6px 0}
+.swcard{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;width:100%;min-height:300px;box-sizing:border-box;border-radius:26px;padding:22px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,#2a2622,#1c1815);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px -22px rgba(0,0,0,.8);position:relative}
+.swtitel{font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.02em;overflow-wrap:anywhere}.swnotiz{font-size:16px;opacity:.85}
+.swstempel{position:absolute;top:18px;padding:3px 12px;border:3px solid;border-radius:10px;font-weight:900;letter-spacing:.08em;opacity:0;transition:opacity .1s;pointer-events:none}
+.swstempel.ja{right:16px;color:#3ecf8e;transform:rotate(10deg)}.swstempel.nein{left:16px;color:#ff5c6c;transform:rotate(-10deg)}.swstempel.vl{left:50%;margin-left:-52px;top:auto;bottom:70px;color:#ffc23a}
+.swcard[data-hint=ja] .swstempel.ja,.swcard[data-hint=nein] .swstempel.nein,.swcard[data-hint=vl] .swstempel.vl{opacity:1}
+.swknoepfe{display:flex;justify-content:center;gap:18px;padding-top:6px}
+.swk{all:unset;cursor:pointer;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;background:rgba(127,127,127,.16)}
+.swk.ja{color:#3ecf8e}.swk.nein{color:#ff5c6c}.swk.vl{color:#ffc23a}.swk:active{transform:scale(.92)}.swk:focus-visible{outline:3px solid var(--yel,#f5c518);outline-offset:2px}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -904,7 +919,7 @@ function syncReisen(){
 }
 function setTrip(rid){
   if(S.rid===rid) return;
-  unsubs.trip.forEach(u=>u()); unsubs.trip=[]; S.rid=rid; S.tripAt=now(); S.rt={mitglied:[],vorschlaege:[],stimmen:[],akt:[],msgs:[],kasse:[],mitbringen:[],herzAn:[],herzVon:[],ustimmen:[],zimmer:[],zwahl:[],angebote:[],astimmen:[],aufgaben:[],einkauf:[],musik:[],anreisen:[]}; S.myVote=null; S.voteDirty=false;
+  unsubs.trip.forEach(u=>u()); unsubs.trip=[]; S.rid=rid; S.tripAt=now(); S.rt={mitglied:[],vorschlaege:[],stimmen:[],akt:[],msgs:[],kasse:[],mitbringen:[],herzAn:[],herzVon:[],ustimmen:[],zimmer:[],zwahl:[],angebote:[],astimmen:[],aufgaben:[],einkauf:[],musik:[],anreisen:[], npMein:[], npAn:[], npAlle:[], rund:[], ideen:[]}; S.myVote=null; S.voteDirty=false;
   if(!rid) return;
   const db=S.db, T=unsubs.trip, q=c=>db.collection(c).where('rid','==',rid);
   T.push(q('mitglied').onSnapshot(s=>{ S.rt.mitglied=snapDocs(s); render(); refreshProfiles(); awPruefenBald(); konfPruefenBald(); setTimeout(morgenPruefen, 5500); }, e=>console.warn(e)));
@@ -918,6 +933,11 @@ function setTrip(rid){
   T.push(q('einkauf').onSnapshot(s=>{ S.rt.einkauf=snapDocs(s); render(); }, e=>console.warn('Einkauf',e)));
   T.push(q('musik').onSnapshot(s=>{ S.rt.musik=snapDocs(s); render(); }, e=>console.warn('Musik',e)));
   T.push(q('anreisewunsch').onSnapshot(s=>{ S.rt.anreisen=snapDocs(s); render(); }, e=>console.warn('Anreise',e)));
+  T.push(S.db.collection('notfallpass').where('rid','==',rid).where('uid','==',S.uid).onSnapshot(s=>{ S.rt.npMein=snapDocs(s); render(); }, e=>console.warn('Notfallpass',e)));
+  T.push(S.db.collection('notfallpass').where('rid','==',rid).where('an','array-contains',S.uid).onSnapshot(s=>{ S.rt.npAn=snapDocs(s); render(); }, e=>console.warn('Notfallpass',e)));
+  T.push(S.db.collection('notfallpass').where('rid','==',rid).where('an','array-contains','alle').onSnapshot(s=>{ S.rt.npAlle=snapDocs(s); render(); }, e=>console.warn('Notfallpass',e)));
+  T.push(q('rundnachrichten').onSnapshot(s=>{ S.rt.rund=snapDocs(s); render(); }, e=>console.warn('Ansagen',e)));
+  T.push(q('ideen').onSnapshot(s=>{ S.rt.ideen=snapDocs(s); render(); }, e=>console.warn('Ideen',e)));
   T.push(q('zimmerwahl').onSnapshot(s=>{ S.rt.zwahl=snapDocs(s); render(); }, e=>console.warn('Zimmerwahl',e)));
   T.push(q('umfragestimmen').onSnapshot(s=>{ S.rt.ustimmen=snapDocs(s); render(); }, e=>console.warn('Umfragen',e)));
   T.push(q('mitbringen').onSnapshot(s=>{ S.rt.mitbringen=snapDocs(s); render(); }, e=>console.warn('Mitbringen',e)));
@@ -1042,8 +1062,8 @@ function meBtn(){ return `<button class="avbtn" data-act="go" data-v="profil" ar
 function hdrTrip(label, sub=''){ const r=cur(); return `<header class="hdr${sub?' mitsub':''}">${sub?'<div class="hdrrow">':''}<button class="homebtn" data-act="home" aria-label="Zu Meine Reisen">${I.logo()}</button>${verTag()}<button class="pill" data-act="reisewahl" aria-label="Reise wechseln, aktuell ${esc(r?.titel)}"><span style="color:var(--yelt);display:flex">${ic(art(r).icon,18)}</span><span>${esc(r?.titel||'Reise')}</span>${ic('down',16,'style="color:var(--mut);flex-shrink:0"')}</button><span class="seclabel">${esc(label)}</span>${meBtn()}${sub?`</div><div class="hdrsub">${sub}</div>`:''}</header>`; }
 function backBtn(label='Zurück'){ return `<button class="back" data-act="back">${ic('back',20)} ${esc(label)}</button>`; }
 function navBar(){ return ''; }
-const TRIPMAP = {zimmer:'reise',zanfrage:'reise',gruppenprofil:'reise',termine:'reise',tag:'tag',herde:'tag',aktivitaet:'tag',neueAkt:'tag',chat:'chat',fluester:'chat',fneu:'chat',fcode:'chat',person:'chat',album:'album',papierkorb:'album',reise:'reise',mitglieder:'reise',mitglied:'reise',reiseEinst:'reise',einladen:'reise',kasseNeu:'reise',packliste:'reise',aufgaben:'reise',heimreise:'reise',reiseDaten:'reise',anreise:'reise',infos:'reise',notfall:'reise',barometer:'barometer'};
-const HOMEMAP = {home:'home',neu:'home',konferenz:'home',dabei:'home',vorschlag:'home',freigabe:'home',fliste:'fliste',fluester:'fliste',fneu:'fliste',fcode:'fliste',person:'fliste',beitreten:'beitreten',profil:'profil',neues:'profil',profilEdit:'profil',einstellungen:'profil',sysadmin:'profil',reiseDaten:'profil',herzen:'profil',einladen:'home',konto:'profil',gastAkt:'home'};
+const TRIPMAP = {zimmer:'reise',zanfrage:'reise',gruppenprofil:'reise',termine:'reise',tag:'tag',herde:'tag',aktivitaet:'tag',neueAkt:'tag',chat:'chat',fluester:'chat',fneu:'chat',fcode:'chat',person:'chat',album:'album',papierkorb:'album',reise:'reise',mitglieder:'reise',mitglied:'reise',reiseEinst:'reise',einladen:'reise',kasseNeu:'reise',packliste:'reise',aufgaben:'reise',rueckblick:'reise',heimreise:'reise',reiseDaten:'reise',anreise:'reise',infos:'reise',notfall:'reise',notpass:'profil',barometer:'barometer'};
+const HOMEMAP = {home:'home',neu:'home',konferenz:'home',dabei:'home',vorschlag:'home',freigabe:'home',fliste:'fliste',fluester:'fliste',fneu:'fliste',fcode:'fliste',person:'fliste',beitreten:'beitreten',profil:'profil',ideen:'home',notpass:'profil',datenschutz:'profil',neues:'profil',profilEdit:'profil',einstellungen:'profil',sysadmin:'profil',reiseDaten:'profil',herzen:'profil',einladen:'home',konto:'profil',gastAkt:'home'};
 function navHtml(){
   if(S.boot!=='ok' || !S.profilesLoaded || !S.profile[S.uid] || gesperrt()) return '';
   if(S.route?.v==='sysadmin') return ''; // Adminbereich: kein Fußzeilenmenü
@@ -1399,9 +1419,9 @@ V.tag = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), a=art(r), m=my
   // Mein Platz heute
   const myPlatz = m.platz?.datum===today() ? m.platz.text : '';
   return `${hdrTrip('Mein Tag')}${geschlossenBanner()}<!--pushhinweis-->
-  <div class="col" style="gap:10px">${reiseSzene(r, '', false, `${greet()}, ${nm(S.uid)}`, true)}<div class="row wrap">${vorChip(r)}<span class="chip yel">${ic('sun',16)} ${esc(cnt)}</span><span class="chip">${ic('tag',16)} ${dayLabel(day)} ${acts.length} ${acts.length===1?'Termin':'Termine'}</span>${wlanKnopf()}</div>${isToday?herdeLeiste():''}</div>
+  <div class="col" style="gap:10px">${reiseSzene(r, '', false, `${greet()}, ${nm(S.uid)}`, true)}<div class="row wrap">${vorChip(r)}<span class="chip yel">${ic('sun',16)} ${esc(cnt)}</span><span class="chip">${ic('tag',16)} ${dayLabel(day)} ${acts.length} ${acts.length===1?'Termin':'Termine'}</span>${aufChip()}</div>${isToday?herdeLeiste():''}</div>
   ${days.length>1?`<div class="scrollx" role="group" aria-label="Tag wählen">${days.map((d,i)=>{ const dd=parseDay(d); const out=d<md.von||d>md.bis; const gap=i>0 && addDays(days[i-1],1)!==d; return `${gap?'<span class="daygap" aria-hidden="true">…</span>':''}<button class="daybtn ${out?'out':''}" aria-pressed="${d===day}" data-act="ui" data-k="day" data-val="${d}" aria-label="${dayLabel(d)}${out?', außerhalb der Reise':''}"><span>${d===today()?'Heute':out?`${pad(dd.getDate())}.${pad(dd.getMonth()+1)}.`:WD[dd.getDay()]}</span><b class="num">${out?WD[dd.getDay()]:dd.getDate()}</b></button>`; }).join('')}</div>`:''}
-  ${herzAnfrageKarte()}${herzFrageKarte()}${tafelKarte(day)}${aufKarte()}${packKarte()}${heimKarte()}
+  ${rundKarte()}${herzAnfrageKarte()}${herzFrageKarte()}${tafelKarte(day)}${dienstHeuteKarte()}${aufKarte()}${packKarte()}${heimKarte()}
   ${kasseMini()}
   ${isToday && !r.geschlossen?(istZu('platz')?zuKarte('platz',a.platzIcon,myPlatz?`Mein Platz: ${myPlatz}`:'Mein Platz heute','umbruch','',myPlatz?'':'noch nicht geteilt'):`<div class="card tight"><div class="row between"><div class="row"><span style="color:var(--yelt)">${ic(a.platzIcon,22)}</span><span class="ttl">Mein Platz heute</span></div><span class="row" style="gap:6px">${myPlatz?`<button class="link" data-act="platzEdit">Ändern</button>`:''}${klappBtn('platz','Mein Platz heute')}</span></div>
     ${myPlatz && !S.ui.platzEdit?`<div class="row"><span class="grow" style="font-size:16px;font-weight:700">${esc(myPlatz)}</span>${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).length?`<div class="stack">${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).map(([u])=>av(u,26)).join('')}</div>`:''}</div>`
@@ -1697,6 +1717,7 @@ const legend = ()=>`<div class="legend"><span>${AW.trikot(16)} meiste Herzen</sp
 
 /* ---------- Mitglieder ---------- */
 V.mitglieder = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const all=S.rt.mitglied; const tab=S.ui.mitTab||'mit';
+  if(tab==='herde') return `${hdrTrip('Mitglieder')}${S.hist.length?backBtn('Reise'):''}${geschlossenBanner()}${mitgliederTabs('herde')}${herdeBody()}`;
   if(tab==='kasse') return `${hdrTrip('Kassenbuch')}${S.hist.length?backBtn('Reise'):''}${geschlossenBanner()}${mitgliederTabs('kasse')}${kasseView()}`;
   const act=all.filter(m=>m.status==='zugesagt'); const aus=act.filter(m=>daysUntil(m.abreise||r.bis)<0); const da=act.filter(m=>!aus.includes(m)).sort((a,b)=>(a.abreise||'').localeCompare(b.abreise||''));
   const weg=all.filter(m=>['entfernt','ausgetreten'].includes(m.status)); const offen=all.filter(m=>['teilnehmer','eingeladen'].includes(m.status));
@@ -1802,6 +1823,8 @@ V.profil = ()=>{ const p=pr(S.uid); const z=zodiac(p.geb); const r=cur(); const 
   <div class="grow col" style="gap:4px;min-width:0"><h1 class="ell">${esc(nm(S.uid))}</h1>${vollName(p)&&vollName(p)!==nm(S.uid)?`<div class="mut ell">${esc(vollName(p))}</div>`:''}${z?`<span class="chip yel" style="align-self:flex-start">${z.sym} ${esc(z.name)}</span>`:''}</div></div>
   <div class="list">
     ${punkt('profilEdit', ic('mitgl',20), 'Mein Profil', 'Name, Geburtstag, Foto, Telefon, E-Mail und Passwort')}
+    ${punkt('go', ic('shield',20), 'Notfallpass', 'Angehörige, Gesundheit, Handy-Code. Gehört zu dir, nicht zur Reise', 'data-v="notpass"')}
+    ${punkt('go', ic('dl',20), 'Meine Daten', 'Herunterladen oder Konto löschen', 'data-v="datenschutz"')}
     ${punkt('go', ic('gear',20), 'Einstellungen', 'Töne, Darstellung, Blockierte', 'data-v="einstellungen"')}
     ${punkt('go', ic('tag',20), 'Was ist neu?', 'Die Neuerungen der letzten Versionen', 'data-v="neues"')}
     ${punkt('home', ic('suitcase',20), 'Meine Reisen', 'Reisen bearbeiten, einladen, löschen')}
@@ -3289,7 +3312,7 @@ function planGesamt(list=S.rt.kasse||[]){ const s=saldenVon(list);
 const aktTitel = aid => (S.rt.akt.find(a=>a.id===aid) || S.gast?.akt?.[aid])?.titel || 'Event';
 
 /* ---------- Ansicht (Reiter im Bereich Mitglieder) ---------- */
-function mitgliederTabs(tab){ return `<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='mit'}" data-act="ui" data-k="mitTab" data-val="mit">Mitglieder</button><button role="tab" aria-selected="${tab==='kasse'}" data-act="ui" data-k="mitTab" data-val="kasse">${ic('euro',16)} Kassenbuch</button></div>`; }
+function mitgliederTabs(tab){ return `<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='mit'}" data-act="ui" data-k="mitTab" data-val="mit">Mitglieder</button><button role="tab" aria-selected="${tab==='kasse'}" data-act="ui" data-k="mitTab" data-val="kasse">${ic('euro',16)} Kassenbuch</button>${typeof modulAn==='function'&&modulAn('herde')?`<button role="tab" aria-selected="${tab==='herde'}" data-act="ui" data-k="mitTab" data-val="herde">${ic(art(cur()).platzIcon!=='pin'?art(cur()).platzIcon:'pin',16)} Herde</button>`:''}</div>`; }
 const betrifftMich = e => e.typ==='ausgleich' ? (e.von===S.uid||e.an===S.uid) : (e.zahler===S.uid||(e.fuer||[]).includes(S.uid));
 const meinZuerst = (a,b) => ((b.von===S.uid||b.an===S.uid)?1:0) - ((a.von===S.uid||a.an===S.uid)?1:0);
 A.kasseFilter = el => { S.ui.kasseFilter=el.dataset.val; render(); };
@@ -3398,6 +3421,7 @@ V.konferenz = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'
   ${stepper}
   ${adm?`<button class="btn block sec" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',18)} Einladung zur Reise verschicken</button>`:''}
   ${schritteKarte(r)}
+  ${ideenKarte(r)}
   ${offen.length?standKarte(r, mem, abgestimmt):''}${eingeladen?`<span class="tiny mut" style="margin-top:-6px">${eingeladen} eingeladen, noch nicht beigetreten</span>`:''}
   <div id="konfRunden"></div>
   ${offen.length ? offen.map(rd=>rundeKarte(r,rd,adm)).join('')+frageDazuHtml(r,adm) : `<div class="card gold"><div class="ttl">Alle Runden sind entschieden</div><p class="small" style="color:var(--goldtx)">${adm?'Jetzt nur noch die Reise festlegen.':`${esc(nm(r.admin))} legt die Reise gleich fest.`}</p>${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">Reise festlegen</button>`:''}</div>`}
@@ -3779,12 +3803,13 @@ A.klapp = el => { const k=el.dataset.k; const zu={...(S.settings.zu||{})}; if(zu
 const herdePlaetze = () => zugesagt().filter(x=>x.uid!==S.uid && x.platz?.datum===today() && x.platz?.text);
 function herdeLeiste(){ if(!modulAn('herde')) return ''; const h=herdePlaetze(); if(!h.length) return '';
   return `<button class="herde" data-act="go" data-v="herde" aria-label="Meine Herde: ${h.length} ${h.length===1?'teilt':'teilen'} ihren Platz heute"><span class="stack">${h.slice(0,5).map(x=>av(x.uid,24)).join('')}</span><span class="grow ell small"><b>Meine Herde</b> · ${h.length===1?`${esc(nm(h[0].uid).split(' ')[0])}: ${esc(h[0].platz.text)}`:`${h.length} sind heute unterwegs`}</span>${ic('right',16,'style="color:var(--mut);flex-shrink:0"')}</button>`; }
-V.herde = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), a=art(r); const h=herdePlaetze(); const m=myM(); const mein=m.platz?.datum===today()?m.platz.text:'';
-  return `${hdrTrip('Meine Herde')}${backBtn()}<h1>Meine Herde</h1><p class="small mut">Wo die anderen heute sind. Tippe auf „Ich bin dabei“, wenn du dazukommst.</p>
+function herdeBody(){ const r=cur(), a=art(r); const h=herdePlaetze(); const m=myM(); const mein=m.platz?.datum===today()?m.platz.text:'';
+  return `<p class="small mut">Wo die anderen heute sind. Tippe auf „Ich bin dabei“, wenn du dazukommst.</p>
   ${h.length?`<div class="list">${h.map(x=>{ const on=(x.platzDabei||{})[S.uid]===today(); const mit=Object.entries(x.platzDabei||{}).filter(([u,d])=>d===today()).map(([u])=>u);
     return `<div class="li" style="align-items:flex-start">${av(x.uid,40)}<span class="grow col" style="gap:3px;min-width:0"><b>${esc(nm(x.uid))}</b><span style="font-size:16px"><span style="color:var(--yelt)">${ic(a.platzIcon,16)}</span> ${esc(x.platz.text)}</span>${mit.length?`<span class="row" style="gap:6px"><span class="stack">${mit.slice(0,6).map(u=>av(u,22)).join('')}</span><span class="tiny mut">${mit.length} ${mit.length===1?'ist':'sind'} mit dabei</span></span>`:''}</span>
       <button class="btn xs ${on?'on':'sec'}" data-act="platzDabei" data-uid="${x.uid}">${on?ic('check',14)+' Dabei':'Ich bin dabei'}</button></div>`; }).join('')}</div>`:'<div class="empty">Heute hat noch niemand seinen Platz geteilt.</div>'}
   <div class="card tight"><div class="row"><span style="color:var(--yelt)">${ic(a.platzIcon,20)}</span><span class="ttl">Mein Platz heute</span></div>${mein?`<span class="small">${esc(mein)}</span>`:`<span class="small mut">Noch nicht geteilt. Das geht auf „Mein Tag“.</span>`}</div>`; };
+V.herde = ()=>{ const g=tripGuard(); if(g) return g; S.ui.mitTab='herde'; S.route={v:'mitglieder'}; return V.mitglieder(); };
 /* ===================== Event-Kasse: Kosten eines Events, auch mit Gästen =====================
    Einträge mit aktId gehören zu einem Event. Gäste des Events sehen nur diese Einträge und können
    selbst Kosten eintragen oder als bezahlt markieren, auch nachdem das Event vorbei ist. */
@@ -4741,6 +4766,8 @@ const PUSHKAT = [
   ['fluester','Flüstern und Bademeister','Private Nachrichten und Nachrichten von Poolposition Bademeister'],
   ['termine','Termine','Neue Termine und eine Erinnerung 30 Minuten vor Beginn'],
   ['morgen','Morgenbericht','Die Zusammenfassung am Morgen'],
+  ['rund','Ansagen des Admins','Wichtige Nachrichten an die ganze Gruppe'],
+  ['aufgaben','Erinnerungen','Der Tag vor der Abreise und fällige To-dos'],
   ['admin','Badeaufsicht','Neue Meldungen (nur für Bademeister)']];
 const PUSH = { geprueft:false, geht:false, prefs:null, an:false };
 const istIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
@@ -4807,9 +4834,9 @@ function packKarte(){ const r=cur(); const m=myM(); if(!r || r.status!=='fest' |
     <span class="tiny mut">${n?`${ok} von ${n} eingepackt`:'Noch keine Packliste'} · ${mb.length?`${meins?`du bringst ${meins} mit · `:''}${offen?`<span class="warnt">${offen} ${offen===1?'Sache sucht':'Sachen suchen'} noch jemanden</span>`:'alles verteilt'}`:'Wer bringt was mit?'}</span></span>${ic('right',16,'style="color:var(--mut)"')}</span>
     ${n?`<span class="packbalken" aria-hidden="true"><span style="width:${Math.round(ok/n*100)}%"></span></span>`:''}</button>`; }
 
-V.packliste = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const heimOk=['unterwegs','abreise','vorbei'].includes(reisePhase()); const tab=(S.ui.packTab==='heim'&&!heimOk)?'mein':(S.ui.packTab||'mein');
-  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='mein'}" data-act="ui" data-k="packTab" data-val="mein">Meine Liste</button><button role="tab" aria-selected="${tab==='gruppe'}" data-act="ui" data-k="packTab" data-val="gruppe">Mitbringen${(S.rt.mitbringen||[]).some(x=>!x.wer)?`<span class="badge orange">${(S.rt.mitbringen||[]).filter(x=>!x.wer).length}</span>`:''}</button>${heimOk?`<button role="tab" aria-selected="${tab==='heim'}" data-act="ui" data-k="packTab" data-val="heim">Heimreise</button>`:''}</div>`;
-  return `${hdrTrip('Packliste')}${backBtn()}<h1>${tab==='heim'?'Heimreise-Check':tab==='gruppe'?'Wer bringt was mit?':'Koffer packen'}</h1>${tabs}${tab==='gruppe'?mitbringenView(r):tab==='heim'?heimView(r):packView(r)}`; };
+V.packliste = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const heimOk=['unterwegs','abreise','vorbei'].includes(reisePhase()); const tab=((S.ui.packTab==='heim'&&!heimOk)||S.ui.packTab==='gruppe')?'mein':(S.ui.packTab||'mein');
+  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='mein'}" data-act="ui" data-k="packTab" data-val="mein">Meine Liste</button>${heimOk?`<button role="tab" aria-selected="${tab==='heim'}" data-act="ui" data-k="packTab" data-val="heim">Heimreise</button>`:''}</div>`;
+  return `${hdrTrip('Packliste')}${backBtn()}<h1>${tab==='heim'?'Heimreise-Check':tab==='gruppe'?'Wer bringt was mit?':'Koffer packen'}</h1>${tabs}${tab==='heim'?heimView(r):packView(r)}`; };
 
 function packView(r){ const items=packVon(r.id).items||{}; const l=Object.entries(items); const {n, ok}=packStand(r.id);
   const nachKat={}; l.forEach(([id,x])=>{ (nachKat[x.k||'sonst']=nachKat[x.k||'sonst']||[]).push([id,x]); });
@@ -4994,9 +5021,9 @@ const HUBIC = {
 };
 const hubSvg = (k, sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${HUBIC[k]}</svg>`;
 const eurKurz = c => (c>0?'+':c<0?'−':'') + Math.round(Math.abs(c)/100).toLocaleString('de-DE') + ' €';
-function kachel2(o, gross, t){ const [c1,c2]=(t||THEMEN.sonst).farben[o.k]||(o.k==='zimmer'?['#a98bff','#5b34b8']:['#5d5a57','#2e2b29']);
+function kachel2(o, gross, t){ const [c1,c2]=(t||THEMEN.sonst).farben[o.k]||(o.k==='zimmer'?['#a98bff','#5b34b8']:o.k==='aufgaben'?['#c4dd55','#5f8a12']:o.k==='rueckblick'?['#ffd24a','#d98a00']:['#5d5a57','#2e2b29']);
   return `<button class="hk ${gross?'fokus':''}" style="--hk1:${c1};--hk2:${c2}" data-act="${o.act||'hubGeh'}" ${o.extra||''} aria-label="${esc(o.titel.replace(/&shy;/g,""))}${o.zahl?`, ${esc(o.zahlLang||o.zahl)}`:''}">
-  ${o.zahl?`<span class="hkzahl ${o.warn?'warn':''}">${o.zahl}</span>`:''}<span class="hkic">${o.icHtml||hubSvg(o.ic, 26)}</span><span class="hktitel">${o.titel}</span><span class="hkmuster" aria-hidden="true"></span></button>`; }
+  ${o.zahlHtml?o.zahlHtml:o.zahl?`<span class="hkzahl ${o.warn?'warn':''}">${o.zahl}</span>`:''}<span class="hkic">${o.icHtml||hubSvg(o.ic, 26)}</span><span class="hktitel">${o.titel}</span><span class="hkmuster" aria-hidden="true"></span></button>`; }
 V.reise = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), m=myM(); const ph=reisePhase(r,m);
   const M=S.rt.mitglied; const dabei=M.filter(x=>x.status==='zugesagt').length;
   const {s}=planGesamt(S.rt.kasse||[]); const mein=s[S.uid]||0;
@@ -5005,24 +5032,23 @@ V.reise = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), m=myM(); con
   const anFehlt=!reiseInfoVon(m, ph==='abreise'?'rueck':'an')?.zeit;
   const K = {
     ...(modulAn('zimmer')?{zimmer:{titel:'Zimmer', ic:'bett', farbe:'violett', zahl:(()=>{ const p=zPlan(); return p.personen.length?`${p.untergebracht}/${p.personen.length}`:''; })(), zahlLang:'untergebracht', warn:(()=>{ const p=zPlan(); return p.ohne.length>0||p.rooms.some(z=>z.ueber); })(), extra:'data-v="zimmer"'}}:{}),
-    mitglieder:{titel:'Mit&shy;glieder', ic:'mitglieder', farbe:'violett', zahl:dabei?String(dabei):'', zahlLang:`${dabei} dabei`, extra:'data-v="mitglieder" data-tab="mit"'},
+    mitglieder:{titel:'Mit&shy;glieder', ic:'mitglieder', farbe:'violett', zahl:dabei?String(dabei):'', zahlLang:`${dabei} dabei${herde&&modulAn('herde')?`, ${herde} teilen heute ihren Platz`:''}`, extra:'data-v="mitglieder" data-tab="mit"'},
     kasse:{titel:'Kassen&shy;buch', ic:'kasse', farbe:'gruen', zahl:mein?eurKurz(mein):'', zahlLang:mein>0?`du bekommst ${eur(mein)}`:`du zahlst ${eur(-mein)}`, warn:mein<0, extra:'data-v="mitglieder" data-tab="kasse"'},
     packliste: ph==='abreise' ? {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:`${hc.ok}/${hc.n}`, zahlLang:`Heimreise-Check ${hc.ok} von ${hc.n}`, warn:hc.ok<hc.n, extra:'data-v="packliste" data-tab="heim"'}
       : {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:n?`${ok}/${n}`:'', zahlLang:`${ok} von ${n} eingepackt`, extra:'data-v="packliste" data-tab="mein"'},
-    aufgaben:{titel:'Auf&shy;gaben', ic:'aufgaben', farbe:'tuerkis', zahl:aufMeine().length?String(aufMeine().length):'', zahlLang:`${aufMeine().length} offen`, warn:aufOffen().some(aufUeberfaellig), extra:'data-v="aufgaben"'},
-    mitbringen:{titel:'Mit&shy;bringen', ic:'mitbringen', farbe:'pink', zahl:mbOffen?`${mbOffen} offen`:'', warn:mbOffen>0, extra:'data-v="packliste" data-tab="gruppe"'},
+    aufgaben:{titel:'To-do', ic:'aufgaben', farbe:'tuerkis', zahl:aufStand().gesamt?`${aufStand().offen}/${aufStand().gesamt}`:'', zahlHtml:aufPills(aufStand()), zahlLang:`${aufStand().offen} von ${aufStand().gesamt} offen: ${aufStandText(aufStand())||'alles erledigt'}`, warn:aufOffen().some(aufUeberfaellig), extra:'data-v="aufgaben"'},
     termine:{titel:'Termine', ic:'termine', farbe:'blau', zahl:kommend?String(kommend):'', zahlLang:`${kommend} kommende`, extra:'data-v="termine"'},
-    herde:{titel:'Herde', ic:'herde', icHtml:art(r).platzIcon!=='pin'?ic(art(r).platzIcon,26):'', farbe:'tuerkis', zahl:herde?String(herde):'', zahlLang:`${herde} teilen heute ihren Platz`, extra:'data-v="herde"'},
-    anreise:{titel:ph==='abreise'?'Rück&shy;reise':'Anreise', ic:'daten', farbe:'nacht', zahl:anFehlt&&['vorfreude','abreise'].includes(ph)?'fehlt':'', warn:true, extra:`data-v="anreise" data-tab="${ph==='abreise'?'rueck':'an'}"`},
-    infos:{titel:'Infos', ic:'infos', farbe:'gelb', zahl:'', extra:'data-v="infos"'},
-    notfall:{titel:'Notfall', ic:'notfall', farbe:'rot', zahl:'', extra:'data-v="notfall"'},
+    anreise:{titel:'Meine Reise', ic:'daten', farbe:'nacht', zahl:anFehlt&&['vorfreude','abreise'].includes(ph)?'fehlt':'', warn:true, extra:`data-v="anreise" data-tab="${ph==='abreise'?'rueck':'an'}"`},
+    rueckblick:{titel:'Rück&shy;blick', ic:'infos', icHtml:'<span style="font-size:24px">📸</span>', farbe:'gold', zahl:'', extra:'data-v="rueckblick"'},
+    infos:{titel:'Reise&shy;info', ic:'infos', farbe:'gelb', zahl:'', extra:'data-v="infos"'},
+    notfall:{titel:'Notfall', ic:'notfall', farbe:'rot', zahl:npGeteilt().length?`${npGeteilt().length} ${npGeteilt().length===1?'Pass':'Pässe'}`:'', zahlLang:`${npGeteilt().length} Notfallpässe mit dir geteilt`, extra:'data-v="notfall"'},
   };
-  const folge = { vorfreude:['zimmer','aufgaben','packliste','mitbringen','anreise','infos','mitglieder','termine','kasse','herde','notfall'],
-    unterwegs:['termine','zimmer','herde','kasse','aufgaben','infos','mitglieder','notfall','anreise','mitbringen','packliste'],
-    abreise:['packliste','zimmer','anreise','kasse','termine','mitglieder','herde','infos','notfall','mitbringen','aufgaben'],
-    vorbei:['kasse','zimmer','mitglieder','termine','herde','infos','anreise','packliste','mitbringen','notfall','aufgaben'],
-    konferenz:['mitglieder','zimmer','kasse','termine','packliste','mitbringen','anreise','infos','herde','notfall'] }[ph];
-  const l=folge.filter(k=>K[k] && (k!=='herde' || modulAn('herde')));
+  const folge = { vorfreude:['zimmer','aufgaben','packliste','anreise','infos','mitglieder','termine','kasse','notfall'],
+    unterwegs:['termine','zimmer','kasse','aufgaben','infos','mitglieder','notfall','anreise','packliste'],
+    abreise:['packliste','zimmer','anreise','kasse','termine','mitglieder','infos','notfall','aufgaben'],
+    vorbei:['rueckblick','kasse','zimmer','mitglieder','termine','infos','anreise','packliste','notfall','aufgaben'],
+    konferenz:['mitglieder','zimmer','kasse','termine','packliste','anreise','infos','notfall'] }[ph];
+  const l=folge.filter(k=>K[k]);
   const phText={vorfreude:`noch ${daysUntil(m?.anreise||r.von)} ${daysUntil(m?.anreise||r.von)===1?'Tag':'Tage'}`, unterwegs:'unterwegs', abreise:'Heimreise', vorbei:'vorbei', konferenz:''}[ph];
   const t=thema(r);
   return `${hdrTrip('Reise')}${geschlossenBanner()}${reiseSzene(r, phText, canMod(r))}${canMod(r)?herzHinweisAdmin(r):''}
@@ -6319,7 +6345,7 @@ function gemeinsamHtml(zeilen, w){ const g=gemeinsam(zeilen); if(!g.length) retu
 V.anreise = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), m=myM(); const tab=S.ui.anTab||'an';
   const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='an'}" data-act="ui" data-k="anTab" data-val="an">Ankunft</button><button role="tab" aria-selected="${tab==='rueck'}" data-act="ui" data-k="anTab" data-val="rueck">Rückreise</button></div>`;
   const z=tafelZeilen(r, tab); const mein=reiseInfoVon(m, tab); const v=VERKEHR[mein?.art]||null; const fehlt=zugesagt().filter(x=>!reiseInfoVon(x,tab)?.zeit).map(x=>x.uid);
-  return `${hdrTrip('Anreise')}${backBtn()}<h1>${tab==='rueck'?'Rückreise':'Anreise'}</h1>${tabs}
+  return `${hdrTrip('Meine Reise')}${backBtn()}<h1>Meine Reise</h1>${tabs}
     <div class="card tight"><div class="row between"><b>Meine ${tab==='rueck'?'Rückreise':'Anreise'}</b><span class="tiny mut">${fD(tab==='rueck'?abDatum(m,r):anDatum(m,r))}</span></div>
       ${mein?.zeit?`<div class="row" style="gap:10px"><span class="tic gross">${ic(v?.[1]||'suitcase',20)}</span><span class="grow col" style="gap:1px"><b>${esc(mein.zeit)} Uhr${mein.nr?` · ${esc(mein.nr)}`:''}</b><span class="small mut">${esc(v?.[0]||'')}${mein.ort?` · ${esc(mein.ort)}`:''}</span></span><button class="btn xs sec" data-act="anAuf" data-w="${tab}">${ic('pencil',13)} Ändern</button></div>`
         : `<span class="small mut">Trag ein, wie und wann du ${tab==='rueck'?'zurückfährst':'ankommst'}. Dann sehen die anderen, wer wann ${tab==='rueck'?'abreist':'landet'}.</span><button class="btn block" data-act="anAuf" data-w="${tab}">${ic('plus',18)} Eintragen</button>`}
@@ -6353,7 +6379,7 @@ const infosDarf = (r=cur()) => isAdmin(r) || (!!r?.infosOffen && myM()?.status==
 const mapsLink = a => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}`;
 V.infos = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const tab=S.ui.infoTab2||'gruppe';
   const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='gruppe'}" data-act="ui" data-k="infoTab2" data-val="gruppe">Für alle</button><button role="tab" aria-selected="${tab==='doks'}" data-act="ui" data-k="infoTab2" data-val="doks">Meine Dokumente</button></div>`;
-  return `${hdrTrip('Infos')}${backBtn()}<h1>Infos</h1>${tabs}${tab==='doks'?doksView(r):infosView(r)}`; };
+  return `${hdrTrip('Reiseinfo')}${backBtn()}<h1>Reiseinfo</h1>${tabs}${tab==='doks'?doksView(r):infosView(r)}`; };
 function infosView(r){ const I=r.infos||{}; const da=INFOFELDER.filter(([k])=>String(I[k]||'').trim());
   const zeile=(k,l)=>{ const v=String(I[k]||''); if(k==='adresse') return `<a class="izeile" href="${mapsLink(v)}" target="_blank" rel="noopener"><span class="tiny mut">${l}</span><span>${esc(v)} ${ic('pin',13)}</span></a>`;
     if(k==='wlanPw') return `<button class="izeile" data-act="copy" data-text="${esc(v)}"><span class="tiny mut">${l}</span><span class="num">${esc(v)} ${ic('copy',13)}</span></button>`;
@@ -6424,7 +6450,7 @@ function landVon(r){ if(r?.land && NOTRUF[r.land]) return r.land; const q=(r?.we
   const k=q.toLowerCase(); if(LAND[k]!==undefined) return LAND[k]; LAND[k]=null;
   holJson(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=de&format=json`).then(j=>{ LAND[k]=(j.results?.[0]?.country_code||'').toLowerCase()||'?'; render(); }).catch(()=>{ LAND[k]='?'; render(); });
   return null; }
-V.notfall = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const lc=S.ui.notLand||landVon(r); const L=NOTRUF[lc]; const I=r.infos||{}; const pass=S.settings.notfallpass||{};
+V.notfall = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const lc=S.ui.notLand||landVon(r); const L=NOTRUF[lc]; const I=r.infos||{}; 
   const nummern=L?Object.entries(L[1]):[['Notruf','112']];
   return `${hdrTrip('Notfall')}${backBtn()}<h1>Notfall</h1>
     <a class="notruf" href="tel:${esc(nummern[0][1])}"><span class="notrufnr num">${esc(nummern[0][1])}</span><span class="col" style="gap:2px"><b>${esc(nummern[0][0])} anrufen</b><span class="small" style="opacity:.85">${L?esc(L[0]):'In vielen Ländern'}</span></span></a>
@@ -6436,21 +6462,9 @@ V.notfall = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const lc=S
       ${I.adresse?`<a class="izeile" href="${mapsLink(I.adresse)}" target="_blank" rel="noopener"><span class="tiny mut">Eure Unterkunft (für den Notruf)</span><span>${esc(I.unterkunft?I.unterkunft+', ':'')}${esc(I.adresse)}</span></a>`:''}
       <a class="izeile" href="tel:+49116116"><span class="tiny mut">Karte verloren oder gestohlen</span><span>💳 Sperr-Notruf +49 116 116</span></a>
       <a class="izeile" href="https://www.auswaertiges-amt.de/de/service/laender" target="_blank" rel="noopener"><span class="tiny mut">Botschaft, Konsulat, Reisehinweise</span><span>🇩🇪 Auswärtiges Amt ${ic('right',13)}</span></a></div>
-    <div class="card tight"><div class="row between"><b>Mein Notfallpass</b><button class="btn xs sec" data-act="passAuf">${ic('pencil',13)} ${Object.values(pass).some(Boolean)?'Bearbeiten':'Anlegen'}</button></div>
-      ${Object.values(pass).some(Boolean)?[['kontakt','Notfallkontakt'],['blut','Blutgruppe'],['allergien','Allergien'],['medis','Medikamente'],['versicherung','Auslandskrankenversicherung']].filter(([k])=>pass[k]).map(([k,l])=>`<div class="izeile"><span class="tiny mut">${l}</span><span>${esc(pass[k])}</span></div>`).join('')
-        :'<span class="small mut">Nur für dich: wichtige Angaben, die du im Notfall dem Arzt oder Helfern zeigen kannst.</span>'}</div>
+    ${npMeineKarte(r.id)}${npGruppenKarte()}
     <p class="tiny mut">Angaben ohne Gewähr. Prüfe die Nummern vor der Reise beim Auswärtigen Amt.</p>`; };
 A.notLand = el => { S.ui.notLand=el.value; render(); };
-A.passAuf = ()=>{ const p=S.settings.notfallpass||{}; ['kontakt','blut','allergien','medis','versicherung'].forEach(k=>S.form['np_'+k]=p[k]||''); openOv('passForm'); };
-OV.passForm = () => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Notfallpass"><div class="row between"><h2 style="margin:0">Mein Notfallpass</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
-  <p class="small mut">Nur du siehst diese Angaben. Alles ist freiwillig.</p>
-  <label class="f">Notfallkontakt<input class="in" id="f_np_kontakt" maxlength="80" placeholder="Name und Telefon"></label>
-  <label class="f">Blutgruppe<input class="in" id="f_np_blut" maxlength="10" placeholder="z. B. A+"></label>
-  <label class="f">Allergien<input class="in" id="f_np_allergien" maxlength="120"></label>
-  <label class="f">Medikamente<input class="in" id="f_np_medis" maxlength="160"></label>
-  <label class="f">Auslandskrankenversicherung<input class="in" id="f_np_versicherung" maxlength="120" placeholder="Name und Notfallnummer"></label>
-  <button class="btn block" data-act="passSpeichern">Speichern</button></div>`;
-A.passSpeichern = async ()=>{ const p=Object.fromEntries(['kontakt','blut','allergien','medis','versicherung'].map(k=>[k, String(S.form['np_'+k]||'').trim()])); closeOv(); await saveSettings({notfallpass:p}); toast('Notfallpass gespeichert'); };
 /* ===================== Gruppenprofil, Willkommen und Reise-Assistent =====================
    reisen/{rid}.profil = { gruppe, alter:[], ziele:[], module:{herzen,barometer,herde}, gesetzt }
    Aus dem Profil entstehen Vorschläge, welche Funktionen zur Gruppe passen. Der Admin kann sie jederzeit ändern.
@@ -6941,13 +6955,23 @@ function budgetPflichtKarte(r){ const adm=isAdmin(r); const mein=zBudgetMein(); 
    einkauf/{id}  = { rid, text, by, createdAt, gekauft, kaeufer, gekauftAt }
    musik/{id}    = { rid, typ:'playlist'|'song', titel, link, by, createdAt }
    Der Admin legt Aufgaben an und weist sie zu. Mitglieder schlagen vor (der Admin gibt frei) und übernehmen offene Aufgaben mit „Ich mach das“. */
-const AUF_TABS = [['auf','Aufgaben'],['ein','Einkauf'],['mus','Musik']];
+const AUF_TABS = [['auf','To-dos'],['mit','Mitbringen'],['ein','Einkauf'],['mus','Musik']];
 const aufListe = () => S.rt.aufgaben||[];
-const aufAktiv = () => aufListe().filter(a=>!a.vorgeschlagen);
+const aufAktiv = () => aufListe().filter(a=>!a.vorgeschlagen && a.typ!=='dienst');
 const aufOffen = () => aufAktiv().filter(a=>!a.done);
 const aufUeberfaellig = a => !a.done && a.bis && a.bis<today();
 const aufMeine = () => aufOffen().filter(a=>a.wer===S.uid || !a.wer);
-const AUF_EMO = {musik:'🎶', einkauf:'🛒', aufgabe:'✅'};
+/* Offene Dinge nach Art: To-dos, Einkauf, Musik-Aufgaben (Zahlen für Kachel und Mein Tag) */
+function aufStand(){ const t=aufAktiv(); const ein=S.rt.einkauf||[]; const mb=S.rt.mitbringen||[]; const k={aufgabe:0, einkauf:0, musik:0, mit:0}; t.filter(a=>!a.done).forEach(a=>k[a.typ==='musik'?'musik':'aufgabe']++); k.einkauf=ein.filter(x=>!x.gekauft).length; k.mit=mb.filter(x=>!x.wer).length;
+  return {...k, offen:k.aufgabe+k.einkauf+k.musik+k.mit, gesamt:t.length+ein.length+mb.length}; }
+const aufStandText = s => [s.aufgabe?`${s.aufgabe} ${s.aufgabe===1?'To-do':'To-dos'}`:'', s.einkauf?`${s.einkauf} ${s.einkauf===1?'Einkauf':'Einkäufe'}`:'', s.musik?`${s.musik} Musik`:'', s.mit?`${s.mit} Mitbringen`:''].filter(Boolean).join(', ');
+/* Kleines Symbol für „Mein Tag“: offene von allen Aufgaben, Tipp öffnet die Aufgaben */
+function aufChip(){ const st=aufStand(); const n=st.gesamt; if(!n || cur()?.status!=='fest') return ''; const o=st.offen; const ue=aufOffen().some(aufUeberfaellig);
+  return `<button class="chip aufchip ${o?'':'fertig'} ${ue?'warn':''}" data-act="go" data-v="aufgaben" aria-label="${o} von ${n} noch offen (${aufStandText(st)||'alles erledigt'})${ue?', einige überfällig':''}. Aufgaben öffnen" title="Aufgaben">${ic('check',16)} <b class="num">${o}/${n}</b></button>`; }
+const AUF_EMO = {musik:'🎶', einkauf:'🛒', aufgabe:'✅', mit:'🎁'};
+/* Kleine Zähler an der Kachel: was genau offen ist */
+const aufPills = s => { if(!s.gesamt) return ''; if(!s.offen) return '<span class="hkpills"><span>✓ alles erledigt</span></span>';
+  const l=[['aufgabe','To-dos'],['mit','Mitbringen'],['einkauf','Einkauf'],['musik','Musik']].filter(([k])=>s[k]); return `<span class="hkpills">${l.map(([k,n])=>`<span title="${n}">${AUF_EMO[k]} <b>${s[k]}</b></span>`).join('')}</span>`; };
 
 /* ---------- Vorlagen ---------- */
 function aufVorlagen(r){ const p=r.profil||{}; const fam=p.gruppe==='familie' || (typeof pfKinder==='function'&&p.gruppe&&pfKinder(p)); const party=(p.ziele||[]).includes('party');
@@ -6969,9 +6993,9 @@ A.aufVorHinzu = async el => { const l=aufVorlagen(cur()); const w=l.filter((x,i)
 
 /* ---------- Ansicht ---------- */
 V.aufgaben = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const tab=S.ui.aufTab||'auf';
-  const nEin=(S.rt.einkauf||[]).filter(x=>!x.gekauft).length; const nAuf=aufOffen().length+(isAdmin(r)?aufListe().filter(a=>a.vorgeschlagen).length:0);
-  const tabs=`<div class="tabs" role="tablist">${AUF_TABS.map(([k,n])=>`<button role="tab" aria-selected="${tab===k}" data-act="ui" data-k="aufTab" data-val="${k}">${n}${k==='auf'&&nAuf?`<span class="badge orange">${nAuf}</span>`:''}${k==='ein'&&nEin?`<span class="badge orange">${nEin}</span>`:''}</button>`).join('')}</div>`;
-  return `${hdrTrip('Aufgaben')}${backBtn()}${geschlossenBanner()}<h1>${tab==='ein'?'Einkaufsliste':tab==='mus'?'Musik':'Aufgaben'}</h1>${tabs}${tab==='ein'?einkaufView(r):tab==='mus'?musikView(r):aufView(r)}`; };
+  const nEin=(S.rt.einkauf||[]).filter(x=>!x.gekauft).length; const nMit=(S.rt.mitbringen||[]).filter(x=>!x.wer).length; const nAuf=aufOffen().length+(isAdmin(r)?aufListe().filter(a=>a.vorgeschlagen).length:0);
+  const tabs=`<div class="tabs" role="tablist">${AUF_TABS.map(([k,n])=>`<button role="tab" aria-selected="${tab===k}" data-act="ui" data-k="aufTab" data-val="${k}">${n}${k==='auf'&&nAuf?`<span class="badge orange">${nAuf}</span>`:''}${k==='ein'&&nEin?`<span class="badge orange">${nEin}</span>`:''}${k==='mit'&&nMit?`<span class="badge orange">${nMit}</span>`:''}</button>`).join('')}</div>`;
+  return `${hdrTrip('To-do')}${backBtn()}${geschlossenBanner()}<h1>${tab==='ein'?'Einkaufsliste':tab==='mus'?'Musik':tab==='mit'?'Wer bringt was mit?':'To-dos'}</h1>${tabs}${tab==='ein'?einkaufView(r):tab==='mus'?musikView(r):tab==='mit'?mitbringenView(r):aufView(r)}`; };
 
 function aufZeile(a, r){ const adm=isAdmin(r); const meins=a.wer===S.uid; const ue=aufUeberfaellig(a);
   const frist = a.bis ? `<span class="chip ${ue?'red':''}" style="height:22px;font-size:11.5px">${ue?'überfällig · ':''}bis ${fD(a.bis)}</span>` : '';
@@ -6991,6 +7015,7 @@ function aufView(r){ const adm=isAdmin(r); const alle=aufListe(); const frei=all
     ${adm?`<button class="btn sm sec" style="align-self:flex-start" data-act="aufVorlagen">✨ Vorschläge für eure Reise</button>`:''}
     ${adm&&frei.length?`<div class="card hot"><h3 style="margin:0">Zur Freigabe</h3>${frei.map(a=>`<div class="row" style="gap:8px"><span class="grow small"><b>${esc(a.titel)}</b><br><span class="tiny mut">vorgeschlagen von ${esc(nm(a.by))}</span></span><button class="btn xs" data-act="aufFrei" data-id="${a.id}">Freigeben</button><button class="icbtn sm0" data-act="aufWeg" data-id="${a.id}" aria-label="Ablehnen">${ic('x',14)}</button></div>`).join('')}</div>`:''}
     ${!adm&&meine.length?`<div class="info small">${meine.map(a=>`„${esc(a.titel)}“`).join(', ')} ${meine.length===1?'wartet':'warten'} auf die Freigabe von ${esc(vorname(r.admin))}.</div>`:''}
+    ${dienstKarte(r)}
     ${offen.length?`<div class="info small">${offen.filter(a=>!a.wer).length?`${offen.filter(a=>!a.wer).length} ${offen.filter(a=>!a.wer).length===1?'Aufgabe sucht':'Aufgaben suchen'} noch jemanden. `:''}${offen.some(aufUeberfaellig)?'Manche sind überfällig.':''}</div>`:''}
     ${offen.length?offen.map(a=>aufZeile(a,r)).join(''):`<div class="empty small">${aktiv.length?'Alles erledigt. 🎉':'Noch keine Aufgaben.'}${adm&&!aktiv.length?' Tipp: Tippe auf „Vorschläge für eure Reise“.':''}</div>`}
     ${rang.length?`<div class="card tight"><b class="small">Fleißigste Helfer</b><div class="row wrap" style="gap:10px">${rang.map(([u,n],i)=>`<span class="chip ${i===0?'yel':''}">${['🥇','🥈','🥉'][i]} ${esc(vorname(u))} · ${n}</span>`).join('')}</div></div>`:''}
@@ -7068,6 +7093,49 @@ A.musKopieren = async ()=>{ const t=(S.rt.musik||[]).filter(x=>x.typ==='song').m
 function aufKarte(){ const r=cur(); const m=myM(); if(!r || r.status!=='fest' || m?.status!=='zugesagt' || typeof reisePhase!=='function' || reisePhase()!=='vorfreude') return '';
   const t=aufMeine(); const mein=t.filter(a=>a.wer===S.uid).length; const frei=t.filter(a=>!a.wer).length; const ue=t.some(aufUeberfaellig); if(!t.length) return ''; const d=daysUntil(m.anreise||r.von);
   return `<button class="card tight packkarte vorfreude" data-act="go" data-v="aufgaben"><span class="row" style="gap:10px;width:100%"><span class="admic">${ic('check',20)}</span><span class="grow col" style="gap:1px;text-align:left"><b>${mein?`${mein} ${mein===1?'Aufgabe':'Aufgaben'} für dich`:'Aufgaben der Gruppe'}${ue?' · überfällig':''}</b><span class="tiny mut">${frei?`${frei} suchen noch jemanden · `:''}Abreise in ${d} ${d===1?'Tag':'Tagen'}</span></span>${ic('right',14)}</span></button>`; }
+/* ===================== Dienste reihum (wiederkehrende To-dos) =====================
+   aufgaben/{id} mit typ:'dienst' = { rid, titel, typ:'dienst', reihum:[uids], start:'JJJJ-MM-TT', by, createdAt }
+   Wer dran ist, ergibt sich rein aus dem Datum: reihum[(Tage seit Start) mod Anzahl]. Kein Server nötig, jeder sieht dasselbe.
+   Beispiele: „Wer kocht heute?“, Abwasch, Müll rausbringen. Nur der Admin legt Dienste an. */
+const diensteListe = () => aufListe().filter(a=>a.typ==='dienst' && Array.isArray(a.reihum) && a.reihum.length).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+const tageZw = (a,b) => Math.round((Date.UTC(+b.slice(0,4),+b.slice(5,7)-1,+b.slice(8,10)) - Date.UTC(+a.slice(0,4),+a.slice(5,7)-1,+a.slice(8,10)))/86400000);
+const dienstWer = (d, datum) => { if(!d.start || datum<d.start) return null; const n=d.reihum.length; return d.reihum[((tageZw(d.start,datum))%n+n)%n]; };
+const dienstTag = (datum, n) => { const t=new Date(datum+'T12:00:00Z'); t.setUTCDate(t.getUTCDate()+n); return t.toISOString().slice(0,10); };
+const dienstWo = n => n===0?'Heute':n===1?'Morgen':n===2?'Übermorgen':'';
+const dienstIdeen = ['Kochen','Abwaschen','Frühstück holen','Müll rausbringen','Einkaufen','Tisch decken'];
+
+function dienstKarte(r){ const adm=isAdmin(r); const l=diensteListe(); const h=today();
+  const zeile=d=>{ const heute=dienstWer(d,h); const vor=!heute&&d.start>h; const ich=heute===S.uid;
+    return `<div class="card tight ${ich?'hot':''}"><div class="row between" style="gap:8px"><b>${esc(d.titel)}</b>${adm?`<button class="icbtn sm0" data-act="dienstWeg" data-id="${d.id}" aria-label="${esc(d.titel)} entfernen">${ic('x',14)}</button>`:''}</div>
+      ${vor?`<span class="small mut">Startet am ${fD(d.start)}. Erster Dienst: ${esc(vorname(d.reihum[0]))}</span>`
+        :[0,1,2].map(n=>{ const w=dienstWer(d,dienstTag(h,n)); return `<div class="row" style="gap:8px"><span class="small ${n?'mut':''}" style="width:86px;${n?'':'font-weight:700'}">${dienstWo(n)}</span>${av(w,n?24:30)}<span class="${n?'small':''}" style="${n?'':'font-weight:700'}">${w===S.uid?'Du':esc(nm(w))}</span></div>`; }).join('')}
+      <details class="tiny"><summary class="mut" style="cursor:pointer">Plan der nächsten 7 Tage</summary>${Array.from({length:7},(_,i)=>{ const dt=dienstTag(h,i); const w=dienstWer(d,dt); return w?`<div style="margin-top:3px"><b>${fD(dt)}:</b> ${w===S.uid?'Du':esc(nm(w))}</div>`:''; }).join('')}</details></div>`; };
+  if(!l.length && !adm) return '';
+  return `<div class="col" style="gap:8px"><div class="row between"><h3 style="margin:0">Dienste reihum</h3>${adm?`<button class="btn xs sec" data-act="dienstAuf">${ic('plus',14)} Dienst</button>`:''}</div>
+    ${l.length?l.map(zeile).join(''):`<span class="small mut">Zum Beispiel „Wer kocht heute?“: Die App verteilt den Dienst Tag für Tag der Reihe nach.</span>`}</div>`; }
+
+A.dienstAuf = ()=>{ const r=cur(); const ms=S.rt.mitglied.filter(m=>m.status==='zugesagt').map(m=>m.uid); const f=S.form; f.dn_titel=''; f.dn_start=(r.von&&r.von>today())?r.von:today(); f.dn_misch=false; f.dn_wer=Object.fromEntries(ms.map(u=>[u,true])); openOv('dienst'); };
+A.dienstIdee = el => { S.form.dn_titel=el.dataset.t; const i=document.getElementById('f_dn_titel'); if(i) i.value=el.dataset.t; };
+A.dnWer = el => { S.form.dn_wer=S.form.dn_wer||{}; S.form.dn_wer[el.dataset.u]=!!el.checked; };
+A.dnMisch = el => { S.form.dn_misch=!!el.checked; };
+OV.dienst = ()=>{ const f=S.form; const ms=S.rt.mitglied.filter(m=>m.status==='zugesagt').map(m=>m.uid);
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Dienst reihum"><div class="row between"><h2 style="margin:0">Dienst reihum</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <p class="small mut">Die App verteilt den Dienst jeden Tag an die nächste Person.</p>
+  <label class="f">Was?<input class="in" id="f_dn_titel" maxlength="60" placeholder="z. B. Kochen" value="${esc(f.dn_titel||'')}"></label>
+  <div class="fchips">${dienstIdeen.map(t=>`<button type="button" class="fchip" data-act="dienstIdee" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+  <label class="f">Start<input class="in" type="date" id="f_dn_start" value="${esc(f.dn_start||'')}"></label>
+  <div class="col" style="gap:6px"><span class="small mut" style="font-weight:700">Wer ist dabei?</span>${ms.map(u=>`<label class="toggle">${av(u,26)}<input type="checkbox" data-change="dnWer" data-u="${u}" ${f.dn_wer?.[u]?'checked':''}> ${esc(nm(u))}</label>`).join('')}</div>
+  <label class="toggle"><input type="checkbox" data-change="dnMisch" ${f.dn_misch?'checked':''}> Reihenfolge zufällig mischen</label>
+  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="dienstSpeichern">Anlegen</button></div></div>`; };
+A.dienstSpeichern = async ()=>{ const f=S.form; const t=(document.getElementById('f_dn_titel')?.value||f.dn_titel||'').trim().slice(0,60); const start=document.getElementById('f_dn_start')?.value||f.dn_start;
+  let wer=Object.keys(f.dn_wer||{}).filter(u=>f.dn_wer[u]); if(!t) return toast('Bitte gib den Dienst an.'); if(wer.length<2) return toast('Wähle mindestens zwei Personen.'); if(!/^\d{4}-\d{2}-\d{2}$/.test(start||'')) return toast('Bitte wähle ein Startdatum.');
+  if(f.dn_misch) wer=wer.map(u=>[Math.random(),u]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  closeOv(); await W(()=>S.db.collection('aufgaben').add({rid:S.rid, titel:t, typ:'dienst', reihum:wer, start, by:S.uid, createdAt:now()}),'Anlegen'); toast('Dienst angelegt'); };
+A.dienstWeg = async el => { openOv('confirm',{title:'Dienst entfernen?', text:'Der Plan verschwindet für alle.', ok:'Entfernen', fn: async ()=>{ closeOv(); await W(()=>S.db.doc(`aufgaben/${el.dataset.id}`).delete(),'Entfernen'); }}); };
+
+/* Hinweis auf „Mein Tag“: wer heute dran ist */
+function dienstHeuteKarte(){ const r=cur(); if(!r||r.status!=='fest'||myM()?.status!=='zugesagt') return ''; const h=today(); const mein=diensteListe().filter(d=>dienstWer(d,h)===S.uid); if(!mein.length) return '';
+  return `<button class="card tight packkarte vorfreude" data-act="go" data-v="aufgaben"><span class="row" style="gap:10px;width:100%"><span class="admic">${ic('check',20)}</span><span class="grow col" style="gap:1px;text-align:left"><b>Heute bist du dran: ${esc(mein.map(d=>d.titel).join(', '))}</b><span class="tiny mut">Dienst reihum</span></span>${ic('right',16,'style="color:var(--mut)"')}</span></button>`; }
 /* ===================== Anreise: Flug, Zug oder Auto =====================
    reisen/{id}.anreiseArt = 'flug'|'zug'|'auto'|'gemischt' (beim Anlegen gewählt), reisen/{id}.zielflughaefen = [Namen] (vom Admin)
    anreisewunsch/{rid}_{uid} = { rid, uid, art:'flug'|'zug'|'auto'|'selbst', abflug:[Flughäfen], ziel:[Flughäfen], zugZumFlug, bahnhof, startort, hinweis, gast?, name?, by, at }
@@ -7191,6 +7259,225 @@ A.selbstUm = async el => { const an=el.dataset.an==='1'; const id=`${S.rid}_${S.
   try{ if(an){ await S.db.doc(`anreisewunsch/${id}`).set({rid:S.rid, uid:S.uid, art:'selbst', selbstAlles:true, abflug:[], ziel:[], zugZumFlug:false, bahnhof:'', startort:'', hinweis:'', by:S.uid, at:now()}); toast('Notiert: du kümmerst dich selbst um deine Reise.'); }
     else { await S.db.doc(`anreisewunsch/${id}`).delete(); toast('Du bist wieder bei der Gruppenplanung dabei.'); }
   }catch(e){ fail(e,'Speichern'); } };
+/* ===================== Notfallpass: gehört zum Profil, nicht zur Reise =====================
+   Privat in den eigenen Einstellungen: settings.notfallpass = { blut, allergien, medis, versicherung, entsperr, angehoerige:[{name,bez,tel}], kontakt(alt) }.
+   Teilen pro Reise: notfallpass/{rid}_{uid} = { rid, uid, an:['alle'] | [uids], daten:{…ohne Entsperrcode, außer mitCode}, mitCode, at }.
+   Gelesen werden darf es nur von der Person selbst und den gewählten Mitgliedern der Reise. Alles ist freiwillig. */
+const NP_FELDER = [['blut','Blutgruppe'],['allergien','Allergien'],['medis','Medikamente'],['versicherung','Auslandskrankenversicherung']];
+const npAnz = 3;
+function npDaten(){ const p=S.settings.notfallpass||{}; let a=(p.angehoerige||[]).filter(x=>x&&(x.name||x.bez||x.tel));
+  if(!a.length && p.kontakt) a=[{name:p.kontakt, bez:'', tel:''}];
+  return {...p, angehoerige:a}; }
+const npLeer = p => !(NP_FELDER.some(([k])=>p[k]) || p.entsperr || (p.angehoerige||[]).length);
+const npTel = t => String(t||'').replace(/[^\d+]/g,'');
+/* Zeilen für Pass, mitCode steuert den Entsperrcode (verdeckt, Tipp zeigt ihn) */
+function npZeilen(p, opt={}){ const l=[];
+  (p.angehoerige||[]).forEach((a,i)=>l.push(`<div class="izeile"><span class="tiny mut">${i?`Angehörige/r ${i+1}`:'Nächste Angehörige'}${a.bez?` · ${esc(a.bez)}`:''}</span><span class="row between" style="gap:8px"><span>${esc(a.name||'')}</span>${a.tel?`<a class="btn xs sec" href="tel:${esc(npTel(a.tel))}" aria-label="${esc(a.name||'Kontakt')} anrufen">${ic('phone',13)} ${esc(a.tel)}</a>`:''}</span></div>`));
+  NP_FELDER.filter(([k])=>p[k]).forEach(([k,n])=>l.push(`<div class="izeile"><span class="tiny mut">${n}</span><span>${esc(p[k])}</span></div>`));
+  if(p.entsperr && (opt.code!==false)){ const id=opt.id||'eigen'; const zeigen=S.ui.npCode===id; l.push(`<button class="izeile" data-act="npCodeUm" data-id="${esc(id)}" aria-label="Entsperrcode ${zeigen?'verbergen':'zeigen'}"><span class="tiny mut">Entsperrcode Handy (Tipp zum Anzeigen)</span><span class="num">${zeigen?esc(p.entsperr):'••••••'}</span></button>`); }
+  return l.join(''); }
+A.npCodeUm = el => { S.ui.npCode = S.ui.npCode===el.dataset.id ? '' : el.dataset.id; render(); };
+
+/* ---------- eigene Karte (Profilseite und Notfall-Seite der Reise) ---------- */
+function npMeineKarte(rid){ const p=npDaten(); const leer=npLeer(p);
+  const teil = rid ? npMeinTeil(rid) : null;
+  return `<div class="card tight"><div class="row between"><b>Mein Notfallpass</b><button class="btn xs sec" data-act="passAuf">${ic('pencil',13)} ${leer?'Anlegen':'Bearbeiten'}</button></div>
+    ${leer?'<span class="small mut">Wichtige Angaben für den Ernstfall: nächste Angehörige, Blutgruppe, Allergien, Medikamente, Versicherung und auf Wunsch der Entsperrcode deines Handys. Alles freiwillig, der Pass gehört zu deinem Profil und gilt für jede Reise.</span>':npZeilen(p,{id:'eigen'})}
+    ${!leer&&rid?`<div class="row between" style="gap:8px;border-top:1px solid var(--line);padding-top:8px"><span class="small ${teil?'':'mut'}">${teil?`${ic('check',14)} Geteilt mit ${teil.an.includes('alle')?'allen Mitgliedern':`${teil.an.length} ${teil.an.length===1?'Person':'Personen'}`}`:'Nur für dich sichtbar'}</span><button class="btn xs ${teil?'sec':''}" data-act="npTeilenAuf" data-rid="${rid}">${teil?'Ändern':'Mit der Gruppe teilen'}</button></div>`:''}</div>`; }
+const npMeinTeil = rid => (S.rt.npMein||[]).find(x=>x.rid===rid);
+const npGeteilt = () => { const m=new Map(); [...(S.rt.npAn||[]), ...(S.rt.npAlle||[])].forEach(x=>{ if(x.uid!==S.uid) m.set(x.id,x); }); return [...m.values()]; };
+function npGruppenKarte(){ const l=npGeteilt(); if(!l.length) return '';
+  return `<div class="card tight"><b>Notfallpässe der Gruppe</b><span class="tiny mut">Diese Mitglieder haben ihren Pass mit dir geteilt.</span>${l.map(x=>`<details class="npgeteilt"><summary class="row" style="gap:8px;cursor:pointer;padding:6px 0">${av(x.uid,28)}<b class="grow">${esc(nm(x.uid))}</b></summary>${npZeilen({...(x.daten||{}), entsperr:x.mitCode?(x.daten||{}).entsperr:''},{id:'g_'+x.uid})||'<span class="small mut">Keine Angaben.</span>'}</details>`).join('')}</div>`; }
+
+/* ---------- Bearbeiten ---------- */
+A.passAuf = ()=>{ const p=npDaten(); NP_FELDER.forEach(([k])=>S.form['np_'+k]=p[k]||''); S.form.np_entsperr=p.entsperr||'';
+  for(let i=0;i<npAnz;i++){ const a=p.angehoerige[i]||{}; S.form[`np_a${i}n`]=a.name||''; S.form[`np_a${i}b`]=a.bez||''; S.form[`np_a${i}t`]=a.tel||''; } openOv('passForm'); };
+OV.passForm = () => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Notfallpass"><div class="row between"><h2 style="margin:0">Mein Notfallpass</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <p class="small mut">Alles ist freiwillig. Die Angaben sind privat, bis du sie selbst mit einer Reisegruppe teilst.</p>
+  ${Array.from({length:npAnz},(_,i)=>`<div class="card tight"><b class="small">${i?`Weitere/r Angehörige/r ${i+1}`:'Nächste Angehörige'}</b>
+    <label class="f">Name<input class="in" id="f_np_a${i}n" maxlength="60" placeholder="Vor- und Nachname"></label>
+    <label class="f">Zugehörigkeit<input class="in" id="f_np_a${i}b" maxlength="40" placeholder="z. B. Partnerin, Mutter, Bruder"></label>
+    <label class="f">Telefon<input class="in" id="f_np_a${i}t" type="tel" inputmode="tel" maxlength="30" placeholder="+49 …"></label></div>`).join('')}
+  <label class="f">Blutgruppe<input class="in" id="f_np_blut" maxlength="10" placeholder="z. B. A+"></label>
+  <label class="f">Allergien<input class="in" id="f_np_allergien" maxlength="120"></label>
+  <label class="f">Medikamente<input class="in" id="f_np_medis" maxlength="160"></label>
+  <label class="f">Auslandskrankenversicherung<input class="in" id="f_np_versicherung" maxlength="120" placeholder="Name und Notfallnummer"></label>
+  <label class="f">Entsperrcode Handy<input class="in" id="f_np_entsperr" type="password" autocomplete="off" maxlength="30" placeholder="freiwillig"></label>
+  <span class="tiny mut">Der Code wird nur mit deinem Konto gespeichert und nur geteilt, wenn du das beim Teilen ausdrücklich wählst.</span>
+  <button class="btn block" data-act="passSpeichern">Speichern</button></div>`;
+A.passSpeichern = async ()=>{ const f=S.form; const t=k=>String(f[k]||'').trim();
+  const angehoerige=Array.from({length:npAnz},(_,i)=>({name:t(`np_a${i}n`), bez:t(`np_a${i}b`), tel:t(`np_a${i}t`)})).filter(a=>a.name||a.bez||a.tel);
+  const p={angehoerige, entsperr:t('np_entsperr'), ...Object.fromEntries(NP_FELDER.map(([k])=>[k,t('np_'+k)]))};
+  closeOv(); await saveSettings({notfallpass:p}); toast('Notfallpass gespeichert'); npSync(); };
+
+/* ---------- Teilen ---------- */
+function npTeilDaten(mitCode){ const p=npDaten(); const d={angehoerige:p.angehoerige, ...Object.fromEntries(NP_FELDER.map(([k])=>[k,p[k]||'']))}; if(mitCode && p.entsperr) d.entsperr=p.entsperr; return d; }
+/* nach dem Bearbeiten alle bestehenden Freigaben aktualisieren */
+async function npSync(){ try{ const s=await S.db.collection('notfallpass').where('uid','==',S.uid).get(); for(const d of s.docs){ const x=d.data(); await S.db.doc(`notfallpass/${d.id}`).update({daten:npTeilDaten(!!x.mitCode), at:now()}); } }catch(e){ console.warn('Notfallpass',e); } }
+A.npTeilenAuf = el => { const rid=el.dataset.rid; if(rid!==S.rid) return; const x=npMeinTeil(rid); const f=S.form;
+  f.npAlle = x ? x.an.includes('alle') : true; f.npAn=Object.fromEntries(((x&&!x.an.includes('alle'))?x.an:[]).map(u=>[u,true])); f.npCodeTeilen=!!x?.mitCode; openOv('npTeilen'); };
+A.npAlleWahl = el => { S.form.npAlle=el.dataset.v==='alle'; renderOv(); };
+A.npPers = el => { S.form.npAn=S.form.npAn||{}; S.form.npAn[el.dataset.u]=!!el.checked; };
+A.npCodeTog = el => { S.form.npCodeTeilen=!!el.checked; };
+OV.npTeilen = () => { const f=S.form; const ms=S.rt.mitglied.filter(m=>['zugesagt','teilnehmer'].includes(m.status)&&m.uid!==S.uid); const p=npDaten(); const x=npMeinTeil(S.rid);
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Notfallpass teilen"><div class="row between"><h2 style="margin:0">Notfallpass teilen</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <p class="small mut">Wer darf deinen Notfallpass in dieser Reise sehen? Du kannst das jederzeit ändern oder beenden.</p>
+  <div class="col" style="gap:8px"><button type="button" class="pfopt ${f.npAlle?'on':''}" aria-pressed="${!!f.npAlle}" data-act="npAlleWahl" data-v="alle"><b>Alle Mitglieder dieser Reise</b></button><button type="button" class="pfopt ${f.npAlle?'':'on'}" aria-pressed="${!f.npAlle}" data-act="npAlleWahl" data-v="auswahl"><b>Nur ausgewählte Personen</b></button></div>
+  ${f.npAlle?'':`<div class="col" style="gap:6px">${ms.map(m=>`<label class="toggle">${av(m.uid,26)}<input type="checkbox" data-change="npPers" data-u="${m.uid}" ${f.npAn?.[m.uid]?'checked':''}> ${esc(nm(m.uid))}</label>`).join('')||'<span class="small mut">Noch keine anderen Mitglieder.</span>'}</div>`}
+  ${p.entsperr?`<label class="toggle" style="align-items:flex-start"><input type="checkbox" data-change="npCodeTog" ${f.npCodeTeilen?'checked':''}><span><b>Auch den Entsperrcode meines Handys teilen</b><br><span class="small mut">Nur sinnvoll für Menschen, denen du voll vertraust.</span></span></label>`:''}
+  <div class="row" style="gap:8px">${x?`<button class="btn sec" data-act="npTeilenEnde">Teilen beenden</button>`:`<button class="btn sec" data-act="closeOv">Abbrechen</button>`}<button class="btn grow" data-act="npTeilenSpeichern">Teilen</button></div></div>`; };
+A.npTeilenSpeichern = async ()=>{ const f=S.form; const an=f.npAlle?['alle']:Object.keys(f.npAn||{}).filter(u=>f.npAn[u]); if(!an.length) return toast('Bitte wähle mindestens eine Person.');
+  const mitCode=!!(f.npCodeTeilen && npDaten().entsperr); closeOv();
+  await W(()=>S.db.doc(`notfallpass/${S.rid}_${S.uid}`).set({rid:S.rid, uid:S.uid, an, daten:npTeilDaten(mitCode), mitCode, at:now()}),'Teilen'); toast('Notfallpass geteilt'); };
+A.npTeilenEnde = async ()=>{ closeOv(); await W(()=>S.db.doc(`notfallpass/${S.rid}_${S.uid}`).delete(),'Beenden'); toast('Du teilst deinen Notfallpass nicht mehr.'); };
+
+/* ---------- eigene Seite im Profil ---------- */
+V.notpass = ()=>{ const trips=S.meineM.filter(m=>['zugesagt','teilnehmer'].includes(m.status)&&S.reisen[m.rid]&&S.reisen[m.rid].status!=='geloescht');
+  return `${hdrPlain('Notfallpass')}${backBtn()}<h1>Mein Notfallpass</h1>${npMeineKarte(null)}
+    <p class="small mut">Geteilt wird pro Reise: Öffne die Reise, dort unter „Notfall“ kannst du deinen Pass mit der Gruppe teilen. ${trips.length?'':'Du bist noch in keiner Reise.'}</p>
+    <div class="card tight">${trips.length?trips.map(m=>`<div class="row between"><span>${esc(S.reisen[m.rid].titel)}</span><button class="btn xs sec" data-act="openTrip" data-rid="${m.rid}">Zur Reise</button></div>`).join(''):'<span class="small mut">Noch keine Reise.</span>'}</div>`; };
+/* ===================== Reise-Rückblick =====================
+   Nach der Reise: die Reise in Zahlen und ein direkter Weg zur nächsten Planung mit derselben Truppe („Gleiche Truppe, neue Reise?“).
+   Alles wird aus den vorhandenen Daten der Reise berechnet, es wird nichts Neues gespeichert. */
+function rueckblickDaten(r){ const M=S.rt.mitglied.filter(m=>m.status==='zugesagt');
+  const tage = r.von&&r.bis ? tageZw(r.von,r.bis)+1 : 0;
+  const akt = (S.rt.akt||[]).filter(a=>!a.ausgeblendet);
+  const fotos = (S.rt.msgs||[]).filter(x=>x.typ==='bild' && !x.geloescht);
+  const videos = fotos.filter(x=>String(x.mime||'').startsWith('video')).length;
+  const ausg = (S.rt.kasse||[]).filter(e=>e.typ!=='ausgleich').reduce((s,e)=>s+(+e.betrag||0),0);
+  const herzen = S.rt.mitglied.reduce((s,m)=>s+(+m.herzen||0),0);
+  const fertig = (typeof aufAktiv==='function'?aufAktiv():[]).filter(a=>a.done); const z={}; fertig.forEach(a=>{ if(a.doneBy) z[a.doneBy]=(z[a.doneBy]||0)+1; }); const helfer=Object.entries(z).sort((a,b)=>b[1]-a[1])[0];
+  const top = akt.map(a=>[a,Object.values(a.dabei||{}).filter(v=>v===true).length]).sort((a,b)=>b[1]-a[1])[0];
+  return {M, tage, akt, fotos:fotos.length-videos, videos, ausg, herzen, fertig:fertig.length, helfer, top}; }
+function rbKachel(zahl, label, ico){ return `<div class="rbz"><span class="rbzi" aria-hidden="true">${ico}</span><b class="num">${zahl}</b><span class="tiny">${label}</span></div>`; }
+V.rueckblick = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const d=rueckblickDaten(r);
+  const kach=[[d.tage,d.tage===1?'Tag':'Tage','☀️'],[d.M.length,d.M.length===1?'Person':'Personen','👥'],[d.akt.length,d.akt.length===1?'Termin':'Termine','📅'],[d.fotos,d.fotos===1?'Foto':'Fotos','📷'],...(d.videos?[[d.videos,d.videos===1?'Video':'Videos','🎬']]:[]),[d.herzen,'Herzen','❤️'],...(d.ausg?[[eur(d.ausg),'ausgegeben','💶']]:[]),...(d.fertig?[[d.fertig,'To-dos erledigt','✅']]:[])].filter(k=>k[0]!==0&&k[0]!=='0');
+  return `${hdrTrip('Rückblick')}${backBtn()}${reiseSzene(r, 'Rückblick', false, r.titel, true)}
+    <p class="small mut" style="margin:0">${esc(r.ort||'Eure Reise')}${r.von?` · ${fRange(r.von,r.bis)}`:''}. Das habt ihr zusammen erlebt:</p>
+    <div class="rbgrid">${kach.map(k=>rbKachel(...k)).join('')||'<div class="empty small">Zu dieser Reise gibt es noch nicht viele Daten.</div>'}</div>
+    ${d.top&&d.top[1]>1?`<div class="card tight"><span class="tiny mut">Beliebtester Termin</span><b>${esc(d.top[0].titel||'Termin')}</b><span class="small mut">${d.top[1]} waren dabei</span></div>`:''}
+    ${d.helfer?`<div class="card tight"><span class="tiny mut">Fleißigster Helfer</span><b>🥇 ${esc(nm(d.helfer[0]))}</b><span class="small mut">${d.helfer[1]} ${d.helfer[1]===1?'Aufgabe':'Aufgaben'} erledigt</span></div>`:''}
+    ${d.M.length?`<div class="stack" style="align-self:flex-start">${d.M.slice(0,10).map(m=>av(m.uid,36)).join('')}</div>`:''}
+    <div class="card gold"><div class="ttl">Gleiche Truppe, neue Reise?</div><p class="small" style="color:var(--goldtx);margin:0">Wir starten eine neue Koffer-Konferenz und laden alle ein, die diesmal dabei waren.</p><button class="btn block yel" data-act="nochmal" data-rid="${r.id}">Neue Reise planen</button></div>
+    <div class="row" style="gap:8px"><button class="btn sec grow" data-act="go" data-v="album">${ic('cam',16)} Zum Album</button><button class="btn sec grow" data-act="go" data-v="mitglieder">Kassenbuch</button></div>`; };
+/* ===================== Meine Daten und Konto löschen (Pflicht für App Store und Google Play) =====================
+   Export: Server-Funktion datenExport (komplette Daten), in der Testversion ohne Server nur die lokal geladenen Daten.
+   Löschen: Server-Funktion kontoLoeschen. Bestätigung durch Tippen von LÖSCHEN, Anmeldung muss frisch sein. */
+V.datenschutz = ()=>{ const adm=S.meineM.filter(m=>m.status!=='ausgetreten'&&S.reisen[m.rid]?.admin===S.uid&&S.reisen[m.rid].status!=='geloescht').map(m=>S.reisen[m.rid].titel);
+  return `${hdrPlain('Meine Daten')}${backBtn()}<h1>Meine Daten</h1>
+  <div class="card"><h3 style="margin:0">Daten herunterladen</h3><p class="small mut" style="margin:0">Du bekommst eine Datei mit allem, was Poolposition über dich gespeichert hat: Profil, Einstellungen, Reisen, deine Beiträge und Angaben.</p>
+    <button class="btn block" data-act="datenExport" ${S.ui.dsBusy?'disabled':''}>${ic('dl',16)} ${S.ui.dsBusy==='exp'?'Wird erstellt …':'Meine Daten herunterladen'}</button></div>
+  <div class="card" style="border-color:var(--pinktx)"><h3 style="margin:0;color:var(--pinktx)">Konto löschen</h3>
+    <p class="small" style="margin:0">Dein Profil, deine Einstellungen, dein Notfallpass, deine Zimmer-, Budget- und Anreiseangaben und dein Zugang werden endgültig gelöscht. Deine Chatnachrichten werden anonymisiert. Das lässt sich nicht rückgängig machen.</p>
+    <p class="tiny mut" style="margin:0">Kassenbuch-Einträge bleiben für die Abrechnung der anderen erhalten, ohne deinen Namen.</p>
+    ${adm.length?`<div class="warn small">Du bist Admin von ${esc(adm.join(', '))}. Sind noch andere Mitglieder dabei, musst du die Reisen vorher löschen. Reisen ohne weitere Mitglieder werden mit gelöscht.</div>`:''}
+    ${FB?`<label class="f">Tippe zur Bestätigung LÖSCHEN<input class="in" id="f_dsBest" autocomplete="off" autocapitalize="characters" placeholder="LÖSCHEN"></label>
+    <button class="btn block" style="background:var(--pinktx);color:#fff" data-act="kontoLoeschen" ${S.ui.dsBusy?'disabled':''}>${ic('trash',16)} ${S.ui.dsBusy==='del'?'Wird gelöscht …':'Konto endgültig löschen'}</button>`
+      :'<span class="small mut">In dieser Testversion gibt es kein eigenes Konto zum Löschen. In der Poolposition-App steht hier die Löschfunktion.</span>'}</div>`; };
+
+async function datenSammeln(){ if(FB){ return await PPAuth.call('datenExport',{}); }
+  return {erstellt:new Date().toISOString(), uid:S.uid, hinweis:'Testversion: nur lokal geladene Daten', profil:S.profile?.[S.uid]||null, einstellungen:S.settings||{}, mitgliedschaften:S.meineM, reisen:Object.values(S.reisen).map(r=>({id:r.id, titel:r.titel, ort:r.ort, von:r.von, bis:r.bis}))}; }
+A.datenExport = async ()=>{ S.ui.dsBusy='exp'; render();
+  try{ const d=await datenSammeln(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const name=`Poolposition_Meine_Daten_${today()}.json`;
+    if(S.downloads){ await S.downloads.save({filename:name, data:blob}); toast('Gespeichert'); }
+    else { const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast('Heruntergeladen'); } }
+  catch(e){ fail(e,'Export'); } finally{ S.ui.dsBusy=''; render(); } };
+A.kontoLoeschen = ()=>{ const t=(document.getElementById('f_dsBest')?.value||'').trim().toUpperCase(); if(t!=='LÖSCHEN') return toast('Bitte tippe zur Bestätigung LÖSCHEN.');
+  openOv('confirm',{title:'Konto endgültig löschen?', text:'Alle deine Daten werden gelöscht. Das lässt sich nicht rückgängig machen.', ok:'Ja, löschen', fn: async ()=>{ closeOv(); S.ui.dsBusy='del'; render();
+    try{ await PPAuth.call('kontoLoeschen',{bestaetigung:'LÖSCHEN'}); toast('Dein Konto wurde gelöscht.'); try{ await PPAuth.signOut(); }catch(e){} setTimeout(()=>location.reload(),900); }
+    catch(e){ S.ui.dsBusy=''; render(); const m=String(e?.message||''); toast(/neu an/i.test(m)?'Bitte melde dich neu an und versuche es dann noch einmal.':(m.replace(/^.*?:\s*/,'')||'Löschen hat nicht geklappt.')); } }}); };
+/* ===================== Ansagen (Rundnachricht des Admins) =====================
+   rundnachrichten/{id} = { rid, text, by, createdAt, wichtig, gelesen:{uid:Zeitpunkt} }
+   Nur der Admin der Reise schreibt. Alle Mitglieder sehen die Ansage hervorgehoben auf „Mein Tag“, bis sie „Gelesen“ getippt haben, und bekommen eine Push-Nachricht.
+   Der Admin sieht, wie viele sie gelesen haben. Zusätzlich landet sie als Hinweis im Gruppenchat. */
+const RUND_IDEEN = ['Treffpunkt hat sich geändert.','Wir fahren früher los. Bitte seid pünktlich.','Bitte gebt bis heute Abend Bescheid.','Heute Abend gemeinsames Essen um 19 Uhr.'];
+const rundListe = () => [...(S.rt.rund||[])].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+const rundMein = m => !!(m.gelesen||{})[S.uid] || m.by===S.uid;
+function rundKarte(){ const r=cur(); const me=myM(); if(!r||!me||!['zugesagt','teilnehmer'].includes(me.status)) return '';
+  const adm=isAdmin(r); const l=rundListe(); const frisch=l.filter(m=>!rundMein(m) && (m.createdAt||0)>now()-14*864e5).slice(0,2);
+  const mitgl=S.rt.mitglied.filter(x=>['zugesagt','teilnehmer'].includes(x.status)&&x.uid!==r.admin).length;
+  const alt=l.filter(m=>!frisch.includes(m)).slice(0,5);
+  const kopf = adm ? `<button class="btn sm sec" style="align-self:flex-start" data-act="rundNeu">📣 Ansage an alle</button>` : '';
+  return `${frisch.map(m=>`<div class="card hot"><span class="tag"><span class="dot"></span>ANSAGE VON ${esc(vorname(m.by).toUpperCase())}</span><div style="font-size:17px;font-weight:700;line-height:1.3">${esc(m.text)}</div><div class="row between" style="gap:8px"><span class="tiny mut">${fStamp(m.createdAt)}</span><button class="btn xs" data-act="rundGelesen" data-id="${m.id}">${ic('check',14)} Gelesen</button></div></div>`).join('')}
+    ${kopf||alt.length?`<div class="col" style="gap:6px">${kopf}${alt.length?`<details class="tiny"><summary class="mut" style="cursor:pointer">Frühere Ansagen (${alt.length})</summary>${alt.map(m=>`<div style="margin-top:6px"><b>${esc(vorname(m.by))}</b> · ${fStamp(m.createdAt)}<br>${esc(m.text)}${adm?`<br><span class="mut">${Object.keys(m.gelesen||{}).filter(u=>u!==r.admin).length} von ${mitgl} gelesen</span> <button class="link tiny" data-act="rundWeg" data-id="${m.id}">entfernen</button>`:''}</div>`).join('')}</details>`:''}</div>`:''}
+    ${adm?l.filter(m=>!alt.includes(m)&&m.by===S.uid).slice(0,1).map(m=>`<div class="tiny mut">Letzte Ansage: ${Object.keys(m.gelesen||{}).filter(u=>u!==r.admin).length} von ${mitgl} haben sie gelesen.</div>`).join(''):''}`; }
+A.rundGelesen = async el => { const m=(S.rt.rund||[]).find(x=>x.id===el.dataset.id); if(!m) return; m.gelesen={...(m.gelesen||{}),[S.uid]:now()}; render();
+  try{ await S.db.doc(`rundnachrichten/${m.id}`).update({gelesen:{[S.uid]:now()}}); }catch(e){ console.warn(e); } };
+A.rundNeu = ()=>{ S.form.rund_text=''; openOv('rund'); };
+A.rundIdee = el => { S.form.rund_text=el.dataset.t; const i=document.getElementById('f_rund_text'); if(i) i.value=el.dataset.t; };
+OV.rund = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label="Ansage an alle"><div class="row between"><h2 style="margin:0">📣 Ansage an alle</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <p class="small mut">Alle Mitglieder bekommen die Ansage als Push und sehen sie hervorgehoben auf „Mein Tag“, bis sie „Gelesen“ tippen.</p>
+  <label class="f">Deine Nachricht<textarea class="in" id="f_rund_text" rows="3" maxlength="280" placeholder="z. B. Treffpunkt ist jetzt um 9 Uhr an der Rezeption">${esc(S.form.rund_text||'')}</textarea></label>
+  <div class="fchips">${RUND_IDEEN.map(t=>`<button type="button" class="fchip" data-act="rundIdee" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="rundSenden">Senden</button></div></div>`;
+A.rundSenden = async el => { const t=(document.getElementById('f_rund_text')?.value||S.form.rund_text||'').trim().slice(0,280); if(!t) return toast('Bitte schreib eine Nachricht.'); el.disabled=true;
+  try{ await S.db.collection('rundnachrichten').add({rid:S.rid, text:t, by:S.uid, createdAt:now(), gelesen:{}}); closeOv(); toast('Ansage verschickt');
+    S.db.collection('nachrichten').add({rid:S.rid, typ:'system', text:`📣 Ansage von ${nm(S.uid)}: ${t}`, by:S.uid, createdAt:now()}).catch(()=>{}); }
+  catch(e){ el.disabled=false; fail(e,'Senden'); } };
+A.rundWeg = async el => { await W(()=>S.db.doc(`rundnachrichten/${el.dataset.id}`).delete(),'Entfernen'); };
+/* ===================== Ideen-Pool mit Swipe (Koffer-Konferenz) =====================
+   ideen/{id} = { rid, titel, notiz, link, by, createdAt, stimmen:{uid:'ja'|'vl'|'nein'}, uebernommen? }
+   Jeder wirft Ideen für Reiseziele in den Pool. Dann wischt jeder durch die Karten: rechts = Passt, oben = Vielleicht, links = Nein
+   (oder per Knopf). Die Rangliste zeigt, was bei der Gruppe ankommt. Der Admin übernimmt Favoriten als Ortsvorschlag in die Abstimmung. */
+const ideenListe = () => (S.rt.ideen||[]).slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+const ideeZahl = (i,k) => Object.values(i.stimmen||{}).filter(v=>v===k).length;
+const ideeRang = i => [ideeZahl(i,'ja'), ideeZahl(i,'vl'), -ideeZahl(i,'nein')];
+const ideeVergleich = (a,b) => { const x=ideeRang(a), y=ideeRang(b); for(let k=0;k<3;k++) if(x[k]!==y[k]) return y[k]-x[k]; return (a.createdAt||0)-(b.createdAt||0); };
+const ideeOffen = () => ideenListe().filter(i=>!(i.stimmen||{})[S.uid]);
+const IDEE_ST = {ja:['♥','Passt','grn'], vl:['?','Vielleicht','yel'], nein:['✕','Nein','red']};
+
+/* Karte in der Koffer-Konferenz */
+function ideenKarte(r){ if(r.status!=='abstimmung') return ''; const l=ideenListe(); const o=ideeOffen().length;
+  return `<button class="card tight packkarte vorfreude" data-act="go" data-v="ideen"><span class="row" style="gap:10px;width:100%"><span class="admic" style="font-size:20px">💡</span><span class="grow col" style="gap:1px;text-align:left"><b>Ideen-Pool</b><span class="tiny mut">${l.length?`${l.length} ${l.length===1?'Idee':'Ideen'}${o?` · ${o} noch nicht bewertet`:' · alles bewertet'}`:'Wirf Reiseziele in den Pool und wischt gemeinsam durch'}</span></span>${o?`<span class="chip yel" style="height:22px">${o}</span>`:''}${ic('right',16,'style="color:var(--mut)"')}</span></button>`; }
+
+V.ideen = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(r.status==='geloescht') return `${hdrPlain()}<div class="empty">Diese Reise wurde gelöscht.</div><button class="btn sec" data-act="home">Zu Meine Reisen</button>`; if(!myM()||!['teilnehmer','zugesagt'].includes(myM().status)) return V.dabei(); const tab=S.ui.ideeTab||'swipe'; const o=ideeOffen();
+  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='swipe'}" data-act="ui" data-k="ideeTab" data-val="swipe">Wischen${o.length?`<span class="badge orange">${o.length}</span>`:''}</button><button role="tab" aria-selected="${tab==='rang'}" data-act="ui" data-k="ideeTab" data-val="rang">Rangliste</button></div>`;
+  return `${hdrPlain('Ideen-Pool')}${backBtn()}<div class="row between"><h1>Ideen-Pool</h1><button class="btn sm" data-act="ideeNeu">${ic('plus',16)} Idee</button></div>${tabs}${tab==='rang'?ideeRangView(r):ideeSwipeView(r)}`; };
+
+function ideeSwipeView(r){ const o=ideeOffen(); const i=o[0]; const n=ideenListe().length;
+  if(!n) return `<div class="empty">Noch keine Ideen im Pool. Wirf die erste ein, zum Beispiel ein Reiseziel.</div><button class="btn block" data-act="ideeNeu">${ic('plus',18)} Idee einwerfen</button>`;
+  if(!i) return `<div class="card gold"><div class="ttl">Alles bewertet 🎉</div><p class="small" style="color:var(--goldtx);margin:0">Schau in die Rangliste, was bei der Gruppe ankommt. Neue Ideen erscheinen hier automatisch.</p><button class="btn block yel" data-act="ui" data-k="ideeTab" data-val="rang">Zur Rangliste</button></div>`;
+  return `<p class="tiny mut" style="margin:0;text-align:center">Noch ${o.length} ${o.length===1?'Idee':'Ideen'} · wische nach rechts (passt), oben (vielleicht) oder links (nein)</p>
+    <div class="swbuehne"><div class="swcard" data-id="${i.id}" role="group" aria-label="${esc(i.titel)}"><span class="swstempel ja">PASST</span><span class="swstempel nein">NEIN</span><span class="swstempel vl">VIELLEICHT</span>
+      <div class="swtitel">${esc(i.titel)}</div>${i.notiz?`<div class="swnotiz">${esc(i.notiz)}</div>`:''}
+      ${i.link?`<a class="btn xs sec" style="align-self:flex-start" href="${esc(ortLinkFix?ortLinkFix(i.link):i.link)}" target="_blank" rel="noopener">${ic('right',13)} Ansehen</a>`:''}
+      <div class="row" style="gap:8px;margin-top:auto">${av(i.by,26)}<span class="tiny mut">Idee von ${i.by===S.uid?'dir':esc(vorname(i.by))}</span></div></div></div>
+    <div class="swknoepfe"><button class="swk nein" data-act="ideeBewerte" data-id="${i.id}" data-val="nein" aria-label="Nein">✕</button><button class="swk vl" data-act="ideeBewerte" data-id="${i.id}" data-val="vl" aria-label="Vielleicht">?</button><button class="swk ja" data-act="ideeBewerte" data-id="${i.id}" data-val="ja" aria-label="Passt">♥</button></div>`; }
+
+function ideeRangView(r){ const adm=isAdmin(r); const l=ideenListe().sort(ideeVergleich); if(!l.length) return '<div class="empty">Noch keine Ideen.</div>';
+  const ortRunde=runden(r).find(x=>x.typ==='ort'&&x.status==='offen');
+  return `<div class="col" style="gap:8px">${l.map((i,k)=>{ const mein=(i.stimmen||{})[S.uid]; const kann=i.by===S.uid||adm;
+    return `<div class="card tight ${k===0&&ideeZahl(i,'ja')?'gold':''}"><div class="row" style="gap:10px;align-items:flex-start"><span class="pos ${k===0?'p1':''}">${k+1}</span><div class="grow col" style="gap:2px;min-width:0"><b>${esc(i.titel)}</b>${i.notiz?`<span class="small mut">${esc(i.notiz)}</span>`:''}<span class="tiny mut">von ${i.by===S.uid?'dir':esc(vorname(i.by))}${i.uebernommen?' · in der Abstimmung':''}</span></div>${kann?`<button class="icbtn sm0" data-act="ideeWeg" data-id="${i.id}" aria-label="${esc(i.titel)} entfernen">${ic('x',14)}</button>`:''}</div>
+      <div class="row wrap" style="gap:6px"><span class="chip grn">♥ ${ideeZahl(i,'ja')}</span><span class="chip yel">? ${ideeZahl(i,'vl')}</span><span class="chip red">✕ ${ideeZahl(i,'nein')}</span>${i.link?`<a class="chip" href="${esc(ortLinkFix?ortLinkFix(i.link):i.link)}" target="_blank" rel="noopener">Link</a>`:''}</div>
+      <div class="row" style="gap:6px"><span class="tiny mut" style="width:62px">Meine:</span>${Object.entries(IDEE_ST).map(([k2,[sym,lab]])=>`<button class="btn xs ${mein===k2?'':'sec'}" aria-pressed="${mein===k2}" data-act="ideeBewerte" data-id="${i.id}" data-val="${k2}" aria-label="${lab}">${sym}</button>`).join('')}${adm&&!i.uebernommen&&ortRunde?`<button class="btn xs yel" style="margin-left:auto" data-act="ideeUebernehmen" data-id="${i.id}">In die Abstimmung</button>`:''}</div></div>`; }).join('')}</div>${adm&&!ortRunde?'<p class="tiny mut">Zum Übernehmen braucht es eine laufende Runde „Wohin?“ in der Konferenz.</p>':''}`; }
+
+A.ideeBewerte = async el => { const i=(S.rt.ideen||[]).find(x=>x.id===el.dataset.id); if(!i) return; const v=el.dataset.val; i.stimmen={...(i.stimmen||{}),[S.uid]:v}; render();
+  try{ await S.db.doc(`ideen/${i.id}`).update({stimmen:{[S.uid]:v}}); }catch(e){ fail(e,'Speichern'); } };
+A.ideeNeu = ()=>{ S.form.id_titel=''; S.form.id_notiz=''; S.form.id_link=''; openOv('ideeNeu'); };
+OV.ideeNeu = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label="Idee einwerfen"><div class="row between"><h2 style="margin:0">💡 Idee einwerfen</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <label class="f">Was?<input class="in" id="f_id_titel" maxlength="60" placeholder="z. B. Kreta oder Hüttenurlaub in Tirol"></label>
+  <label class="f">Warum? (freiwillig)<input class="in" id="f_id_notiz" maxlength="140" placeholder="z. B. Strand, günstig, direkt vom Flughafen"></label>
+  <label class="f">Link (freiwillig)<input class="in" id="f_id_link" maxlength="300" placeholder="Hotel, Ort oder Foto"></label>
+  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ideeSpeichern">Einwerfen</button></div></div>`;
+A.ideeSpeichern = async el => { const t=(document.getElementById('f_id_titel')?.value||'').trim().slice(0,60); if(!t) return toast('Bitte gib deiner Idee einen Namen.');
+  if(ideenListe().some(i=>i.titel.toLowerCase()===t.toLowerCase())) return toast('Diese Idee gibt es schon im Pool.');
+  const d={rid:S.rid, titel:t, notiz:(document.getElementById('f_id_notiz')?.value||'').trim().slice(0,140), link:(typeof ortLinkFix==='function'?ortLinkFix(document.getElementById('f_id_link')?.value||''):''), by:S.uid, createdAt:now(), stimmen:{[S.uid]:'ja'}};
+  el.disabled=true; try{ await S.db.collection('ideen').add(d); closeOv(); toast('Idee eingeworfen'); }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
+A.ideeWeg = el => { const i=(S.rt.ideen||[]).find(x=>x.id===el.dataset.id); if(!i) return; openOv('confirm',{title:`„${i.titel}“ entfernen?`, text:'Die Idee verschwindet für alle.', ok:'Entfernen', fn: async ()=>{ closeOv(); await W(()=>S.db.doc(`ideen/${i.id}`).delete(),'Entfernen'); }}); };
+A.ideeUebernehmen = async el => { const r=cur(); const i=(S.rt.ideen||[]).find(x=>x.id===el.dataset.id); const rd=runden(r).find(x=>x.typ==='ort'&&x.status==='offen'); if(!i||!rd) return;
+  if(S.rt.vorschlaege.some(o=>o.typ==='ort'&&o.runde===rd.id&&String(o.name||'').toLowerCase()===i.titel.toLowerCase())) { toast('Steht schon in der Abstimmung.'); return; }
+  try{ await vorRundeSichern(r); await S.db.collection('vorschlaege').add({rid:r.id, typ:'ort', runde:rd.id, name:i.titel, link:i.link||'', by:S.uid, createdAt:now()}); await S.db.doc(`ideen/${i.id}`).update({uebernommen:true}); toast('In die Abstimmung übernommen'); }catch(e){ fail(e,'Übernehmen'); } };
+
+/* Wischen: Zeiger-Ereignisse einmal global (die Karte wird bei jedem Neuzeichnen neu erzeugt) */
+(()=>{ let st=null; const el0=()=>st&&document.querySelector('.swcard');
+  document.addEventListener('pointerdown',e=>{ const c=e.target.closest?.('.swcard'); if(!c||e.target.closest('a,button')) return; st={x:e.clientX,y:e.clientY,id:c.dataset.id,dx:0,dy:0}; try{ c.setPointerCapture(e.pointerId); }catch(x){} });
+  document.addEventListener('pointermove',e=>{ if(!st) return; const c=el0(); if(!c) return; st.dx=e.clientX-st.x; st.dy=e.clientY-st.y; c.style.transition='none'; c.style.transform=`translate(${st.dx}px,${Math.min(0,st.dy)}px) rotate(${st.dx/18}deg)`;
+    const art=Math.abs(st.dx)>=Math.abs(st.dy)?(st.dx>0?'ja':'nein'):(st.dy<0?'vl':''); c.dataset.hint=Math.hypot(st.dx,st.dy)>40?art:''; });
+  const ende=e=>{ if(!st) return; const c=el0(); const {dx,dy,id}=st; st=null; if(!c) return; const waag=Math.abs(dx)>=Math.abs(dy); let v='';
+    if(waag&&Math.abs(dx)>90) v=dx>0?'ja':'nein'; else if(!waag&&dy<-90) v='vl';
+    if(v){ c.style.transition='transform .18s'; c.style.transform=`translate(${v==='ja'?420:v==='nein'?-420:0}px,${v==='vl'?-420:0}px) rotate(${v==='ja'?18:v==='nein'?-18:0}deg)`; setTimeout(()=>A.ideeBewerte({dataset:{id,val:v}}),150); }
+    else { c.style.transition='transform .2s'; c.style.transform=''; c.dataset.hint=''; } };
+  document.addEventListener('pointerup',ende); document.addEventListener('pointercancel',ende); })();
 /* ===================== Was ist neu? =====================
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
@@ -7207,6 +7494,15 @@ const NEUES = [
     'Neuer Ablauf für jedes Mitglied: Eine Karte „Das fehlt noch“ führt durch Abstimmen, Zimmerwunsch, Budget und Anreise (alles Pflicht, in beliebiger Reihenfolge, jederzeit nachholbar). Der Admin sieht, wer noch etwas offen hat.',
     'Wer sich selbst um seine Reise kümmert, sagt das mit einem Tipp und ist aus Zimmerplanung, Budget-Schnitt und Anfrage ans Reisebüro heraus.',
     'Bei der Anreise per Flug wählt jeder nur noch seine Abflughäfen aus der Liste.',
+    'Kacheln aufgeräumt: „Anreise“ heißt jetzt „Meine Reise“, „Infos“ heißt „Reiseinfo“. „Mitbringen“ ist in die neue Kachel „To-do“ gewandert (Reiter To-dos, Mitbringen, Einkauf, Musik), „Herde“ ist ein Reiter in „Mitglieder“.',
+    'Der Notfallpass gehört jetzt zu deinem Profil und gilt für jede Reise. Neu: nächste Angehörige (Name, Zugehörigkeit, Telefon, bis zu drei) und der Entsperrcode deines Handys, alles freiwillig. Unter „Notfall“ kannst du den Pass mit allen oder ausgewählten Mitgliedern der Reise teilen, den Code nur auf ausdrücklichen Wunsch.',
+    'Dienste reihum: Der Admin legt unter „To-do“ Dienste wie „Kochen“ oder „Abwaschen“ an. Die App verteilt sie jeden Tag der Reihe nach, „Mein Tag“ zeigt, wenn du dran bist.',
+    'Erinnerungen per Push: am Tag vor der Abreise und zwei Tage sowie am Tag vor einer To-do-Frist (in den Einstellungen abschaltbar).',
+    'Nach der Reise gibt es den „Rückblick“ mit Zahlen zu eurer Reise und dem Knopf „Gleiche Truppe, neue Reise?“.',
+    'Unter „Mein Profil“ gibt es jetzt „Meine Daten“: alle deine Daten als Datei herunterladen oder dein Konto endgültig löschen.',
+    'Ansagen: Der Admin schickt mit „📣 Ansage an alle“ eine wichtige Nachricht an die ganze Gruppe. Sie erscheint hervorgehoben auf „Mein Tag“ und als Push, bis jeder „Gelesen“ getippt hat. Der Admin sieht, wie viele sie gelesen haben.',
+    'Ideen-Pool in der Koffer-Konferenz: Jeder wirft Reiseziele ein, dann wischt die Gruppe durch die Karten (rechts passt, oben vielleicht, links nein). Die Rangliste zeigt die Favoriten, der Admin übernimmt sie mit einem Tipp in die Abstimmung.',
+    'Offene Aufgaben auf einen Blick: Die Kachel „To-do“ zeigt mit kleinen Symbolen, was offen ist (To-dos, Mitbringen, Einkauf, Musik), und ein kleines Symbol in „Mein Tag“ zeigen z. B. 2/12 (2 von 12 noch zu erledigen). Ein Tipp öffnet die Aufgaben. Die WLAN-Anzeige in „Mein Tag“ ist dafür entfallen.',
     'Angebote vom Anbieter lassen sich hochladen, alle stimmen ab. Haben alle angenommen, ist die Reise vorgemerkt. Der Admin startet sie, sobald die Reisebestätigung da ist.'] },
   { v:'Beta 2.25', t:'Zimmerwünsche schon in der Koffer-Konferenz', p:[
     'Ist der Bettenmanager eingeschaltet, erscheint in der Abstimmung eine Karte „Zimmerplanung“.',

@@ -1,6 +1,6 @@
 /* Poolposition – Push-Benachrichtigungen (Firebase Cloud Messaging)
    Geräte-Schlüssel liegen unter pushtokens/{uid}: { tokens: {<token>: {at, ua}}, prefs: {chat, fluester, termine, morgen, admin} }.
-   - Gruppenchat, Event-Chat, Flüstern, Morgenbericht, neue Termine, Termin-Erinnerung 30 Minuten vorher, neue Meldungen für die Badeaufsicht.
+   - Gruppenchat, Event-Chat, Flüstern, Morgenbericht, neue Termine, Termin-Erinnerung 30 Minuten vorher, neue Meldungen für die Badeaufsicht, Erinnerung am Vortag der Abreise und an fällige To-dos (Kategorie 'aufgaben').
    - Wer blockiert ist, löst beim Blockierenden keine Benachrichtigung aus. Ungültige Geräte-Schlüssel werden automatisch entfernt. */
 const { onDocumentCreated, onDocumentUpdated, onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
@@ -96,6 +96,37 @@ exports.terminErinnerung = onSchedule({ schedule: 'every 10 minutes', region: 'e
       const dabei = Object.entries(x.dabei || {}).filter(([u, v]) => v === true).map(([u]) => u).concat(x.by ? [x.by] : []);
       try { await senden(dabei, 'termine', { title: `⏰ Gleich geht's los: ${x.titel || 'Termin'}`, body: `Um ${x.zeit} Uhr${x.ort ? ' · ' + x.ort : ''} · ${reiseTitel(r)}`, tag: `erinnerung_${a.id}` }); }
       catch (e) { logger.error('Erinnerung', a.id, e); } } }
+});
+
+/* ---------- Ansagen des Admins (rundnachrichten) ---------- */
+exports.pushRund = onDocumentCreated({ ...TRIG, document: 'rundnachrichten/{id}' }, async ev => {
+  const x = ev.data?.data(); if (!x || !x.rid || !x.text) return;
+  const rs = await db.doc(`reisen/${x.rid}`).get(); if (!rs.exists) return; const r = rs.data();
+  const ms = (await db.collection('mitglied').where('rid', '==', x.rid).get()).docs.map(d => d.data());
+  const aktiv = ms.filter(m => ['zugesagt', 'teilnehmer'].includes(m.status)).map(m => m.uid);
+  const n = await namen([x.by]);
+  return senden(aktiv, 'rund', { title: `📣 Ansage von ${vorname(n[x.by])} · ${reiseTitel(r)}`, body: x.text, tag: `rund_${ev.params.id}`, von: x.by });
+});
+
+/* ---------- Tägliche Erinnerungen (um 9 Uhr Ortszeit der Reise) ----------
+   1) Am Tag vor der Abreise: „Morgen geht es los“ an alle, die dabei sind (einmal pro Reise, Marker reisen/{id}.erinnertAbreise).
+   2) To-dos: zwei Tage vor der Frist und am Tag der Frist an die zuständige Person (Marker aufgaben/{id}.erinnert = Anzahl der Stufen 1|2). */
+const tagPlus = (datum, n) => { const d = new Date(datum + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+exports.tagesErinnerung = onSchedule({ schedule: 'every 60 minutes', region: 'europe-west3', timeoutSeconds: 240, maxInstances: 1 }, async () => {
+  const rs = await db.collection('reisen').where('status', '==', 'fest').get();
+  for (const d of rs.docs) { const r = d.data(); if (r.geschlossen) continue; let jetzt; try { jetzt = jetztIn(r.tz || 'Europe/Berlin'); } catch (e) { jetzt = jetztIn('Europe/Berlin'); }
+    if (jetzt.min < 9 * 60 || jetzt.min >= 10 * 60) continue; // nur in der Stunde ab 9 Uhr
+    try {
+      const dabei = (await db.collection('mitglied').where('rid', '==', d.id).where('status', '==', 'zugesagt').get()).docs.map(x => x.data().uid);
+      if (r.von && tagPlus(jetzt.datum, 1) === r.von && r.erinnertAbreise !== r.von) {
+        await d.ref.update({ erinnertAbreise: r.von }).catch(() => {});
+        await senden(dabei, 'aufgaben', { title: `🧳 Morgen geht's los: ${reiseTitel(r)}`, body: 'Letzter Check: Koffer gepackt, Tickets und Ausweise griffbereit?', tag: `abreise_${d.id}`, link: '/' }); }
+      const as = await db.collection('aufgaben').where('rid', '==', d.id).get();
+      for (const a of as.docs) { const x = a.data(); if (x.done || x.vorgeschlagen || !x.bis || !x.wer) continue;
+        const stufe = x.bis === jetzt.datum ? 2 : x.bis === tagPlus(jetzt.datum, 2) ? 1 : 0; if (!stufe || (x.erinnert || 0) >= stufe) continue;
+        await a.ref.update({ erinnert: stufe }).catch(() => {});
+        await senden([x.wer], 'aufgaben', { title: stufe === 2 ? `⏰ Heute fällig: ${x.titel}` : `📝 In 2 Tagen fällig: ${x.titel}`, body: reiseTitel(r), tag: `aufgabe_${a.id}` }); }
+    } catch (e) { logger.error('Tageserinnerung', d.id, e); } }
 });
 
 /* ---------- Urlaubsherzen an Gruppenmitglieder ----------
