@@ -668,14 +668,26 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .rbz{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 6px;border-radius:16px;background:rgba(127,127,127,.13);text-align:center}
 .rbz b{font-size:22px;line-height:1.1}.rbzi{font-size:20px}
 .swbuehne{position:relative;display:flex;justify-content:center;padding:6px 0}
-.swcard{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;width:100%;min-height:300px;box-sizing:border-box;border-radius:26px;padding:22px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,#2a2622,#1c1815);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px -22px rgba(0,0,0,.8);position:relative}
-.swtitel{font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.02em;overflow-wrap:anywhere}.swnotiz{font-size:16px;opacity:.85}
+.swcard{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;width:100%;min-height:380px;box-sizing:border-box;border-radius:28px;padding:22px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,#2a2622,#1c1815);border:1px solid rgba(255,255,255,.18);box-shadow:0 22px 44px -22px rgba(0,0,0,.85);position:relative;overflow:hidden;color:#fff}
+.swtitel{font-size:34px;font-weight:900;line-height:1.05;letter-spacing:-.02em;overflow-wrap:anywhere;position:relative;text-shadow:0 2px 14px rgba(0,0,0,.35)}.swnotiz{font-size:17px;line-height:1.35;opacity:.92;position:relative;font-style:italic}.swnotiz.swleer{opacity:.6}
 .swstempel{position:absolute;top:18px;padding:3px 12px;border:3px solid;border-radius:10px;font-weight:900;letter-spacing:.08em;opacity:0;transition:opacity .1s;pointer-events:none}
 .swstempel.ja{right:16px;color:#3ecf8e;transform:rotate(10deg)}.swstempel.nein{left:16px;color:#ff5c6c;transform:rotate(-10deg)}.swstempel.vl{left:50%;margin-left:-52px;top:auto;bottom:70px;color:#ffc23a}
 .swcard[data-hint=ja] .swstempel.ja,.swcard[data-hint=nein] .swstempel.nein,.swcard[data-hint=vl] .swstempel.vl{opacity:1}
-.swknoepfe{display:flex;justify-content:center;gap:18px;padding-top:6px}
-.swk{all:unset;cursor:pointer;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;background:rgba(127,127,127,.16)}
-.swk.ja{color:#3ecf8e}.swk.nein{color:#ff5c6c}.swk.vl{color:#ffc23a}.swk:active{transform:scale(.92)}.swk:focus-visible{outline:3px solid var(--yel,#f5c518);outline-offset:2px}
+.swknoepfe{display:flex;justify-content:center;gap:14px;padding-top:6px}
+.swk{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;width:84px;font-weight:800}.swsym{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;background:rgba(127,127,127,.18)}.swlab{font-size:13px;color:var(--tx)}
+.swk.ja{color:#3ecf8e}.swk.nein{color:#ff5c6c}.swk.vl{color:#ffc23a}.swk:active .swsym{transform:scale(.92)}.swk:focus-visible{outline:3px solid var(--yel,#f5c518);outline-offset:2px}
+.step[data-act]{cursor:pointer}
+.step.akt .stepnr{box-shadow:0 0 0 3px rgba(245,197,24,.55)} .step.akt b{text-decoration:underline;text-underline-offset:3px}
+
+.swmark{position:absolute;right:-18px;bottom:-26px;font-size:190px;line-height:1;opacity:.13;transform:rotate(-12deg);pointer-events:none}
+.swblob{position:absolute;border-radius:50%;background:rgba(255,255,255,.09);pointer-events:none}.swblob.b1{width:210px;height:210px;left:-70px;top:-80px}.swblob.b2{width:120px;height:120px;right:30px;top:90px;background:rgba(255,255,255,.06)}
+.swkopf{display:flex;align-items:center;gap:12px;position:relative}.swflagge{font-size:64px;line-height:1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.swchip{display:inline-block;padding:3px 11px;border-radius:999px;background:rgba(255,255,255,.2);font-size:12.5px;font-weight:700;backdrop-filter:blur(2px)}
+.swlink{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.22);color:#fff;font-weight:700;font-size:14px;text-decoration:none;position:relative}
+.swvon{margin-top:auto;gap:8px;position:relative;opacity:.92}
+.ktag.fest:not(.von):not(.bis){background:rgba(63,163,107,.28)}
+.ktag.festvon:not(.von):not(.bis),.ktag.festbis:not(.von):not(.bis){background:#3fa36b;color:#fff;font-weight:800}
+.ktag.festvon:not(.von):not(.bis){border-radius:12px 0 0 12px}.ktag.festbis:not(.von):not(.bis){border-radius:0 12px 12px 0}.ktag.festvon.festbis:not(.von):not(.bis){border-radius:12px}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -688,7 +700,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.26";
+const APP_VERSION = "Beta 2.27";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -3398,45 +3410,68 @@ const RUNDEN = { monat:{frage:'In welchem Monat?', kurz:'Monat', icon:'tag'}, ze
 function runden(r){ if(Array.isArray(r.runden) && r.runden.length) return r.runden;
   return [{id:'z', typ:'zeit', status:'offen', alt:true}, {id:'o', typ:'ort', status:'offen', alt:true}]; }
 const optRunde = (o, r) => o.runde || (o.typ==='zeit'?'z':o.typ==='ort'?'o':'');
-const optionen = (r, rd) => S.rt.vorschlaege.filter(o=>o.typ===rd.typ && optRunde(o,r)===rd.id).sort((a,b)=>(a.monat||a.von||'').localeCompare(b.monat||b.von||'') || (a.createdAt||0)-(b.createdAt||0));
-function stimmeVon(s, o){ const w=s.wahl?.[o.id]; if(w) return w; if(o.typ==='zeit') return s.zeiten?.[o.id]; if(o.typ==='ort') return +(s.orte?.[o.id]||0)>0 ? 'ja' : undefined; }
-function wertung(o){ const r={ja:[],vl:[],ne:[]}; for(const s of allVotes()){ const v=stimmeVon(s,o); if(r[v]) r[v].push(s.uid); } r.punkte=r.ja.length*2+r.vl.length; return r; }
+const optionen = (r, rd) => rd.pool && rd.status==='offen' ? ideenListe().map(i=>({id:i.id, typ:'ort', name:i.titel, link:i.link||'', createdAt:i.createdAt, by:i.by, _idee:true, stimmen:i.stimmen||{}})) : S.rt.vorschlaege.filter(o=>o.typ===rd.typ && optRunde(o,r)===rd.id).sort((a,b)=>(a.monat||a.von||'').localeCompare(b.monat||b.von||'') || (a.createdAt||0)-(b.createdAt||0));
+function stimmeVon(s, o){ if(o._idee){ const v=(o.stimmen||{})[s.uid]; return v==='nein'?'ne':(v||undefined); } const w=s.wahl?.[o.id]; if(w) return w; if(o.typ==='zeit') return s.zeiten?.[o.id]; if(o.typ==='ort') return +(s.orte?.[o.id]||0)>0 ? 'ja' : undefined; }
+function wertung(o){ const r={ja:[],vl:[],ne:[]}; const wer = o._idee ? S.rt.mitglied.filter(m=>['teilnehmer','zugesagt'].includes(m.status)).map(m=>({uid:m.uid})) : allVotes(); for(const s of wer){ const v=stimmeVon(s,o); if(r[v]) r[v].push(s.uid); } r.punkte=r.ja.length*2+r.vl.length; return r; }
 function vorn(opts){ let best=null; for(const o of opts){ const w=wertung(o); if(!best || w.punkte>best.w.punkte || (w.punkte===best.w.punkte && w.ne.length<best.w.ne.length)) best={o,w}; } return best && best.w.punkte>0 ? best.o : null; }
 function optLabel(o){ if(o.typ==='monat') return monatLabel(o.monat); if(o.typ==='zeit') return fRange(o.von,o.bis); return o.name; }
 function optInfo(o){ if(o.typ==='zeit') return `${WD[parseDay(o.von).getDay()]}–${WD[parseDay(o.bis).getDay()]} · ${dauerText(o.von,o.bis)}`; if(o.typ==='ort' && o.link) return /^https?:\/\//.test(o.link)?`<a href="${esc(o.link)}" target="_blank" rel="noopener" style="color:var(--yelt)">${esc(o.link.replace(/^https?:\/\//,'').slice(0,34))}</a>`:esc(o.link); return ''; }
 const siegerVon = (r, typ) => { const rd=runden(r).find(x=>x.typ===typ && x.status==='fertig' && x.sieger); return rd ? S.rt.vorschlaege.find(o=>o.id===rd.sieger) : null; };
 
+const rdOffen = (r, rd) => rd.offen!==undefined ? !!rd.offen : !!r.vorschlaegeOffen;
 /* ---------- Ansicht ---------- */
 V.konferenz = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(r.status==='geloescht') return `${hdrPlain()}<div class="empty">Diese Koffer-Konferenz wurde gelöscht.</div><button class="btn sec" data-act="home">Zu Meine Reisen</button>`;
   if(r.status!=='abstimmung'){ S.route={v:'dabei'}; return V.dabei(); }
   const a=art(r); const adm=isAdmin(r); const RD=runden(r); const offen=RD.filter(x=>x.status==='offen');
+  if(!offen.length && !r.buchung && konfDabei() && S.ui.konfAlles!==r.id) return mwSeite(r,true);
   const eingeladen=S.rt.mitglied.filter(m=>m.status==='eingeladen').length;
   // Fertig ist, wer in jeder laufenden Frage bei mindestens einem Vorschlag abgestimmt hat
   const {mem, fertig:abgestimmt}=konfStand(r);
   const kopf=`${hdrPlain('Koffer-Konferenz', konfDabei()?konfTabs():'')}${S.ui.konfTab==='chat'&&konfDabei()?'':`<button class="back" data-act="home">${ic('back',20)} Meine Reisen</button>`}
   <div class="row"><span style="color:var(--yelt)">${ic(a.icon,32)}</span><div class="grow" style="min-width:0"><h1 class="ell">${esc(r.titel)}</h1><div class="small mut">Koffer-Konferenz von ${esc(nm(r.admin))}</div></div></div>`;
   if(konfDabei() && S.ui.konfTab==='chat') return kopf+konfChat(r);
-  const stepper = `<div class="stepper">${RD.map((rd,i)=>{ const s=rd.status==='fertig'?S.rt.vorschlaege.find(o=>o.id===rd.sieger):null; return `<div class="step ${rd.status}"><span class="stepnr">${rd.status==='fertig'?ic('check',14):i+1}</span><span class="col" style="gap:0;min-width:0"><b class="small">${RUNDEN[rd.typ].kurz}</b><span class="tiny ell">${s?esc(optLabel(s)):rd.status==='offen'?'läuft':''}</span></span></div>`; }).join('<span class="stepline"></span>')}<span class="stepline"></span><div class="step ziel"><span class="stepnr">${ic('suitcase',14)}</span><span class="col" style="gap:0"><b class="small">Reise</b><span class="tiny">steht</span></span></div></div>`;
+  const aktId=aktRunde(r, offen); const aktRd=offen.find(x=>x.id===aktId); const nxt=aktRd?offen[offen.indexOf(aktRd)+1]:null;
+  const stepper = `<div class="stepper">${RD.map((rd,i)=>{ const s=rd.status==='fertig'?S.rt.vorschlaege.find(o=>o.id===rd.sieger):null; const klick=rd.status==='offen'&&offen.length>1; return `<div class="step ${rd.status} ${rd.id===aktId?'akt':''}" ${klick?`data-act="konfStep" data-id="${rd.id}" role="button" tabindex="0" aria-label="${RUNDEN[rd.typ].kurz} abstimmen"`:''}><span class="stepnr">${rd.status==='fertig'?ic('check',14):i+1}</span><span class="col" style="gap:0;min-width:0"><b class="small">${RUNDEN[rd.typ].kurz}</b><span class="tiny ell">${s?esc(optLabel(s)):rd.status==='offen'?'läuft':''}</span></span></div>`; }).join('<span class="stepline"></span>')}<span class="stepline"></span><div class="step ziel"><span class="stepnr">${ic('suitcase',14)}</span><span class="col" style="gap:0"><b class="small">Reise</b><span class="tiny">steht</span></span></div></div>`;
+  const legacyIdeen = RD.some(x=>x.typ==='ort'&&x.status==='offen'&&!x.pool);
   return `${kopf}
   ${stepper}
-  ${adm?`<button class="btn block sec" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',18)} Einladung zur Reise verschicken</button>`:''}
-  ${schritteKarte(r)}
-  ${ideenKarte(r)}
-  ${offen.length?standKarte(r, mem, abgestimmt):''}${eingeladen?`<span class="tiny mut" style="margin-top:-6px">${eingeladen} eingeladen, noch nicht beigetreten</span>`:''}
+  ${aktRd ? (aktRd.pool?poolKarte(r,aktRd,adm):rundeKarte(r,aktRd,adm)) + (nxt?`<button class="btn block" data-act="konfStep" data-id="${nxt.id}">Weiter: ${RUNDEN[nxt.typ].frage} ${ic('right',18)}</button>`:`<button class="btn block" data-act="mwStart" data-s="">Weiter: Meine Angaben ${ic('right',18)}</button>`) + (offen.length>1&&!nxt?`<button class="btn block sec" data-act="konfStep" data-id="${offen[0].id}">${ic('back',18)} Zurück zu: ${RUNDEN[offen[0].typ].frage}</button>`:'') + frageDazuHtml(r,adm)
+    : `<div class="card gold"><div class="ttl">Alle Runden sind entschieden</div><p class="small" style="color:var(--goldtx)">${adm?'Jetzt nur noch die Reise festlegen.':`${esc(nm(r.admin))} legt die Reise gleich fest.`}</p>${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">Reise festlegen</button>`:''}<button class="btn xs ghost" style="align-self:flex-start" data-act="mwPager">Meine Schritte</button></div>`}
+  ${offen.length?'':schritteKarte(r)}
+  ${legacyIdeen?ideenKarte(r):''}
+  ${offen.length?standKarte(r, mem, abgestimmt):''}
+  <div class="row between" style="gap:8px"><span class="tiny mut">${eingeladen?`${eingeladen} eingeladen, noch nicht beigetreten`:''}</span>${adm?`<button class="btn xs ghost" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',14)} Einladen</button>`:''}</div>
   <div id="konfRunden"></div>
-  ${offen.length ? offen.map(rd=>rundeKarte(r,rd,adm)).join('')+frageDazuHtml(r,adm) : `<div class="card gold"><div class="ttl">Alle Runden sind entschieden</div><p class="small" style="color:var(--goldtx)">${adm?'Jetzt nur noch die Reise festlegen.':`${esc(nm(r.admin))} legt die Reise gleich fest.`}</p>${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">Reise festlegen</button>`:''}</div>`}
-  <details class="card tight" ${adm&&siegerVon(r,'zeit')?'open':''}><summary class="small" style="cursor:pointer;font-weight:700">Zimmer, Budget und Anreise der Gruppe</summary>${typeof zKonfKarte==='function'?zKonfKarte(r):''}${budgetPflichtKarte(r)}${anreiseKarte(r)}</details>
+  ${offen.length?'':`<details class="card tight" ${adm&&siegerVon(r,'zeit')?'open':''}><summary class="small" style="cursor:pointer;font-weight:700">Zimmer, Budget und Anreise der Gruppe</summary>${typeof zKonfKarte==='function'?zKonfKarte(r):''}${budgetPflichtKarte(r)}${anreiseKarte(r)}</details>`}
   ${adm?`<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">${ic('gear',14)} Konferenz verwalten</summary>
     ${codeRow(r)}
-    <label class="toggle small"><input type="checkbox" data-change="toggleOffen" ${r.vorschlaegeOffen?'checked':''}> Alle dürfen Vorschläge ergänzen</label>
+    ${offen.map(rd=>`<label class="toggle small"><input type="checkbox" data-change="rdOffenTog" data-id="${rd.id}" ${rdOffen(r,rd)?'checked':''}> Alle dürfen ${rd.typ==='ort'?'Orte':rd.typ==='monat'?'Monate':'Zeiträume'} vorschlagen</label>`).join('')}
     ${offen.length?`<button class="btn sm sec" style="align-self:flex-start" data-act="go" data-v="freigabe">Abkürzen: Reise jetzt festlegen</button>`:''}
     <button class="btn sm ghost" style="align-self:flex-start;color:var(--pinktx)" data-act="reiseLoeschen" data-rid="${r.id}">${ic('trash',14)} Konferenz löschen</button></details>`
   :`<button class="link" style="align-self:center;color:var(--mut)" data-act="leaveKonf">Konferenz verlassen</button>`}`; };
 
-function rundeKarte(r, rd, adm){ const opts=optionen(r,rd); const lead=vorn(opts); const mayAdd=adm||r.vorschlaegeOffen; const nr=runden(r).indexOf(rd)+1;
+/* Welcher Schritt der Abstimmung gerade im Fokus ist: zuerst der erste, bei dem ich noch nichts abgestimmt habe. Bleibt danach stehen, bis man selbst wechselt. */
+function aktRunde(r, offen){ if(!offen.length) return ''; if(S.ui.kstepRid!==r.id){ S.ui.kstepRid=r.id; S.ui.kstep=''; }
+  if(!S.ui.kstep || !offen.some(x=>x.id===S.ui.kstep)){ const my={uid:S.uid}; const unv=offen.find(rd=>{ const op=optionen(r,rd); return op.length && !op.some(o=>stimmeVon({...S.myVote,...my},o)); }); S.ui.kstep=(unv||offen[0]).id; }
+  return S.ui.kstep; }
+A.rdOffenTog = async el => { const r=cur(); const RD=runden(r).map(({alt,...x})=>x.id===el.dataset.id?{...x, offen:!rdOffen(r,x)}:x); const any=RD.some(x=>x.status==='offen'&&x.offen);
+  try{ await S.db.doc(`reisen/${r.id}`).update({runden:RD, vorschlaegeOffen:any}); r.runden=RD; r.vorschlaegeOffen=any; render(); }catch(e){ fail(e,'Speichern'); } };
+A.konfStep = el => { S.ui.kstep=el.dataset.id; render(); try{ window.scrollTo({top:0}); }catch(e){} };
+
+/* Ort-Schritt: der Ideen-Pool ist die Abstimmung (Wischen oder Rangliste), direkt auf der Seite */
+function poolKarte(r, rd, adm){ const nr=runden(r).indexOf(rd)+1; const tab=S.ui.ideeTab||'swipe'; const o=ideeOffen(); const l=ideenListe();
+  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='swipe'}" data-act="ui" data-k="ideeTab" data-val="swipe">Wischen${o.length?`<span class="badge orange">${o.length}</span>`:''}</button><button role="tab" aria-selected="${tab==='rang'}" data-act="ui" data-k="ideeTab" data-val="rang">Rangliste</button></div>`;
+  return `<div class="card rund"><div class="row between"><span class="tag"><span class="dot"></span>SCHRITT ${nr} · ORT</span>${rd.bis?`<span class="small" style="color:var(--redtx)">${ic('clock',14)} bis ${fD(rd.bis)}</span>`:''}</div>
+  <h2 style="margin:0">Wohin soll es gehen?</h2>
+  <p class="small mut" style="margin:0">Wischt durch die Ideen der Gruppe${ideeDarf(r)?' oder wirf selbst eine ein':''}.</p>
+  ${tabs}${tab==='rang'?ideeRangView(r):ideeSwipeView(r)}
+  ${ideeDarf(r)&&l.length?`<button class="btn sm ghost" style="align-self:flex-start" data-act="ideeNeu">${ic('plus',16)} Idee einwerfen</button>`:''}
+  ${adm&&l.length?`<button class="btn block yel" data-act="rundeZuAuf" data-id="${rd.id}">Ort festlegen</button>`:''}</div>`; }
+
+function rundeKarte(r, rd, adm){ const opts=optionen(r,rd); const lead=vorn(opts); const mayAdd=adm||rdOffen(r,rd); const nr=runden(r).indexOf(rd)+1;
   const monat = rd.typ==='zeit' ? siegerVon(r,'monat') : null;
   const my = o => stimmeVon({...S.myVote, uid:S.uid}, o);
-  return `<div class="card rund"><div class="row between"><span class="tag"><span class="dot"></span>RUNDE ${nr}</span>${rd.bis?`<span class="small" style="color:var(--redtx)">${ic('clock',14)} bis ${fD(rd.bis)}</span>`:''}</div>
+  return `<div class="card rund"><div class="row between"><span class="tag"><span class="dot"></span>SCHRITT ${nr} · ${RUNDEN[rd.typ].kurz.toUpperCase()}</span>${rd.bis?`<span class="small" style="color:var(--redtx)">${ic('clock',14)} bis ${fD(rd.bis)}</span>`:''}</div>
   <h2 style="margin:0">${RUNDEN[rd.typ].frage}${monat?` <span class="mut" style="font-weight:600">im ${esc(monatLabel(monat.monat))}</span>`:''}</h2>
   <p class="small mut" style="margin:0">Tippe bei jedem Vorschlag, ob er dir passt.</p>
   ${opts.length?`<div class="col" style="gap:8px">${opts.map(o=>{ const w=wertung(o); const v=my(o); const n=w.ja.length+w.vl.length+w.ne.length;
@@ -3453,8 +3488,8 @@ function rundeKarte(r, rd, adm){ const opts=optionen(r,rd); const lead=vorn(opts
 /* Weitere Frage parallel zur laufenden Runde starten */
 function frageDazuHtml(r, adm){ if(!adm) return ''; const da=new Set(runden(r).map(x=>x.typ)); const fehlt=['monat','zeit','ort'].filter(t=>!da.has(t) && !(t==='monat' && da.has('zeit')));
   if(!fehlt.length) return ''; return `<div class="row wrap" style="gap:6px"><span class="small mut">Gleichzeitig abstimmen über:</span>${fehlt.map(t=>`<button class="btn xs sec" data-act="frageDazu" data-t="${t}">${ic('plus',14)} ${RUNDEN[t].kurz}</button>`).join('')}</div>`; }
-A.frageDazu = async el => { const r=cur(); const RD=runden(r).map(({alt,...x})=>x); RD.push({id:rid16().slice(0,8), typ:el.dataset.t, status:'offen'});
-  try{ await S.db.doc(`reisen/${r.id}`).update({runden:RD}); r.runden=RD; S.ui.addRunde=RD[RD.length-1].id; konfInfo(r, `frage_${RD[RD.length-1].id}`, `🗳️ Neue Abstimmung: „${RUNDEN[el.dataset.t].frage}“`); toast('Neue Frage gestartet. Füge gleich die ersten Vorschläge hinzu.'); render(); }catch(e){ fail(e,'Starten'); } };
+A.frageDazu = async el => { const r=cur(); const RD=runden(r).map(({alt,...x})=>x); RD.push({id:rid16().slice(0,8), typ:el.dataset.t, status:'offen', ...(el.dataset.t==='ort'?{pool:true}:{})});
+  try{ await S.db.doc(`reisen/${r.id}`).update({runden:RD}); r.runden=RD; S.ui.kstep=RD[RD.length-1].id; S.ui.addRunde=RD[RD.length-1].id; konfInfo(r, `frage_${RD[RD.length-1].id}`, `🗳️ Neue Abstimmung: „${RUNDEN[el.dataset.t].frage}“`); toast('Neue Frage gestartet. Füge gleich die ersten Vorschläge hinzu.'); render(); }catch(e){ fail(e,'Starten'); } };
 
 /* ---------- Vorschläge direkt in der Runde ergänzen ---------- */
 function vorschlagAdder(r, rd, monat){ const offen=S.ui.addRunde===rd.id; const f=S.form;
@@ -3463,7 +3498,7 @@ function vorschlagAdder(r, rd, monat){ const offen=S.ui.addRunde===rd.id; const 
   let body='';
   if(rd.typ==='monat') body=`<div class="row wrap" style="gap:6px">${naechsteMonate().map(m=>`<button class="chip ${f['m_'+m]?'yel':''}" style="border:0;cursor:pointer;height:34px" data-act="formToggle" data-k="m_${m}" ${vorhanden.has(m)?'disabled style="opacity:.4;border:0;height:34px"':''}>${esc(monatLabel(m))}</button>`).join('')}</div>`;
   else if(rd.typ==='zeit'){ const belegt=optionen(r,rd).map(o=>({von:o.von,bis:o.bis}));
-    body=`${kalender('n', {start: monat?`${monat.monat}-01`:undefined, belegt, bloecke:true})}${bloeckeHtml(rd, monat, belegt)}`; }
+    body=`${kalender('n', {start: monat?`${monat.monat}-01`:undefined, gewaehlt:belegt, bloecke:true})}${bloeckeHtml(rd, monat, belegt)}`; }
   else body=`<input class="in" id="f_nort" maxlength="50" placeholder="Ort, z. B. Kreta"><input class="in" id="f_nlink" maxlength="300" placeholder="Link oder Notiz (freiwillig)">`;
   return `<div class="addbox">${body}${rd.typ==='zeit'&&S.ui.bloeckeAuf?'':`<button class="btn block" data-act="addSpeichern" data-id="${rd.id}">${rd.typ==='zeit'?'Diesen Zeitraum vorschlagen':'Hinzufügen'}</button>`}<button class="btn sm ghost" style="align-self:center" data-act="addZu">Abbrechen</button></div>`; }
 A.addAuf = el => { S.ui.addRunde=el.dataset.id; S.ui.kal_n=null; S.ui.bloeckeAuf=false; render(); };
@@ -3497,18 +3532,24 @@ OV.rundeZu = o => { const r=cur(); const RD=runden(r); const rd=RD.find(x=>x.id=
    :`${weiter.map(([t,l])=>`<button class="btn block sec" data-act="rundeZu" data-id="${rd.id}" data-next="${t}">${ic(RUNDEN[t].icon,18)} ${l}</button>`).join('')}<button class="btn block yel" data-act="rundeZu" data-id="${rd.id}" data-next="fertig">${ic('suitcase',18)} Reise festlegen</button>`}
   <button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`; };
 A.setOv = el => { S.form[el.dataset.k]=el.dataset.val; renderOv(); };
-A.rundeZu = async el => { const r=cur(); const next=el.dataset.next; const sieger=S.form.sieger; if(!sieger) return toast('Bitte ein Ergebnis wählen.');
-  const RD=runden(r).map(({alt,...x})=>x.id===el.dataset.id?{...x, status:'fertig', sieger, am:now()}:x);
-  if(next && next!=='fertig') RD.push({id:rid16().slice(0,8), typ:next, status:'offen'});
+A.rundeZu = async el => { const r=cur(); const next=el.dataset.next; let sieger=S.form.sieger; if(!sieger) return toast('Bitte ein Ergebnis wählen.');
+  const rd0=runden(r).find(x=>x.id===el.dataset.id); if(!rd0) return; const pool=!!(rd0.pool && rd0.status==='offen');
   el.disabled=true;
-  try{ await S.db.doc(`reisen/${r.id}`).update({runden:RD}); r.runden=RD; const rd0=runden(r).find(x=>x.id===el.dataset.id); const it=konfRundeText(rd0||{}, sieger, next); if(it) konfInfo(r, `runde_${el.dataset.id}`, it);
-    closeOv(); S.form={}; toast('Runde abgeschlossen'); if(next==='fertig') go('freigabe'); else render(); }
+  try{ let idee=null;
+    if(pool){ idee=ideenListe().find(x=>x.id===sieger); if(!idee){ el.disabled=false; return toast('Bitte ein Ergebnis wählen.'); }
+      const vref=S.db.collection('vorschlaege').doc(); await vref.set({rid:r.id, typ:'ort', runde:rd0.id, name:idee.titel, link:idee.link||'', by:S.uid, createdAt:now()});
+      await S.db.doc(`ideen/${idee.id}`).update({uebernommen:true}).catch(()=>{}); sieger=vref.id; }
+    const RD=runden(r).map(({alt,...x})=>x.id===el.dataset.id?{...x, status:'fertig', sieger, am:now()}:x);
+    if(next && next!=='fertig') RD.push({id:rid16().slice(0,8), typ:next, status:'offen', ...(next==='ort'?{pool:true}:{})});
+    await S.db.doc(`reisen/${r.id}`).update({runden:RD}); r.runden=RD;
+    const it = idee ? `📍 Das Ziel steht: ${idee.titel}!${next && next!=='fertig' ? ` Weiter geht’s mit „${RUNDEN[next].frage}“` : ''}` : konfRundeText(rd0, sieger, next); if(it) konfInfo(r, `runde_${el.dataset.id}`, it);
+    closeOv(); S.form={}; S.ui.kstep=''; toast('Runde abgeschlossen'); if(next==='fertig') go('freigabe'); else render(); }
   catch(e){ el.disabled=false; fail(e,'Abschließen'); } };
 
 /* ---------- Reise festlegen ---------- */
 V.freigabe = ()=>{ const r=cur(); if(!r) return splash('…'); const f=S.form; const zS=siegerVon(r,'zeit'), oS=siegerVon(r,'ort'), mS=siegerVon(r,'monat');
   const zOpts=S.rt.vorschlaege.filter(o=>o.typ==='zeit').map(o=>({o,w:wertung(o)})).sort((a,b)=>b.w.punkte-a.w.punkte);
-  const oOpts=S.rt.vorschlaege.filter(o=>o.typ==='ort').map(o=>({o,w:wertung(o)})).sort((a,b)=>b.w.punkte-a.w.punkte);
+  const poolOffen=runden(r).some(x=>x.pool&&x.status==='offen'); const oOpts=(poolOffen?optionen(r,runden(r).find(x=>x.pool&&x.status==='offen')):S.rt.vorschlaege.filter(o=>o.typ==='ort')).map(o=>({o,w:wertung(o)})).sort((a,b)=>b.w.punkte-a.w.punkte);
   if(f._fg!==r.id){ Object.assign(f,{_fg:r.id, zid:zS?.id||zOpts[0]?.o.id||'', oid:oS?.id||oOpts[0]?.o.id||'', fvon:mS?`${mS.monat}-01`:'', fbis:'', fort:''}); }
   const wahl=(k,list,lab)=>`<div class="list">${list.map(({o,w})=>`<button class="li" style="color:var(--tx)" data-act="setForm" data-k="${k}" data-val="${o.id}"><span class="grow col" style="gap:1px"><b>${esc(optLabel(o))}</b><span class="tiny mut">${w.ja.length} passt · ${w.ne.length} geht nicht</span></span>${f[k]===o.id?`<span style="color:var(--yelt)">${ic('check',22)}</span>`:''}</button>`).join('')}<button class="li" style="color:var(--tx)" data-act="setForm" data-k="${k}" data-val="eigen"><span class="grow">${lab}</span>${f[k]==='eigen'?`<span style="color:var(--yelt)">${ic('check',22)}</span>`:''}</button></div>`;
   return `${hdrPlain('Reise festlegen')}${backBtn()}<h1>Reise festlegen</h1><p class="mut small">Wähle Zeitraum und Ort. Die Frage „Bist du dabei?“ kommt erst, wenn die Reise gebucht ist.</p>
@@ -3517,7 +3558,7 @@ V.freigabe = ()=>{ const r=cur(); if(!r) return splash('…'); const f=S.form; c
   <button class="btn block yel" data-act="freigabe">Ergebnis festhalten und Buchung vorbereiten</button>
   <p class="tiny mut">Die Reise ist dann noch nicht aktiv. Ihr könnt Zimmer verteilen, die Anfrage ans Reisebüro vorbereiten und die Reise buchen. Gestartet wird sie erst, wenn du sie als gebucht bestätigst.</p>
   <button class="btn block sec" data-act="freigabe" data-sofort="1">Gleich starten, ist schon gebucht</button>`; };
-A.freigabe = async el => { const r=cur(); const f=S.form; const z=S.rt.vorschlaege.find(o=>o.id===f.zid), o=S.rt.vorschlaege.find(x=>x.id===f.oid);
+A.freigabe = async el => { const r=cur(); const f=S.form; const z=S.rt.vorschlaege.find(o=>o.id===f.zid), ideeO=(S.rt.ideen||[]).find(x=>x.id===f.oid), o=S.rt.vorschlaege.find(x=>x.id===f.oid)||(ideeO?{id:null,name:ideeO.titel,link:ideeO.link}:null);
   const von=z&&f.zid!=='eigen'?z.von:f.fvon, bis=z&&f.zid!=='eigen'?z.bis:f.fbis, ort=o&&f.oid!=='eigen'?o.name:(f.fort||'').trim();
   if(!von||!bis) return toast('Bitte den Zeitraum festlegen.'); if(bis<von) return toast('Das Ende liegt vor dem Beginn.'); if(!ort) return toast('Bitte den Ort festlegen.');
   el.disabled=true;
@@ -3551,8 +3592,8 @@ function buchungAnsicht(r){ const a=art(r); const adm=isAdmin(r); const o=S.rt.v
     return `${kopf}
   <div class="card gold"><span class="tag"><span class="dot"></span>ERGEBNIS STEHT</span><div class="ttl" style="font-size:20px">${esc(r.ort||'')}</div><div class="num">${fRange(r.von,r.bis)}</div>${o?.link?`<div class="small">${optInfo(o)}</div>`:''}
     <p class="small" style="color:var(--goldtx);margin:0">${r.buchung==='vorgemerkt'?'Vorgemerkt, aber noch nicht gebucht.':'Gebucht ist noch nichts.'} ${adm?'Trag das Budget aller zusammen, schick die Anfrage ans Reisebüro und starte die Reise, sobald gebucht ist.':`${esc(nm(r.admin))} kümmert sich um die Buchung. Die Reise startet, sobald sie gebucht ist.`}</p></div>
-  ${adm?`<button class="btn block sec" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',18)} Einladung zur Reise verschicken</button>`:''}
   ${buchungKarten(r)}
+  ${adm?`<div class="row" style="justify-content:flex-end"><button class="btn xs ghost" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',14)} Einladen</button></div>`:''}
   ${adm?`<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">${ic('gear',14)} Konferenz verwalten</summary>
     <button class="btn sm ghost" style="align-self:flex-start;color:var(--pinktx)" data-act="reiseLoeschen" data-rid="${r.id}">${ic('trash',14)} Konferenz löschen</button></details>`
   :`<button class="link" style="align-self:center;color:var(--mut)" data-act="leaveKonf">Konferenz verlassen</button>`}`; }
@@ -3647,11 +3688,12 @@ const dauerText = (a,b) => { const t=tageInkl(a,b), n=nights(a,b); return `${t} 
 function kalender(pf, o={}){ const f=S.form; const von=f[pf+'von']||'', bis=f[pf+'bis']||''; const min=o.min||today();
   const mk='kal_'+pf; if(!S.ui[mk]) S.ui[mk]=(von||o.start||min).slice(0,7);
   const [y,m]=S.ui[mk].split('-').map(Number); const erster=new Date(y,m-1,1); const tage=new Date(y,m,0).getDate(); const leer=(erster.getDay()+6)%7;
+  const fest=new Set(), festV=new Set(), festB=new Set(); (o.gewaehlt||[]).forEach(z=>{ festV.add(z.von); festB.add(z.bis); for(let d=z.von; d<=z.bis; d=addDays(d,1)) fest.add(d); });
   const belegt=new Set(); (o.belegt||[]).forEach(z=>{ for(let d=z.von; d<=z.bis; d=addDays(d,1)) belegt.add(d); });
   const vorschau = von && !bis && S.ui[mk+'_hover'] && S.ui[mk+'_hover']>von ? S.ui[mk+'_hover'] : '';
   const zellen=[]; for(let i=0;i<leer;i++) zellen.push('<span></span>');
   for(let d=1; d<=tage; d++){ const iso=`${y}-${pad(m)}-${pad(d)}`; const aus=iso<min; const ende=bis||vorschau;
-    const cls=[iso===von?'von':'', iso===bis?'bis':'', von&&ende&&iso>von&&iso<ende?'drin':'', iso===today()?'heute':'', belegt.has(iso)?'belegt':'', aus?'aus':''].filter(Boolean).join(' ');
+    const cls=[iso===von?'von':'', iso===bis?'bis':'', von&&ende&&iso>von&&iso<ende?'drin':'', iso===today()?'heute':'', belegt.has(iso)?'belegt':'', fest.has(iso)?'fest':'', festV.has(iso)?'festvon':'', festB.has(iso)?'festbis':'', aus?'aus':''].filter(Boolean).join(' ');
     zellen.push(`<button type="button" class="ktag ${cls}" data-act="kalTag" data-pf="${pf}" data-d="${iso}" ${aus?'disabled':''} aria-label="${WD[new Date(y,m-1,d).getDay()]} ${d}.${m}.${iso===von?', Anreise':iso===bis?', Abreise':''}" aria-pressed="${iso===von||iso===bis}">${d}</button>`); }
   const zurueckOk = S.ui[mk] > min.slice(0,7);
   const info = von&&bis ? `<b>${dauerText(von,bis)}</b><span class="small">${WD[parseDay(von).getDay()]} ${fD(von)} – ${WD[parseDay(bis).getDay()]} ${fD(bis)}</span>`
@@ -3660,7 +3702,7 @@ function kalender(pf, o={}){ const f=S.form; const von=f[pf+'von']||'', bis=f[pf
     <div class="row between"><button type="button" class="icbtn sm0" data-act="kalMonat" data-pf="${pf}" data-dir="-1" ${zurueckOk?'':'disabled'} aria-label="Vorheriger Monat">${ic('back',18)}</button><b>${MONATSNAMEN[m-1]} ${y}</b><button type="button" class="icbtn sm0" data-act="kalMonat" data-pf="${pf}" data-dir="1" aria-label="Nächster Monat">${ic('right',18)}</button></div>
     <div class="kalgrid">${WT_KURZ.map(w=>`<span class="kwt">${w}</span>`).join('')}${zellen.join('')}</div>
     <div class="kalinfo">${info}${von?`<button type="button" class="link tiny" style="color:var(--mut)" data-act="kalReset" data-pf="${pf}">zurücksetzen</button>`:''}</div>
-    ${o.belegt?.length?'<span class="tiny mut">Punkt unter einem Tag: liegt schon in einem Vorschlag.</span>':''}</div>`; }
+    ${o.belegt?.length?'<span class="tiny mut">Punkt unter einem Tag: liegt schon in einem Vorschlag.</span>':''}${o.gewaehlt?.length?'<span class="tiny" style="color:var(--grntx)">Grün: schon übernommene Zeiträume.</span>':''}</div>`; }
 A.kalTag = el => { const pf=el.dataset.pf, d=el.dataset.d; const f=S.form; const von=f[pf+'von'], bis=f[pf+'bis'];
   if(!von || bis || d<von){ f[pf+'von']=d; f[pf+'bis']=''; }
   else if(d===von){ f[pf+'bis']=d; }
@@ -3747,7 +3789,7 @@ const konfDabei = () => ['teilnehmer','zugesagt'].includes(myM()?.status);
 function konfStand(r, nurGespeichert=false){ const offen=runden(r).filter(x=>x.status==='offen');
   const mem=S.rt.mitglied.filter(m=>['teilnehmer','zugesagt'].includes(m.status));
   const votes = nurGespeichert ? S.rt.stimmen.filter(s=>!['entfernt','ausgetreten'].includes(rtM(s.uid)?.status)) : allVotes();
-  const fertig=new Set(votes.filter(s=>offen.length && offen.every(rd=>optionen(r,rd).some(o=>stimmeVon(s,o)))).map(s=>s.uid));
+  const fertig=new Set(mem.filter(m=>{ if(!offen.length) return false; const s=votes.find(v=>v.uid===m.uid)||{uid:m.uid}; return offen.every(rd=>{ const op=optionen(r,rd); return op.some(o=>stimmeVon(s,o)) || (rd.pool && !op.length); }); }).map(m=>m.uid));
   return {offen, mem, fertig}; }
 const vorname = uid => nm(uid).split(' ')[0];
 
@@ -6848,7 +6890,7 @@ const BU_STUFEN = ['offen','angefragt','vorgemerkt'];
 const inBuchung = r => !!r && r.status==='abstimmung' && BU_STUFEN.includes(r.buchung);
 
 /* ---------- Budget: von allen Pflicht ---------- */
-function zBudgetStand(r){ const s=zBudgetSumme(r); const mein=zBudgetMein(); const pers=zMitgl().map(m=>m.uid).filter(u=>!(S.rt.anreisen||[]).some(a=>a.uid===u&&a.selbstAlles)); const ab=new Set(s?.abgegeben||[]); if(mein) ab.add(S.uid);
+function zBudgetStand(r){ const s=zBudgetSumme(r); const mein=zBudgetMein(); const pers=zMitgl().map(m=>m.uid).filter(u=>!(S.rt.anreisen||[]).some(a=>a.uid===u&&(a.selbstAlles||a.art==='selbst'))); const ab=new Set(s?.abgegeben||[]); if(mein) ab.add(S.uid);
   return {abgegeben:ab, fehlt:pers.filter(u=>!ab.has(u)), egal:s?.egal||0, s}; }
 
 /* ---------- Angebote ---------- */
@@ -7236,29 +7278,114 @@ function schritteVon(r, u){ const st=[]; const zeitFest=!!siegerVon(r,'zeit') ||
   if(selbstbucher(u)) return {selbst:true, st:[]};
   const ks=konfStand(r); if(ks.offen.length && !inBuchung(r)) st.push({k:'abst', n:'Abstimmen: Ort und Zeit', done:ks.fertig.has(u), faellig:true});
   if(typeof modulAn==='function' && modulAn('zimmer',r)) st.push({k:'zimmer', n:'Zimmerwunsch', done:zWunschDa(u), faellig:zeitFest});
-  if(typeof zBudgetStand==='function'){ const b=zBudgetStand(r); st.push({k:'budget', n:'Budget', done:b.abgegeben.has(u), faellig:zeitFest}); }
+  if(anEntry(u)?.art!=='selbst' && typeof zBudgetStand==='function'){ const b=zBudgetStand(r); st.push({k:'budget', n:'Budget', done:b.abgegeben.has(u), faellig:zeitFest}); }
   if(r.anreiseArt) st.push({k:'anreise', n:'Anreise', done:!!anEntry(u), faellig:zeitFest});
   return {selbst:false, st}; }
 
 function schritteKarte(r){ if(r.status!=='abstimmung' || !myM() || !['teilnehmer','zugesagt'].includes(myM().status)) return '';
   if(typeof zBudgetMein==='function') zBudgetMein(); if(typeof zBudgetLaden==='function') zBudgetLaden(r);
   const adm=isAdmin(r); const me=schritteVon(r,S.uid);
-  if(me.selbst) return `<div class="card tight"><div class="row between" style="gap:8px"><span class="small"><b>${ic('check',14)} Du kümmerst dich selbst um deine Reise.</b><br><span class="tiny mut">Du bist nicht in Zimmerplanung, Budget und Anfrage ans Reisebüro enthalten. Abstimmen kannst du weiter.</span></span><button class="btn xs sec" data-act="selbstUm" data-an="0">Doch mit der Gruppe</button></div></div>`;
+  if(me.selbst) return `<div class="card tight"><div class="row between" style="gap:8px"><span class="small"><b>${ic('check',14)} Du kümmerst dich selbst um deine Reise.</b><br><span class="tiny mut">Alleine mit Einzelzimmer: für das Reisebüro nicht relevant. Abstimmen kannst du weiter.</span></span><button class="btn xs sec" data-act="mwStart" data-s="q1">Ändern</button></div></div>`;
   const ms=zMitgl().map(m=>m.uid).filter(u=>!selbstbucher(u)); const alle=ms.map(u=>[u,schritteVon(r,u)]);
   const fertigAnz=alle.filter(([u,s])=>s.st.every(x=>x.done)).length; const erl=me.st.filter(x=>x.done).length; const offen=me.st.filter(x=>!x.done);
-  const knopf = x => x.k==='abst' ? `<button class="btn xs" data-act="schrittRunden">Abstimmen</button>` : x.k==='zimmer' ? `<button class="btn xs" data-act="zwunschAuf" data-u="${S.uid}">Eintragen</button>` : x.k==='budget' ? `<button class="btn xs" data-act="zbudgetAuf">Eintragen</button>` : `<button class="btn xs" data-act="anAuf" data-u="${S.uid}">Angeben</button>`;
+  const knopf = x => x.k==='abst' ? `<button class="btn xs" data-act="schrittRunden">Abstimmen</button>` : `<button class="btn xs" data-act="mwStart" data-s="${x.k}">${x.k==='anreise'?'Angeben':'Eintragen'}</button>`;
   const fehlend = adm ? alle.filter(([u,s])=>!s.st.every(x=>x.done)) : [];
   return `<div class="card ${offen.length?'hot':''}"><div class="row between"><span class="tag"><span class="dot"></span>${offen.length?'DAS FEHLT NOCH':'ALLES ERLEDIGT'}</span><span class="tiny mut">${erl} von ${me.st.length}</span></div>
     <div class="col" style="gap:6px">${me.st.map((x,i)=>`<div class="row between" style="gap:8px"><span class="small ${x.done?'mut':''}"><b>${i+1}.</b> ${x.done?ic('check',14)+' ':''}${esc(x.n)}${x.done?'':x.k==='abst'?'':' <span class="chip yel" style="height:20px;font-size:11px">Pflicht</span>'}${!x.done&&!x.faellig?' <span class="tiny mut">(schon jetzt möglich)</span>':''}</span>${x.done?'':knopf(x)}</div>`).join('')}</div>
     ${offen.length?`<span class="tiny mut">${offen.some(x=>x.k==='abst')&&me.st.length>1?'Du kannst die Schritte in beliebiger Reihenfolge erledigen. ':''}Ohne diese Angaben kann ${adm?'die Anfrage ans Reisebüro':esc(vorname(r.admin))+' die Anfrage ans Reisebüro'} nicht vollständig gestellt werden.</span>`:`<span class="tiny mut">Danke! Jetzt warten wir auf die anderen: ${fertigAnz} von ${ms.length} sind fertig.</span>`}
     ${fehlend.length?`<details class="tiny"><summary style="cursor:pointer;color:var(--yelt)">${fehlend.length} ${fehlend.length===1?'Person hat':'Personen haben'} noch offene Schritte</summary>${fehlend.map(([u,s])=>`<div style="margin-top:3px"><b>${esc(zVor(u))}:</b> ${esc(s.st.filter(x=>!x.done).map(x=>x.n.split(':')[0]).join(', '))}</div>`).join('')}</details>`:''}
-    <button class="link tiny" style="align-self:flex-start;color:var(--mut)" data-act="selbstUm" data-an="1">Ich kümmere mich selbst um meine Reise</button></div>`; }
+    ${offen.some(x=>x.k!=='abst')?`<button class="btn block" data-act="mwStart" data-s="">Schritt für Schritt ausfüllen</button>`:`<button class="link tiny" style="align-self:flex-start;color:var(--mut)" data-act="mwStart" data-s="q1">Meine Angaben ändern</button>`}</div>`; }
 
 A.schrittRunden = ()=>{ const el=document.getElementById('konfRunden'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); else toast('Die Abstimmung ist abgeschlossen.'); };
 A.selbstUm = async el => { const an=el.dataset.an==='1'; const id=`${S.rid}_${S.uid}`;
   try{ if(an){ await S.db.doc(`anreisewunsch/${id}`).set({rid:S.rid, uid:S.uid, art:'selbst', selbstAlles:true, abflug:[], ziel:[], zugZumFlug:false, bahnhof:'', startort:'', hinweis:'', by:S.uid, at:now()}); toast('Notiert: du kümmerst dich selbst um deine Reise.'); }
     else { await S.db.doc(`anreisewunsch/${id}`).delete(); toast('Du bist wieder bei der Gruppenplanung dabei.'); }
   }catch(e){ fail(e,'Speichern'); } };
+/* ===================== Meine Angaben: Schritt für Schritt =====================
+   1 Mit der Gruppe oder alleine anreisen?
+   Gruppe:  2 Budget → 3 Reisepräferenz (Flug/Zug/Auto, Abflughafen bzw. Bahnhof) → 4 Zimmer
+   Alleine: 2 Zimmer. Alleine + Einzelzimmer = für das Reisebüro nicht relevant (anreisewunsch.selbstAlles).
+            Alleine + anderes Zimmer: nur die Zimmerplanung betrifft die Gruppe (art:'selbst', ohne selbstAlles).
+   Jeder Schritt wird beim Weiterklicken gespeichert. */
+const BHF_LISTE = ['Aachen Hbf','Augsburg Hbf','Berlin Hbf','Bielefeld Hbf','Bochum Hbf','Bonn Hbf','Braunschweig Hbf','Bremen Hbf','Chemnitz Hbf','Darmstadt Hbf','Dortmund Hbf','Dresden Hbf','Duisburg Hbf','Düsseldorf Hbf','Erfurt Hbf','Essen Hbf','Frankfurt (Main) Hbf','Freiburg Hbf','Hamburg Hbf','Hannover Hbf','Heidelberg Hbf','Karlsruhe Hbf','Kassel-Wilhelmshöhe','Kiel Hbf','Köln Hbf','Leipzig Hbf','Magdeburg Hbf','Mainz Hbf','Mannheim Hbf','München Hbf','Münster Hbf','Nürnberg Hbf','Osnabrück Hbf','Regensburg Hbf','Rostock Hbf','Saarbrücken Hbf','Stuttgart Hbf','Ulm Hbf','Wiesbaden Hbf','Wuppertal Hbf','Würzburg Hbf'];
+const mwSchritte = f => f.mw_modus==='allein' ? ['q1','zimmer','fertig'] : ['q1','budget','reise','zimmer','fertig'];
+const mwKopf = (f, titel) => { const l=mwSchritte(f); const n=Math.min(l.indexOf(f.mw_s)+1, l.length-1); const g=l.length-1; return `<div class="col" style="gap:6px"><div class="row between"><span class="tag"><span class="dot"></span>SCHRITT ${n} VON ${g}</span><span class="tiny mut">${titel}</span></div><div class="standbar" aria-hidden="true"><i style="width:${Math.round(n/g*100)}%"></i></div></div>`; };
+
+function mwInit(want, pager){ const r=cur(); const e=anEntry(S.uid)||{}; const z=zEntry(S.uid); const m=zBudgetMein();
+  const modus = e.art==='selbst' ? 'allein' : (e.art||m||zWunschDa(S.uid)) ? 'gruppe' : '';
+  const f={ mw_modus:modus, mw_s:'q1', mw_art:(e.art&&e.art!=='selbst')?e.art:(['flug','zug','auto'].includes(r.anreiseArt)?r.anreiseArt:''),
+    an_ab:Object.fromEntries((e.abflug||[]).map(a=>[a,true])), an_zug:!!e.zugZumFlug, an_bhf:e.bahnhof||'', an_start:e.startort||'', an_hin:e.hinweis||'',
+    zbetrag:typeof m==='number'&&m>0?m:'', zbegal:m==='egal', mw_ztyp:zWunschTyp(z)==='egal'&&!zWunschDa(S.uid)?'':zWunschTyp(z) };
+  (z.mit||[]).forEach(v=>f['zm_'+v]=true);
+  const rest = pager ? 'fertig' : 'q1';
+  if(modus && want){ f.mw_s = want==='zimmer'?'zimmer':(modus==='gruppe'?(want==='budget'?'budget':want==='anreise'?'reise':'q1'):'q1'); }
+  else if(modus){ f.mw_s = modus==='allein' ? (zWunschDa(S.uid)?rest:'zimmer') : (!m?'budget':!e.art?'reise':!zWunschDa(S.uid)?'zimmer':rest); }
+  return f; }
+A.mwStart = el => { go('meinweg',{form:mwInit(el?.dataset?.s||'', false)}); };
+
+V.meinweg = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(!myM()||!['teilnehmer','zugesagt'].includes(myM().status)) return V.dabei(); return mwSeite(r,false); };
+/* pager=true: Ort und Zeit stehen fest, die Seite zeigt nur noch diese Schritte */
+function mwSeite(r, pager){ const f=S.form; if(!f.mw_s) Object.assign(f, mwInit('', pager));
+  const s=f.mw_s; let body='', btn='Weiter';
+  if(s==='q1'){ body=`${mwKopf(f,'Anreise')}<h2 style="margin:0">Willst du mit der Gruppe zusammen anreisen oder organisierst du deine Anreise alleine?</h2>
+    <div class="col" style="gap:8px"><button type="button" class="pfopt ${f.mw_modus==='gruppe'?'on':''}" aria-pressed="${f.mw_modus==='gruppe'}" data-act="setForm" data-k="mw_modus" data-val="gruppe"><b>Mit der Gruppe</b><span class="small mut">Das Reisebüro plant deine Anreise mit.</span></button>
+    <button type="button" class="pfopt ${f.mw_modus==='allein'?'on':''}" aria-pressed="${f.mw_modus==='allein'}" data-act="setForm" data-k="mw_modus" data-val="allein"><b>Alleine</b><span class="small mut">Ich kümmere mich selbst um meine Anreise.</span></button></div>`; }
+  else if(s==='budget'){ body=`${mwKopf(f,'Budget')}<h2 style="margin:0">Was darf die Reise insgesamt kosten?</h2><p class="small mut" style="margin:0">Unterkunft, Anreise, alles zusammen. Nur du siehst deine Angabe. Die Gruppe sieht erst ab 3 Angaben Spanne und Durchschnitt.</p>
+    ${f.zbegal?'':`<label class="f">Betrag in Euro<input class="in" id="f_zbetrag" inputmode="numeric" maxlength="6" placeholder="z. B. 800" data-enter="mwWeiter" autocomplete="off"></label>`}
+    <label class="toggle" style="align-items:flex-start"><input type="checkbox" data-change="mwEgal" ${f.zbegal?'checked':''}><span><b>Egal, es kostet was es kostet</b><br><span class="small mut">Du setzt dir keine Obergrenze. Das zählt als Angabe.</span></span></label>`; }
+  else if(s==='reise'){ const art=f.mw_art;
+    const flug = art==='flug' ? `<div class="row between"><span class="small mut" style="font-weight:700">Von welchem Flughafen fliegst du ab? (mehrere möglich)</span><button type="button" class="link tiny" data-act="anAlle">Alle auswählen</button></div>
+      ${AN_FLUG.map(([g,l])=>`<div class="col" style="gap:4px"><label class="toggle" style="font-weight:700"><input type="checkbox" data-g="${esc(g)}" data-act="anGrp" data-gname="${esc(g)}" ${l.every(n=>f.an_ab?.[n])?'checked':''}> ${esc(g)}</label><div class="grid2" style="grid-template-columns:1fr 1fr;gap:2px 10px;padding-left:4px">${l.map(n=>`<label class="toggle small"><input type="checkbox" data-g="${esc(g)}" data-change="anAbTog" data-n="${esc(n)}" ${f.an_ab?.[n]?'checked':''}> ${esc(n)}</label>`).join('')}</div></div>`).join('')}
+      <label class="toggle" style="align-items:flex-start"><input type="checkbox" data-change="anZugTog" ${f.an_zug?'checked':''}><span><b>Zug zum Flug wird benötigt</b><br><span class="small mut">Das Reisebüro bucht dann eine Bahnanreise zum Flughafen mit.</span></span></label>` : '';
+    const zug = art==='zug' ? `<label class="f">Von welchem Bahnhof fährst du ab?<input class="in" id="f_an_bhf" list="bhfliste" maxlength="60" placeholder="Bahnhof wählen oder tippen" autocomplete="off"></label><datalist id="bhfliste">${BHF_LISTE.map(b=>`<option value="${esc(b)}">`).join('')}</datalist>` : '';
+    const auto = art==='auto' ? `<label class="f">Startort<input class="in" id="f_an_start" maxlength="60" placeholder="Ort bzw. PLZ, von dem du losfährst" autocomplete="off"></label>` : '';
+    body=`${mwKopf(f,'Reisepräferenz')}<h2 style="margin:0">Wie möchtest du anreisen?</h2>${r.anreiseArt&&r.anreiseArt!=='gemischt'?`<p class="small mut" style="margin:0">Die Gruppe plant mit: ${esc(anArtName(r.anreiseArt))}.</p>`:''}
+    <div class="row wrap" style="gap:8px">${[['flug','✈️ Flug'],['zug','🚆 Zug'],['auto','🚗 Auto']].map(([k,n])=>`<button type="button" class="chip ${art===k?'yel':''}" style="border:0;cursor:pointer;height:42px;padding:0 16px" aria-pressed="${art===k}" data-act="setForm" data-k="mw_art" data-val="${k}">${n}</button>`).join('')}</div>
+    ${flug}${zug}${auto}${art?`<label class="f">Hinweis (freiwillig)<input class="in" id="f_an_hin" maxlength="120" placeholder="z. B. Handgepäck, früh am Morgen" autocomplete="off"></label>`:''}`; }
+  else if(s==='zimmer'){ const andere=zPlan().personen.filter(x=>x!==S.uid); const t=f.mw_ztyp;
+    body=`${mwKopf(f,'Zimmer')}<h2 style="margin:0">Wie möchtest du schlafen?</h2>
+    <div class="col" style="gap:8px">${ZWUNSCH.map(([k,n,tx])=>`<button type="button" class="pfopt ${t===k?'on':''}" aria-pressed="${t===k}" data-act="setForm" data-k="mw_ztyp" data-val="${k}"><b>${n}</b><span class="small mut">${tx}${k==='einzel'?'. Hat Vorrang, andere können sich dort nicht dazubuchen.':''}</span></button>`).join('')}</div>
+    ${f.mw_modus==='allein'&&t==='einzel'?`<div class="info small">${ic('check',14)} Alleine anreisen und ein Einzelzimmer: Du bist damit für das Reisebüro nicht relevant. Es plant weder deine Anreise noch dein Zimmer mit.</div>`:''}
+    ${andere.length&&t&&t!=='einzel'?`<span class="small mut" style="font-weight:600">Mit wem möchtest du ein Zimmer teilen? (freiwillig)</span><div class="row wrap" style="gap:6px">${andere.map(x=>`<button type="button" class="chip ${f['zm_'+x]?'yel':''}" style="border:0;cursor:pointer;height:36px;gap:6px" aria-pressed="${!!f['zm_'+x]}" data-act="mwMit" data-u="${x}">${zAv(x,20)} ${esc(zVor(x))}</button>`).join('')}</div>`:''}`; btn='Fertig'; }
+  else { const ez=f.mw_modus==='allein'&&f.mw_ztyp==='einzel'; const adm=isAdmin(r);
+    body=`<div class="card gold"><span class="tag"><span class="dot"></span>ERLEDIGT</span><div class="ttl" style="font-size:20px">Danke, das war’s! 🎉</div>
+    <p class="small" style="color:var(--goldtx);margin:0">${ez?'Du organisierst deine Reise komplett selbst. Für das Reisebüro bist du nicht relevant.':f.mw_modus==='allein'?'Du reist alleine an. Dein Zimmerwunsch fließt in die Zimmerplanung ein.':'Deine Angaben sind gespeichert. Du kannst sie jederzeit ändern.'}</p></div>
+    ${pager?`<p class="small mut" style="margin:0">Ort und Zeit stehen fest. ${adm?'Wenn du so weit bist, legst du die Reise jetzt fest.':`${esc(nm(r.admin))} legt die Reise jetzt fest.`}</p>`:''}`;
+    if(pager){ return `${hdrPlain('Koffer-Konferenz')}<h1>${esc(r.titel)}</h1>${body}
+      ${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">${ic('suitcase',18)} Reise festlegen</button>`:`<button class="btn block" data-act="mwHome">Zu Meine Reisen</button>`}
+      <div class="row wrap" style="gap:14px;justify-content:center"><button class="link tiny" style="color:var(--mut)" data-act="mwNochmal">Meine Angaben ändern</button><button class="link tiny" style="color:var(--mut)" data-act="mwAlles">Gesamtübersicht der Konferenz</button></div>`; }
+    btn='Zurück zur Abstimmung'; }
+  return `${hdrPlain(pager?'Koffer-Konferenz':'Meine Angaben')}${s==='fertig'?'':`<button class="back" data-act="mwZurueck">${ic('back',20)} Zurück</button>`}
+  <h1>${esc(r.titel)}</h1>${body}<button class="btn block" data-act="mwWeiter">${btn}</button>${pager&&s!=='fertig'?`<button class="link tiny" style="align-self:center;color:var(--mut)" data-act="mwAlles">Gesamtübersicht der Konferenz</button>`:''}`; }
+
+A.mwPager = ()=>{ S.ui.konfAlles=null; S.form={}; render(); try{ window.scrollTo({top:0}); }catch(e){} };
+A.mwHome = ()=>{ S.form={}; go('home'); };
+A.mwNochmal = ()=>{ S.form.mw_s='q1'; render(); try{ window.scrollTo({top:0}); }catch(e){} };
+A.mwAlles = ()=>{ S.ui.konfAlles=cur()?.id; S.form={}; render(); try{ window.scrollTo({top:0}); }catch(e){} };
+
+A.mwEgal = el => { S.form.zbegal=!!el.checked; render(); };
+A.mwMit = el => { S.form['zm_'+el.dataset.u]=!S.form['zm_'+el.dataset.u]; render(); };
+A.mwZurueck = ()=>{ const f=S.form; const l=mwSchritte(f); const i=l.indexOf(f.mw_s); if(i<=0){ S.form={}; if(S.route.v==='konferenz') go('home'); else { S.route={v:'konferenz'}; render(); } } else { f.mw_s=l[i-1]; render(); } try{ window.scrollTo({top:0}); }catch(e){} };
+A.mwWeiter = async el => { const f=S.form, r=cur(); const s=f.mw_s; const l=mwSchritte(f);
+  if(s==='fertig'){ S.route={v:'konferenz'}; S.form={}; render(); return; }
+  el.disabled=true;
+  try{
+    if(s==='q1'){ if(!f.mw_modus){ el.disabled=false; return toast('Bitte wähle eine Antwort.'); }
+      const e=anEntry(S.uid); if(f.mw_modus==='gruppe' && e && (e.art==='selbst')) await S.db.doc(`anreisewunsch/${S.rid}_${S.uid}`).delete(); }
+    else if(s==='budget'){ const egal=!!f.zbegal; const b=Math.round(+String(f.zbetrag||'').replace(',','.')); if(!egal && (!(b>0)||b>99999)){ el.disabled=false; return toast('Bitte gib einen Betrag zwischen 1 und 99.999 Euro ein oder wähle „Egal“.'); }
+      await S.db.doc(`zimmerbudget/${S.rid}_${S.uid}`).set({rid:S.rid, uid:S.uid, betrag:egal?0:b, ...(egal?{egal:true}:{}), at:now()}); S.ui.zbMein=egal?'egal':b; if(S.ui.zbAgg) delete S.ui.zbAgg[S.rid]; }
+    else if(s==='reise'){ const art=f.mw_art; if(!art){ el.disabled=false; return toast('Bitte wähle, wie du anreist.'); }
+      const d={rid:S.rid, uid:S.uid, art, abflug:[], ziel:[], zugZumFlug:false, bahnhof:'', startort:'', hinweis:(f.an_hin||'').trim(), by:S.uid, at:now()};
+      if(art==='flug'){ d.abflug=AN_ALLE.filter(n=>f.an_ab?.[n]); if(!d.abflug.length){ el.disabled=false; return toast('Bitte wähle mindestens einen Abflughafen.'); } d.zugZumFlug=!!f.an_zug; }
+      if(art==='zug'){ d.bahnhof=(f.an_bhf||'').trim(); if(!d.bahnhof){ el.disabled=false; return toast('Bitte wähle oder tippe deinen Bahnhof.'); } }
+      if(art==='auto'){ d.startort=(f.an_start||'').trim(); if(!d.startort){ el.disabled=false; return toast('Bitte gib deinen Startort ein.'); } }
+      await S.db.doc(`anreisewunsch/${S.rid}_${S.uid}`).set(d); }
+    else if(s==='zimmer'){ const t=f.mw_ztyp; if(!t){ el.disabled=false; return toast('Bitte wähle, wie du schlafen möchtest.'); }
+      const alt=zEntry(S.uid); const neuEz=t==='einzel'; const mit=neuEz?[]:Object.keys(f).filter(k=>k.startsWith('zm_')&&f[k]).map(k=>k.slice(3)).filter(v=>v!==S.uid);
+      await S.db.doc(`zimmerwahl/${S.rid}_${S.uid}`).set({rid:S.rid, uid:S.uid, zimmerId:alt.zimmerId||'', einzel:neuEz, typ:t, mit, claimAt:neuEz&&!alt.einzel?now():(alt.claimAt||0), by:alt.by||S.uid, updatedAt:now()});
+      if(f.mw_modus==='allein') await S.db.doc(`anreisewunsch/${S.rid}_${S.uid}`).set({rid:S.rid, uid:S.uid, art:'selbst', selbstAlles:neuEz, abflug:[], ziel:[], zugZumFlug:false, bahnhof:'', startort:'', hinweis:'', by:S.uid, at:now()}); }
+    f.mw_s=l[l.indexOf(s)+1]; el.disabled=false; render(); try{ window.scrollTo({top:0}); }catch(e2){}
+  }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
 /* ===================== Notfallpass: gehört zum Profil, nicht zur Reise =====================
    Privat in den eigenen Einstellungen: settings.notfallpass = { blut, allergien, medis, versicherung, entsperr, angehoerige:[{name,bez,tel}], kontakt(alt) }.
    Teilen pro Reise: notfallpass/{rid}_{uid} = { rid, uid, an:['alle'] | [uids], daten:{…ohne Entsperrcode, außer mitCode}, mitCode, at }.
@@ -7296,13 +7423,13 @@ OV.passForm = () => `<div class="sheet" role="dialog" aria-modal="true" aria-lab
   <p class="small mut">Alles ist freiwillig. Die Angaben sind privat, bis du sie selbst mit einer Reisegruppe teilst.</p>
   ${Array.from({length:npAnz},(_,i)=>`<div class="card tight"><b class="small">${i?`Weitere/r Angehörige/r ${i+1}`:'Nächste Angehörige'}</b>
     <label class="f">Name<input class="in" id="f_np_a${i}n" maxlength="60" placeholder="Vor- und Nachname"></label>
-    <label class="f">Zugehörigkeit<input class="in" id="f_np_a${i}b" maxlength="40" placeholder="z. B. Partnerin, Mutter, Bruder"></label>
+    <label class="f">Zugehörigkeit<input class="in" id="f_np_a${i}b" autocomplete="off" maxlength="40" placeholder="z. B. Partnerin, Mutter, Bruder"></label>
     <label class="f">Telefon<input class="in" id="f_np_a${i}t" type="tel" inputmode="tel" maxlength="30" placeholder="+49 …"></label></div>`).join('')}
-  <label class="f">Blutgruppe<input class="in" id="f_np_blut" maxlength="10" placeholder="z. B. A+"></label>
-  <label class="f">Allergien<input class="in" id="f_np_allergien" maxlength="120"></label>
-  <label class="f">Medikamente<input class="in" id="f_np_medis" maxlength="160"></label>
-  <label class="f">Auslandskrankenversicherung<input class="in" id="f_np_versicherung" maxlength="120" placeholder="Name und Notfallnummer"></label>
-  <label class="f">Entsperrcode Handy<input class="in" id="f_np_entsperr" type="password" autocomplete="off" maxlength="30" placeholder="freiwillig"></label>
+  <label class="f">Blutgruppe<input class="in" autocomplete="off" data-lpignore="true" data-1p-ignore id="f_np_blut" maxlength="10" placeholder="z. B. A+"></label>
+  <label class="f">Allergien<input class="in" autocomplete="off" data-lpignore="true" data-1p-ignore id="f_np_allergien" maxlength="120"></label>
+  <label class="f">Medikamente<input class="in" autocomplete="off" data-lpignore="true" data-1p-ignore id="f_np_medis" maxlength="160"></label>
+  <label class="f">Auslandskrankenversicherung<input class="in" autocomplete="off" data-lpignore="true" data-1p-ignore id="f_np_versicherung" maxlength="120" placeholder="Name und Notfallnummer"></label>
+  <label class="f">Entsperrcode Handy<input class="in" id="f_np_entsperr" type="text" style="-webkit-text-security:disc" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" name="np-code-x" maxlength="30" placeholder="freiwillig"></label>
   <span class="tiny mut">Der Code wird nur mit deinem Konto gespeichert und nur geteilt, wenn du das beim Teilen ausdrücklich wählst.</span>
   <button class="btn block" data-act="passSpeichern">Speichern</button></div>`;
 A.passSpeichern = async ()=>{ const f=S.form; const t=k=>String(f[k]||'').trim();
@@ -7424,7 +7551,99 @@ const ideeZahl = (i,k) => Object.values(i.stimmen||{}).filter(v=>v===k).length;
 const ideeRang = i => [ideeZahl(i,'ja'), ideeZahl(i,'vl'), -ideeZahl(i,'nein')];
 const ideeVergleich = (a,b) => { const x=ideeRang(a), y=ideeRang(b); for(let k=0;k<3;k++) if(x[k]!==y[k]) return y[k]-x[k]; return (a.createdAt||0)-(b.createdAt||0); };
 const ideeOffen = () => ideenListe().filter(i=>!(i.stimmen||{})[S.uid]);
-const IDEE_ST = {ja:['♥','Passt','grn'], vl:['?','Vielleicht','yel'], nein:['✕','Nein','red']};
+const ideeDarf = r => !r || r.status!=='abstimmung' || isAdmin(r) || runden(r).some(x=>x.typ==='ort' && rdOffen(r,x));
+
+/* Erkennt in einem Ideen-Titel ein Land oder eine Stadt (Flagge) bzw. ein Reisethema (Symbol) und liefert Farbe, Flagge und Symbol für die Karte */
+const ORT_LAENDER = [
+ ['ES','Spanien','spanien|spain|mallorca|ibiza|menorca|formentera|teneriffa|gran canaria|fuerteventura|lanzarote|la palma|kanaren|barcelona|madrid|andalusien|costa brava|costa del sol|costa blanca|valencia|sevilla|malaga|málaga|marbella|granada|san sebastian|benidorm|alicante|cádiz|cadiz|sitges|lloret de mar|salou'],
+ ['IT','Italien','italien|italy|rom|venedig|florenz|toskana|sizilien|sardinien|gardasee|amalfi|amalfiküste|neapel|mailand|capri|rimini|lignano|südtirol|dolomiten|ligurien|cinque terre|elba|apulien|kalabrien|verona|bologna|turin|sorrent|jesolo|caorle|bibione|lago maggiore|comer see|como'],
+ ['FR','Frankreich','frankreich|france|paris|nizza|côte d.azur|cote d.azur|korsika|bretagne|provence|normandie|elsass|bordeaux|lyon|marseille|cannes|saint-tropez|chamonix|loire|atlantikküste'],
+ ['GR','Griechenland','griechenland|greece|kreta|santorin|santorini|mykonos|rhodos|korfu|athen|kos|zakynthos|naxos|paros|chalkidiki|thassos|lefkada|kefalonia|samos|karpathos|peloponnes'],
+ ['PT','Portugal','portugal|lissabon|algarve|madeira|porto|azoren|lagos|faro|cascais|sintra'],
+ ['TR','Türkei','türkei|turkei|turkey|antalya|istanbul|side|bodrum|kappadokien|alanya|marmaris|belek|kemer|dalaman|fethiye|izmir|kusadasi'],
+ ['HR','Kroatien','kroatien|croatia|dubrovnik|split|istrien|hvar|zadar|pula|rovinj|brač|brac|krk|makarska|opatija|plitvicer'],
+ ['AT','Österreich','österreich|oesterreich|austria|tirol|wien|salzburg|kitzbühel|kitzbuehel|ischgl|mayrhofen|zillertal|kärnten|kaernten|wörthersee|woerthersee|vorarlberg|steiermark|zell am see|saalbach|sölden|soelden|innsbruck|lech|arlberg|obertauern|schladming'],
+ ['CH','Schweiz','schweiz|switzerland|zürich|zuerich|zermatt|luzern|davos|genf|engadin|st\\. moritz|interlaken|grindelwald|verbier|lugano|basel|bern|matterhorn'],
+ ['NL','Niederlande','niederlande|holland|netherlands|amsterdam|zeeland|rotterdam|zandvoort|texel'],
+ ['BE','Belgien','belgien|belgium|brüssel|bruessel|brügge|bruegge|antwerpen'],
+ ['GB','Großbritannien','england|london|schottland|großbritannien|grossbritannien|uk|edinburgh|wales|cornwall|scotland|manchester|liverpool'],
+ ['IE','Irland','irland|ireland|dublin|kerry|galway'],
+ ['DK','Dänemark','dänemark|daenemark|denmark|kopenhagen|jütland|juetland|billund|skagen'],
+ ['SE','Schweden','schweden|sweden|stockholm|göteborg|goeteborg|gotland'],
+ ['NO','Norwegen','norwegen|norway|oslo|lofoten|fjord|fjorde|bergen|tromsø|tromso|nordkap'],
+ ['FI','Finnland','finnland|finland|helsinki|lappland|rovaniemi'],
+ ['IS','Island','island|iceland|reykjavik'],
+ ['PL','Polen','polen|poland|krakau|danzig|warschau|breslau'],
+ ['CZ','Tschechien','tschechien|prag|czech|karlsbad'],
+ ['HU','Ungarn','ungarn|hungary|budapest|balaton|plattensee'],
+ ['SK','Slowakei','slowakei|tatra|bratislava'],
+ ['SI','Slowenien','slowenien|slovenia|bled|ljubljana'],
+ ['RO','Rumänien','rumänien|rumaenien|romania|bukarest|siebenbürgen'],
+ ['BG','Bulgarien','bulgarien|bulgaria|sonnenstrand|goldstrand|varna|burgas|bansko'],
+ ['ME','Montenegro','montenegro|kotor|budva'],
+ ['AL','Albanien','albanien|albania|tirana|saranda'],
+ ['MT','Malta','malta|valletta|gozo'],
+ ['CY','Zypern','zypern|cyprus|paphos|ayia napa|larnaka'],
+ ['EG','Ägypten','ägypten|aegypten|egypt|hurghada|sharm el sheikh|marsa alam|kairo|dahab|makadi|el gouna'],
+ ['MA','Marokko','marokko|morocco|marrakesch|marrakech|agadir|casablanca|essaouira'],
+ ['TN','Tunesien','tunesien|tunisia|djerba|hammamet|sousse'],
+ ['US','USA','usa|amerika|new york|florida|miami|kalifornien|california|las vegas|hawaii|los angeles|san francisco|orlando|texas|chicago|alaska'],
+ ['CA','Kanada','kanada|canada|vancouver|toronto|banff|montreal'],
+ ['MX','Mexiko','mexiko|mexico|cancun|cancún|tulum|playa del carmen|riviera maya|yucatan'],
+ ['DO','Dominikanische Republik','dominikanische republik|punta cana|dominikanische|santo domingo'],
+ ['CU','Kuba','kuba|cuba|havanna|varadero'],
+ ['JM','Jamaika','jamaika|jamaica'],
+ ['BR','Brasilien','brasilien|brazil|rio|rio de janeiro|salvador|fortaleza'],
+ ['AR','Argentinien','argentinien|argentina|buenos aires|patagonien'],
+ ['PE','Peru','peru|machu picchu|lima'],
+ ['CL','Chile','chile|santiago'],
+ ['CO','Kolumbien','kolumbien|colombia|cartagena'],
+ ['TH','Thailand','thailand|phuket|bangkok|koh samui|krabi|pattaya|chiang mai|koh phangan|koh lanta'],
+ ['VN','Vietnam','vietnam|hanoi|saigon|da nang|phu quoc'],
+ ['ID','Indonesien','indonesien|indonesia|bali|lombok|java|gili'],
+ ['MY','Malaysia','malaysia|kuala lumpur|langkawi'],
+ ['SG','Singapur','singapur|singapore'],
+ ['JP','Japan','japan|tokio|tokyo|kyoto|osaka|hokkaido'],
+ ['KR','Südkorea','südkorea|suedkorea|korea|seoul'],
+ ['CN','China','china|peking|beijing|shanghai|hongkong'],
+ ['IN','Indien','indien|india|goa|kerala|delhi|rajasthan'],
+ ['LK','Sri Lanka','sri lanka|colombo'],
+ ['MV','Malediven','malediven|maldives'],
+ ['AE','Vereinigte Arabische Emirate','dubai|abu dhabi|emirate|vae'],
+ ['OM','Oman','oman|muscat'],
+ ['JO','Jordanien','jordanien|jordan|petra|aqaba'],
+ ['IL','Israel','israel|tel aviv|eilat'],
+ ['ZA','Südafrika','südafrika|suedafrika|south africa|kapstadt|johannesburg|krüger|krueger'],
+ ['KE','Kenia','kenia|kenya|mombasa|nairobi|masai mara'],
+ ['TZ','Tansania','tansania|tanzania|sansibar|zanzibar|serengeti|kilimandscharo'],
+ ['MU','Mauritius','mauritius'],
+ ['SC','Seychellen','seychellen|seychelles'],
+ ['AU','Australien','australien|australia|sydney|melbourne|brisbane|perth'],
+ ['NZ','Neuseeland','neuseeland|new zealand|auckland|queenstown'],
+ ['DE','Deutschland','deutschland|germany|berlin|hamburg|münchen|muenchen|köln|koeln|nordsee|ostsee|rügen|ruegen|sylt|bayern|schwarzwald|allgäu|allgaeu|harz|usedom|föhr|foehr|amrum|norderney|borkum|langeoog|juist|spiekeroog|fehmarn|timmendorfer strand|binz|warnemünde|warnemuende|bodensee|sauerland|eifel|mosel|rhein|thüringen|thueringen|sachsen|dresden|leipzig|frankfurt|stuttgart|düsseldorf|duesseldorf|bremen|hannover|lüneburger heide|lueneburger heide|st\\. peter-ording|garmisch|berchtesgaden|oberstdorf|winterberg|erzgebirge|fichtelgebirge|spreewald|müritz|mueritz|mecklenburg|königssee|koenigssee|zugspitze|oberammergau|füssen|fuessen|tegernsee|chiemsee|ammersee|starnberger see']
+].map(([c,n,k])=>({c,n,re:new RegExp('(^|[^a-zäöüßéèôç])('+k+')($|[^a-zäöüßéèôç])')}));
+const ORT_THEMEN = [
+ ['🏖️',195,'Strand und Meer','strand|meer|insel|inseln|küste|kueste|bucht|sandstrand|lagune|riviera|beach|resort|all inclusive|baden'],
+ ['⛷️',212,'Winter und Berge','ski|skiurlaub|schnee|winter|skigebiet|snowboard|piste|langlauf|apres'],
+ ['🏔️',222,'Berge','berge|alpen|hütte|huette|gipfel|wandern|wanderurlaub|almhütte|almhuette|hochgebirge|dolomiten|alm'],
+ ['🏙️',268,'Städtereise','stadt|city|städtetrip|staedtetrip|metropole|großstadt|grossstadt|shopping'],
+ ['⛺',140,'Camping','camping|zelt|zelten|wohnmobil|wohnwagen|glamping|van'],
+ ['🚢',205,'Kreuzfahrt','kreuzfahrt|schiff|cruise|segeln|segeltörn|segeltoern|yacht|hausboot'],
+ ['🧖',330,'Wellness','wellness|spa|therme|thermen|sauna|erholung'],
+ ['🦁',32,'Safari','safari|wildlife|nationalpark'],
+ ['🏞️',160,'Natur','see|seen|wald|natur|fluss|wasserfall|nationalpark|landhaus|bauernhof|ferienhaus|finca'],
+ ['🏰',20,'Kultur','schloss|burg|kultur|museum|altstadt|historisch']
+].map(([e,h,n,k])=>({e,h,n,re:new RegExp('(^|[^a-zäöüß])('+k+')($|[^a-zäöüß])')}));
+const flaggeVon = c => String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0)));
+const ortMotivCache = {};
+function ortMotiv(titel){ const t=String(titel||'').toLowerCase(); if(ortMotivCache[t]) return ortMotivCache[t];
+  const l=ORT_LAENDER.find(x=>x.re.test(t)); const th=ORT_THEMEN.find(x=>x.re.test(t));
+  const hash=[...t].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+  const h = th ? th.h : l ? ({ES:12,IT:140,FR:222,GR:200,PT:355,TR:0,HR:205,AT:350,CH:0,NL:25,GB:225,US:225,DE:45}[l.c]??((hash%12)*30)) : (hash%12)*30;
+  const m={flag:l?flaggeVon(l.c):'', land:l?l.n:'', sym:th?th.e:(l?'':'🧳'), thema:th?th.n:'', h, bg:`linear-gradient(155deg,hsl(${h},62%,34%) 0%,hsl(${(h+38)%360},58%,22%) 100%)`};
+  return (ortMotivCache[t]=m); }
+
+const IDEE_ST = {ja:['♥','Super','grn'], vl:['?','Weiß nicht','yel'], nein:['✕','Nein','red']};
 
 /* Karte in der Koffer-Konferenz */
 function ideenKarte(r){ if(r.status!=='abstimmung') return ''; const l=ideenListe(); const o=ideeOffen().length;
@@ -7432,24 +7651,27 @@ function ideenKarte(r){ if(r.status!=='abstimmung') return ''; const l=ideenList
 
 V.ideen = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(r.status==='geloescht') return `${hdrPlain()}<div class="empty">Diese Reise wurde gelöscht.</div><button class="btn sec" data-act="home">Zu Meine Reisen</button>`; if(!myM()||!['teilnehmer','zugesagt'].includes(myM().status)) return V.dabei(); const tab=S.ui.ideeTab||'swipe'; const o=ideeOffen();
   const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='swipe'}" data-act="ui" data-k="ideeTab" data-val="swipe">Wischen${o.length?`<span class="badge orange">${o.length}</span>`:''}</button><button role="tab" aria-selected="${tab==='rang'}" data-act="ui" data-k="ideeTab" data-val="rang">Rangliste</button></div>`;
-  return `${hdrPlain('Ideen-Pool')}${backBtn()}<div class="row between"><h1>Ideen-Pool</h1><button class="btn sm" data-act="ideeNeu">${ic('plus',16)} Idee</button></div>${tabs}${tab==='rang'?ideeRangView(r):ideeSwipeView(r)}`; };
+  return `${hdrPlain('Ideen-Pool')}${backBtn()}<div class="row between"><h1>Ideen-Pool</h1>${ideeDarf(r)?`<button class="btn sm" data-act="ideeNeu">${ic('plus',16)} Idee</button>`:''}</div>${tabs}${tab==='rang'?ideeRangView(r):ideeSwipeView(r)}`; };
 
 function ideeSwipeView(r){ const o=ideeOffen(); const i=o[0]; const n=ideenListe().length;
-  if(!n) return `<div class="empty">Noch keine Ideen im Pool. Wirf die erste ein, zum Beispiel ein Reiseziel.</div><button class="btn block" data-act="ideeNeu">${ic('plus',18)} Idee einwerfen</button>`;
+  if(!n) return `<div class="empty">Noch keine Ideen im Pool.${ideeDarf(r)?' Wirf die erste ein, zum Beispiel ein Reiseziel.':''}</div>${ideeDarf(r)?`<button class="btn block" data-act="ideeNeu">${ic('plus',18)} Idee einwerfen</button>`:''}`;
   if(!i) return `<div class="card gold"><div class="ttl">Alles bewertet 🎉</div><p class="small" style="color:var(--goldtx);margin:0">Schau in die Rangliste, was bei der Gruppe ankommt. Neue Ideen erscheinen hier automatisch.</p><button class="btn block yel" data-act="ui" data-k="ideeTab" data-val="rang">Zur Rangliste</button></div>`;
-  return `<p class="tiny mut" style="margin:0;text-align:center">Noch ${o.length} ${o.length===1?'Idee':'Ideen'} · wische nach rechts (passt), oben (vielleicht) oder links (nein)</p>
-    <div class="swbuehne"><div class="swcard" data-id="${i.id}" role="group" aria-label="${esc(i.titel)}"><span class="swstempel ja">PASST</span><span class="swstempel nein">NEIN</span><span class="swstempel vl">VIELLEICHT</span>
-      <div class="swtitel">${esc(i.titel)}</div>${i.notiz?`<div class="swnotiz">${esc(i.notiz)}</div>`:''}
-      ${i.link?`<a class="btn xs sec" style="align-self:flex-start" href="${esc(ortLinkFix?ortLinkFix(i.link):i.link)}" target="_blank" rel="noopener">${ic('right',13)} Ansehen</a>`:''}
-      <div class="row" style="gap:8px;margin-top:auto">${av(i.by,26)}<span class="tiny mut">Idee von ${i.by===S.uid?'dir':esc(vorname(i.by))}</span></div></div></div>
-    <div class="swknoepfe"><button class="swk nein" data-act="ideeBewerte" data-id="${i.id}" data-val="nein" aria-label="Nein">✕</button><button class="swk vl" data-act="ideeBewerte" data-id="${i.id}" data-val="vl" aria-label="Vielleicht">?</button><button class="swk ja" data-act="ideeBewerte" data-id="${i.id}" data-val="ja" aria-label="Passt">♥</button></div>`; }
+  const mo=ortMotiv(i.titel); const gross=mo.flag||mo.sym||'🧳';
+  return `<p class="tiny mut" style="margin:0;text-align:center">Noch ${o.length} ${o.length===1?'Idee':'Ideen'} · wische nach rechts (super), oben (weiß nicht) oder links (nein)</p>
+    <div class="swbuehne"><div class="swcard" data-id="${i.id}" role="group" aria-label="${esc(i.titel)}" style="background:${mo.bg}"><span class="swmark" aria-hidden="true">${esc(mo.sym||mo.flag||'🧳')}</span><span class="swblob b1" aria-hidden="true"></span><span class="swblob b2" aria-hidden="true"></span>
+      <span class="swstempel ja">SUPER</span><span class="swstempel nein">NEIN</span><span class="swstempel vl">WEISS NICHT</span>
+      <div class="swkopf"><span class="swflagge" aria-hidden="true">${esc(gross)}</span><div class="col" style="gap:4px;align-items:flex-start">${mo.land?`<span class="swchip">${esc(mo.land)}</span>`:''}${mo.thema?`<span class="swchip">${mo.sym} ${esc(mo.thema)}</span>`:''}</div></div>
+      <div class="swtitel">${esc(i.titel)}</div>${i.notiz?`<div class="swnotiz">„${esc(i.notiz)}“</div>`:`<div class="swnotiz swleer">Wäre das was für uns?</div>`}
+      ${i.link?`<a class="swlink" href="${esc(ortLinkFix?ortLinkFix(i.link):i.link)}" target="_blank" rel="noopener">${ic('right',14)} Mehr ansehen</a>`:''}
+      <div class="row swvon">${av(i.by,28)}<span class="small">Idee von ${i.by===S.uid?'dir':esc(vorname(i.by))}</span></div></div></div>
+    <div class="swknoepfe"><button class="swk nein" data-act="ideeBewerte" data-id="${i.id}" data-val="nein" aria-label="Nein"><span class="swsym">✕</span><span class="swlab">Nein</span></button><button class="swk vl" data-act="ideeBewerte" data-id="${i.id}" data-val="vl" aria-label="Weiß nicht"><span class="swsym">?</span><span class="swlab">Weiß nicht</span></button><button class="swk ja" data-act="ideeBewerte" data-id="${i.id}" data-val="ja" aria-label="Super"><span class="swsym">♥</span><span class="swlab">Super</span></button></div>`; }
 
 function ideeRangView(r){ const adm=isAdmin(r); const l=ideenListe().sort(ideeVergleich); if(!l.length) return '<div class="empty">Noch keine Ideen.</div>';
-  const ortRunde=runden(r).find(x=>x.typ==='ort'&&x.status==='offen');
+  const ortRunde=runden(r).find(x=>x.typ==='ort'&&x.status==='offen'&&!x.pool);
   return `<div class="col" style="gap:8px">${l.map((i,k)=>{ const mein=(i.stimmen||{})[S.uid]; const kann=i.by===S.uid||adm;
-    return `<div class="card tight ${k===0&&ideeZahl(i,'ja')?'gold':''}"><div class="row" style="gap:10px;align-items:flex-start"><span class="pos ${k===0?'p1':''}">${k+1}</span><div class="grow col" style="gap:2px;min-width:0"><b>${esc(i.titel)}</b>${i.notiz?`<span class="small mut">${esc(i.notiz)}</span>`:''}<span class="tiny mut">von ${i.by===S.uid?'dir':esc(vorname(i.by))}${i.uebernommen?' · in der Abstimmung':''}</span></div>${kann?`<button class="icbtn sm0" data-act="ideeWeg" data-id="${i.id}" aria-label="${esc(i.titel)} entfernen">${ic('x',14)}</button>`:''}</div>
+    return `<div class="card tight ${k===0&&ideeZahl(i,'ja')?'gold':''}"><div class="row" style="gap:10px;align-items:flex-start"><span class="pos ${k===0?'p1':''}">${k+1}</span><div class="grow col" style="gap:2px;min-width:0"><b>${ortMotiv(i.titel).flag?ortMotiv(i.titel).flag+' ':ortMotiv(i.titel).sym?ortMotiv(i.titel).sym+' ':''}${esc(i.titel)}</b>${i.notiz?`<span class="small mut">${esc(i.notiz)}</span>`:''}<span class="tiny mut">von ${i.by===S.uid?'dir':esc(vorname(i.by))}${i.uebernommen?' · in der Abstimmung':''}</span></div>${kann?`<button class="icbtn sm0" data-act="ideeWeg" data-id="${i.id}" aria-label="${esc(i.titel)} entfernen">${ic('x',14)}</button>`:''}</div>
       <div class="row wrap" style="gap:6px"><span class="chip grn">♥ ${ideeZahl(i,'ja')}</span><span class="chip yel">? ${ideeZahl(i,'vl')}</span><span class="chip red">✕ ${ideeZahl(i,'nein')}</span>${i.link?`<a class="chip" href="${esc(ortLinkFix?ortLinkFix(i.link):i.link)}" target="_blank" rel="noopener">Link</a>`:''}</div>
-      <div class="row" style="gap:6px"><span class="tiny mut" style="width:62px">Meine:</span>${Object.entries(IDEE_ST).map(([k2,[sym,lab]])=>`<button class="btn xs ${mein===k2?'':'sec'}" aria-pressed="${mein===k2}" data-act="ideeBewerte" data-id="${i.id}" data-val="${k2}" aria-label="${lab}">${sym}</button>`).join('')}${adm&&!i.uebernommen&&ortRunde?`<button class="btn xs yel" style="margin-left:auto" data-act="ideeUebernehmen" data-id="${i.id}">In die Abstimmung</button>`:''}</div></div>`; }).join('')}</div>${adm&&!ortRunde?'<p class="tiny mut">Zum Übernehmen braucht es eine laufende Runde „Wohin?“ in der Konferenz.</p>':''}`; }
+      <div class="row" style="gap:6px"><span class="tiny mut" style="width:62px">Meine:</span>${Object.entries(IDEE_ST).map(([k2,[sym,lab]])=>`<button class="btn xs ${mein===k2?'':'sec'}" aria-pressed="${mein===k2}" data-act="ideeBewerte" data-id="${i.id}" data-val="${k2}" aria-label="${lab}">${sym} ${lab}</button>`).join('')}${adm&&!i.uebernommen&&ortRunde?`<button class="btn xs yel" style="margin-left:auto" data-act="ideeUebernehmen" data-id="${i.id}">In die Abstimmung</button>`:''}</div></div>`; }).join('')}</div>`; }
 
 A.ideeBewerte = async el => { const i=(S.rt.ideen||[]).find(x=>x.id===el.dataset.id); if(!i) return; const v=el.dataset.val; i.stimmen={...(i.stimmen||{}),[S.uid]:v}; render();
   try{ await S.db.doc(`ideen/${i.id}`).update({stimmen:{[S.uid]:v}}); }catch(e){ fail(e,'Speichern'); } };
@@ -7459,12 +7681,12 @@ OV.ideeNeu = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label=
   <label class="f">Warum? (freiwillig)<input class="in" id="f_id_notiz" maxlength="140" placeholder="z. B. Strand, günstig, direkt vom Flughafen"></label>
   <label class="f">Link (freiwillig)<input class="in" id="f_id_link" maxlength="300" placeholder="Hotel, Ort oder Foto"></label>
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ideeSpeichern">Einwerfen</button></div></div>`;
-A.ideeSpeichern = async el => { const t=(document.getElementById('f_id_titel')?.value||'').trim().slice(0,60); if(!t) return toast('Bitte gib deiner Idee einen Namen.');
+A.ideeSpeichern = async el => { if(!ideeDarf(cur())) return toast('Nur der Admin kann hier Ideen einwerfen.'); const t=(document.getElementById('f_id_titel')?.value||'').trim().slice(0,60); if(!t) return toast('Bitte gib deiner Idee einen Namen.');
   if(ideenListe().some(i=>i.titel.toLowerCase()===t.toLowerCase())) return toast('Diese Idee gibt es schon im Pool.');
-  const d={rid:S.rid, titel:t, notiz:(document.getElementById('f_id_notiz')?.value||'').trim().slice(0,140), link:(typeof ortLinkFix==='function'?ortLinkFix(document.getElementById('f_id_link')?.value||''):''), by:S.uid, createdAt:now(), stimmen:{[S.uid]:'ja'}};
+  const d={rid:S.rid, titel:t, notiz:(document.getElementById('f_id_notiz')?.value||'').trim().slice(0,140), link:(typeof ortLinkFix==='function'?ortLinkFix(document.getElementById('f_id_link')?.value||''):''), by:S.uid, createdAt:now(), stimmen:{}};
   el.disabled=true; try{ await S.db.collection('ideen').add(d); closeOv(); toast('Idee eingeworfen'); }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
 A.ideeWeg = el => { const i=(S.rt.ideen||[]).find(x=>x.id===el.dataset.id); if(!i) return; openOv('confirm',{title:`„${i.titel}“ entfernen?`, text:'Die Idee verschwindet für alle.', ok:'Entfernen', fn: async ()=>{ closeOv(); await W(()=>S.db.doc(`ideen/${i.id}`).delete(),'Entfernen'); }}); };
-A.ideeUebernehmen = async el => { const r=cur(); const i=(S.rt.ideen||[]).find(x=>x.id===el.dataset.id); const rd=runden(r).find(x=>x.typ==='ort'&&x.status==='offen'); if(!i||!rd) return;
+A.ideeUebernehmen = async el => { const r=cur(); const i=(S.rt.ideen||[]).find(x=>x.id===el.dataset.id); const rd=runden(r).find(x=>x.typ==='ort'&&x.status==='offen'&&!x.pool); if(!i||!rd) return;
   if(S.rt.vorschlaege.some(o=>o.typ==='ort'&&o.runde===rd.id&&String(o.name||'').toLowerCase()===i.titel.toLowerCase())) { toast('Steht schon in der Abstimmung.'); return; }
   try{ await vorRundeSichern(r); await S.db.collection('vorschlaege').add({rid:r.id, typ:'ort', runde:rd.id, name:i.titel, link:i.link||'', by:S.uid, createdAt:now()}); await S.db.doc(`ideen/${i.id}`).update({uebernommen:true}); toast('In die Abstimmung übernommen'); }catch(e){ fail(e,'Übernehmen'); } };
 
@@ -7478,10 +7700,94 @@ A.ideeUebernehmen = async el => { const r=cur(); const i=(S.rt.ideen||[]).find(x
     if(v){ c.style.transition='transform .18s'; c.style.transform=`translate(${v==='ja'?420:v==='nein'?-420:0}px,${v==='vl'?-420:0}px) rotate(${v==='ja'?18:v==='nein'?-18:0}deg)`; setTimeout(()=>A.ideeBewerte({dataset:{id,val:v}}),150); }
     else { c.style.transition='transform .2s'; c.style.transform=''; c.dataset.hint=''; } };
   document.addEventListener('pointerup',ende); document.addEventListener('pointercancel',ende); })();
+/* ===================== Neue Koffer-Konferenz als Assistent =====================
+   Vier Schritte, pro Schritt nur ein Thema: 1 Name, 2 Ort, 3 Zeit, 4 Reiseart (und ob andere Vorschläge machen dürfen).
+   Danach geht es direkt weiter zu den Einladungen. Orte ohne feste Idee landen im Ideen-Pool (Abstimmung durch Wischen),
+   Zeiträume ohne feste Idee in einer normalen Abstimmung. Steht etwas schon fest, ist die Frage sofort entschieden. */
+const WS_N = 4;
+const wsSchritt = f => Math.min(WS_N, Math.max(1, +f.ws||1));
+const wsKopf = (n, titel) => `<div class="col" style="gap:6px"><div class="row between"><span class="tag"><span class="dot"></span>SCHRITT ${n} VON ${WS_N}</span><span class="tiny mut">${titel}</span></div><div class="standbar" aria-hidden="true"><i style="width:${Math.round(n/WS_N*100)}%"></i></div></div>`;
+const wsJaNein = (k, val, frage, jaT, neinT) => `<h2 style="margin:0">${frage}</h2>
+  <div class="col" style="gap:8px"><button type="button" class="pfopt ${val==='ja'?'on':''}" aria-pressed="${val==='ja'}" data-act="setForm" data-k="${k}" data-val="ja"><b>Ja</b><span class="small mut">${jaT}</span></button>
+  <button type="button" class="pfopt ${val==='nein'?'on':''}" aria-pressed="${val==='nein'}" data-act="setForm" data-k="${k}" data-val="nein"><b>Nein</b><span class="small mut">${neinT}</span></button></div>`;
+
+const altNeuWs = V.neu;
+V.neu = ()=>{ const f=S.form; if(f.modus!=='abst') return altNeuWs(); const n=wsSchritt(f); let body='', btn='Weiter';
+  if(n===1){ body=`${wsKopf(1,'Name')}
+    <div class="info small">${ic('suitcase',16,'style="vertical-align:-3px"')} In vier Schritten richten wir die ersten Vorschläge für deine Reisegruppe ein: <b>Name, Ort, Zeit und Art der Reise</b>. Danach lädst du die anderen ein.</div>
+    ${f.invite?.length?`<div class="info">Nochmal zusammen: ${f.invite.length} Mitreisende von damals werden automatisch eingeladen.</div>`:''}
+    <h2 style="margin:0">Wie soll die Reise heißen?</h2>
+    <input class="in" id="f_titel" maxlength="40" placeholder="z. B. Sommer 2027" data-enter="wsWeiter" autocomplete="off">`; }
+  else if(n===2){ body=`${wsKopf(2,'Ort')}${wsJaNein('ojn', f.ojn, 'Hast du schon eine konkrete Idee, wohin es gehen soll?', 'Du trägst den Ort ein, er steht dann fest.', 'Ihr sammelt Ideen und stimmt gemeinsam ab.')}
+    ${f.ojn==='ja'?`<label class="f">Wohin?<input class="in" id="f_ort1" maxlength="50" placeholder="z. B. Mallorca oder Hotel Sonnenstrand" data-enter="wsWeiter" autocomplete="off"></label><label class="f">Link (freiwillig)<input class="in" id="f_ort1l" maxlength="300" inputmode="url" placeholder="z. B. das Hotel" autocomplete="off"></label>`:''}
+    ${f.ojn==='nein'?`<div class="card tight"><b>Welche Orte kommen infrage?</b><span class="small mut">Trag Orte mit Link ein. Sie landen im Ideen-Pool, dort wischt die Gruppe durch.</span>${(f.olist||[]).length?`<div class="col" style="gap:6px">${f.olist.map((o,i)=>`<div class="ortrow"><div class="blk">${ic('pin',14)}<b class="grow ell">${esc(o.name)}</b><button class="icbtn sm0" data-act="listeWeg" data-l="olist" data-i="${i}" aria-label="${esc(o.name)} entfernen">${ic('x',14)}</button></div><input class="in" id="f_olk${i}" maxlength="300" inputmode="url" placeholder="Link zu ${esc(o.name)} (freiwillig)" value="${esc(o.link||'')}" aria-label="Link zu ${esc(o.name)}"></div>`).join('')}</div>`:''}
+      <input class="in" id="f_nort" maxlength="50" placeholder="Ort, z. B. Kreta" data-enter="ortDazu" autocomplete="off"><input class="in" id="f_nlink" maxlength="300" inputmode="url" placeholder="Link zu diesem Ort (freiwillig, z. B. das Hotel)" autocomplete="off"><button class="btn sm sec" data-act="ortDazu">${ic('plus',16)} Ort übernehmen</button></div>
+      <label class="toggle" style="align-items:flex-start"><input type="checkbox" id="f_offenOrt" ${f.offenOrt===true?'checked':''}><span><b>Andere Mitglieder dürfen Orte vorschlagen</b><br><span class="small mut">Aus: nur du schlägst Orte vor.</span></span></label>`:''}`; }
+  else if(n===3){ const zm=f.zmode||'zeit'; body=`${wsKopf(3,'Zeit')}${wsJaNein('zjn', f.zjn, 'Wisst ihr schon, wann es losgehen soll?', 'Du wählst die Reisezeit im Kalender, sie steht dann fest.', 'Ihr schlagt Zeiträume vor und stimmt ab.')}
+    ${f.zjn==='ja'?`<div class="card tight"><b>Reisezeit</b><span class="small mut">Tippe im Kalender Anreise und Abreise an.</span>${kalender('n')}</div>`:''}
+    ${f.zjn==='nein'?`<div class="row wrap" style="gap:6px"><button type="button" class="chip ${zm==='zeit'?'yel':''}" style="border:0;cursor:pointer;height:36px" aria-pressed="${zm==='zeit'}" data-act="setForm" data-k="zmode" data-val="zeit">Genaue Zeiträume</button><button type="button" class="chip ${zm==='monat'?'yel':''}" style="border:0;cursor:pointer;height:36px" aria-pressed="${zm==='monat'}" data-act="setForm" data-k="zmode" data-val="monat">Erst nur den Monat</button></div>
+      ${zm==='monat'?`<div class="card tight"><b>Welche Monate kommen infrage?</b><div class="row wrap" style="gap:6px">${naechsteMonate().map(m=>`<button class="chip ${f['m_'+m]?'yel':''}" style="border:0;cursor:pointer;height:34px" data-act="formToggle" data-k="m_${m}">${esc(monatLabel(m))}</button>`).join('')}</div></div>`
+      :`<div class="card tight"><b>Welche Zeiträume kommen infrage?</b>${(f.zlist||[]).length?`<div class="col" style="gap:6px">${f.zlist.map((z,i)=>`<div class="blk">${ic('check',14)}<span class="grow">${WD[parseDay(z.von).getDay()]} ${fD(z.von)} – ${WD[parseDay(z.bis).getDay()]} ${fDY(z.bis)}</span><span class="tiny mut">${dauerText(z.von,z.bis)}</span><button class="icbtn sm0" data-act="listeWeg" data-l="zlist" data-i="${i}" aria-label="Entfernen">${ic('x',14)}</button></div>`).join('')}</div>`:''}
+        ${kalender('n',{gewaehlt:f.zlist})}<button class="btn sm sec" data-act="zeitDazu" ${f.nvon&&f.nbis?'':'disabled'}>${ic('plus',16)} Zeitraum übernehmen</button></div>`}
+      <label class="toggle" style="align-items:flex-start"><input type="checkbox" id="f_offenZeit" ${f.offenZeit===true?'checked':''}><span><b>Andere Mitglieder dürfen ${zm==='monat'?'Monate':'Zeiträume'} vorschlagen</b><br><span class="small mut">Aus: nur du schlägst vor.</span></span></label>`:''}`; }
+  else { const a=f.art||'strand'; if(!f.anreise) f.anreise='gemischt'; btn='Weiter zu den Einladungen';
+    body=`${wsKopf(4,'Art der Reise')}<h2 style="margin:0">Was für eine Reise soll es werden?</h2>
+    <div class="arten">${Object.entries(ARTEN).map(([k,x])=>`<button type="button" aria-pressed="${a===k}" data-act="setForm" data-k="art" data-val="${k}">${ic(x.icon,26)}<span>${esc(x.label)}</span></button>`).join('')}</div>`; }
+  return `${hdrPlain('Neue Reise')}<button class="back" data-act="wsZurueck">${ic('back',20)} Zurück</button>
+  <h1>Koffer-Konferenz</h1>${body}
+  <button class="btn block" data-act="${n===WS_N?'createReise':'wsWeiter'}">${btn}</button>`; };
+
+A.wsZurueck = ()=>{ const n=wsSchritt(S.form); if(n<=1){ S.form.modus=''; S.form.ws=1; } else S.form.ws=n-1; render(); try{ window.scrollTo({top:0}); }catch(e){} };
+A.wsWeiter = ()=>{ const f=S.form; const n=wsSchritt(f);
+  if(n===1){ if(!(f.titel||'').trim()) return toast('Bitte gib der Reise einen Namen.'); }
+  else if(n===2){ if(!f.ojn) return toast('Bitte wähle Ja oder Nein.');
+    if(f.ojn==='ja'){ if(!(f.ort1||'').trim()) return toast('Bitte trag den Ort ein.'); }
+    else { olistSync(); if((f.nort||'').trim()){ f.olist=[...(f.olist||[]), {name:f.nort.trim(), link:ortLinkFix(f.nlink)}]; f.nort=''; f.nlink=''; } if(!(f.olist||[]).length) return toast('Bitte trag mindestens einen Ort ein.'); } }
+  else if(n===3){ if(!f.zjn) return toast('Bitte wähle Ja oder Nein.');
+    if(f.zjn==='ja'){ if(!f.nvon||!f.nbis) return toast('Bitte tippe im Kalender Anreise und Abreise an.'); }
+    else if((f.zmode||'zeit')==='monat'){ if(!Object.keys(f).some(k=>k.startsWith('m_')&&f[k])) return toast('Bitte tippe mindestens einen Monat an.'); }
+    else { if(f.nvon&&f.nbis&&!(f.zlist||[]).some(z=>z.von===f.nvon&&z.bis===f.nbis)) f.zlist=[...(f.zlist||[]), {von:f.nvon, bis:f.nbis}]; f.nvon=''; f.nbis=''; if(!(f.zlist||[]).length) return toast('Bitte wähle mindestens einen Zeitraum im Kalender.'); } }
+  f.ws=n+1; render(); try{ window.scrollTo({top:0}); }catch(e){} };
+
+const altCreateWs = A.createReise;
+A.createReise = async el => { const f=S.form; if(f.modus!=='abst') return altCreateWs(el);
+  const titel=(f.titel||'').trim(); if(!titel){ f.ws=1; render(); return toast('Bitte gib der Reise einen Namen.'); }
+  const anreise=f.anreise||'gemischt'; const ortJa=f.ojn==='ja', zeitJa=f.zjn==='ja'; const oOff=!ortJa&&f.offenOrt===true, zOff=!zeitJa&&f.offenZeit===true;
+  let ort1=null, ideen=[]; if(ortJa){ const n=(f.ort1||'').trim(); if(!n) return toast('Bitte trag den Ort ein.'); ort1={name:n, link:ortLinkFix(f.ort1l)}; } else { olistSync(); ideen=[...(f.olist||[])]; if(!ideen.length) return toast('Bitte trag mindestens einen Ort ein.'); }
+  let zeit1=null, zl=[], ml=[]; if(zeitJa){ if(!f.nvon||!f.nbis) return toast('Bitte tippe im Kalender Anreise und Abreise an.'); if(f.nbis<f.nvon) return toast('Die Abreise liegt vor der Anreise.'); zeit1={von:f.nvon, bis:f.nbis}; }
+  else if((f.zmode||'zeit')==='monat'){ ml=Object.keys(f).filter(k=>k.startsWith('m_')&&f[k]).sort().map(k=>k.slice(2)); if(!ml.length) return toast('Bitte tippe mindestens einen Monat an.'); }
+  else { zl=[...(f.zlist||[])]; if(!zl.length) return toast('Bitte wähle mindestens einen Zeitraum im Kalender.'); }
+  el.disabled=true;
+  try{ const ref=S.db.collection('reisen').doc(); const rid=ref.id; const bis=f.deadline?{bis:f.deadline}:{}; const am=now();
+    const vOrt = ortJa ? S.db.collection('vorschlaege').doc() : null, vZeit = zeitJa ? S.db.collection('vorschlaege').doc() : null;
+    const RD=[ ortJa ? {id:rid16().slice(0,8), typ:'ort', status:'fertig', sieger:vOrt.id, am} : {id:rid16().slice(0,8), typ:'ort', status:'offen', pool:true, offen:oOff, ...bis},
+      zeitJa ? {id:rid16().slice(0,8), typ:'zeit', status:'fertig', sieger:vZeit.id, am} : {id:rid16().slice(0,8), typ:ml.length?'monat':'zeit', status:'offen', offen:zOff, ...bis} ];
+    const doc={titel, reiseart:f.art||'strand', createdBy:S.uid, admin:S.uid, createdAt:am, status:'abstimmung', anreiseArt:anreise, gesperrt:{}, runden:RD, vorschlaegeOffen:oOff||zOff, ...(f.profil?{profil:f.profil}:{profil:{gruppe:'',alter:[],ziele:[],module:{herzen:true,barometer:true,herde:true,zimmer:true},gesetzt:now()}}), ...(f.deadline?{deadline:f.deadline}:{})};
+    await ref.set(doc);
+    await mDoc(rid,S.uid).set({rid, uid:S.uid, status:'teilnehmer', seit:now()});
+    if(ortJa) await vOrt.set({rid, typ:'ort', runde:RD[0].id, name:ort1.name, link:ort1.link, by:S.uid, createdAt:now()});
+    else for(const o of ideen) await S.db.collection('ideen').add({rid, titel:o.name, notiz:'', link:o.link||'', by:S.uid, createdAt:now(), stimmen:{}});
+    if(zeitJa) await vZeit.set({rid, typ:'zeit', runde:RD[1].id, von:zeit1.von, bis:zeit1.bis, by:S.uid, createdAt:now()});
+    else if(ml.length) for(const m of ml) await S.db.collection('vorschlaege').add({rid, typ:'monat', runde:RD[1].id, monat:m, by:S.uid, createdAt:now()});
+    else for(const z of zl) await S.db.collection('vorschlaege').add({rid, typ:'zeit', runde:RD[1].id, von:z.von, bis:z.bis, by:S.uid, createdAt:now()});
+    for(const u of (f.invite||[])) if(u!==S.uid) await mDoc(rid,u).set({rid, uid:u, status:'eingeladen', seit:now(), eingeladenVon:S.uid});
+    S.reisen[rid]={id:rid,...doc}; toast('Koffer-Konferenz gestartet'); einlNachAnlegen(rid);
+  }catch(e){ fail(e,'Anlegen'); el.disabled=false; } };
+
+/* „Eigene Koffer-Konferenz“ nach einer Absage: mit den übrigen Zeiträumen weitermachen */
+A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='zeit'&&v.id!==r.zeitId).map(v=>({von:v.von,bis:v.bis}));
+  go('neu',{form:{modus:'abst', ws:1, art:r.reiseart, titel:`${r.titel} – Plan B`, zjn:z.length?'nein':'', zmode:'zeit', zlist:z, invite:S.rt.mitglied.filter(m=>m.status==='abgesagt'&&m.uid!==S.uid).map(m=>m.uid)}}); };
 /* ===================== Was ist neu? =====================
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 2.27', t:'Koffer-Konferenz Schritt für Schritt', p:[
+    'Neue Koffer-Konferenz in vier Schritten: Name, Ort, Zeit und Art der Reise. Weißt du Ort oder Zeit schon, steht das sofort fest, sonst wird abgestimmt. Der Ort läuft dann über den Ideen-Pool.',
+    'Abstimmung Schritt für Schritt: immer eine Frage im Fokus, danach weiter zu „Meine Angaben“. Der Ideen-Pool ersetzt die Ortsrunde, die Einladung ist kleiner. Vorschläge anderer Mitglieder sind standardmäßig aus.',
+    'Meine Angaben Schritt für Schritt: Mit der Gruppe oder alleine anreisen? Dann Budget, Reisepräferenz mit Flughafen- oder Bahnhofsauswahl und Zimmer. Alleine mit Einzelzimmer ist für das Reisebüro nicht relevant.',
+    'Ideen-Pool mit hübschen Wischkarten: Flagge und Farbe passen zum Reiseziel, bewertet wird mit Nein, Weiß nicht und Super. Eigene Ideen starten ohne automatische Stimme.',
+    'Im Kalender bleiben übernommene Zeiträume grün markiert.',
+  ] },
   { v:'Beta 2.26', t:'Zimmerwünsche, Buchungsstufe, Anfrage und Angebote', p:[
     'Zimmerwunsch: Einzelzimmer, Doppelzimmer, Mehrbettzimmer oder „ist mir egal“, schon in der Koffer-Konferenz.',
     'Nach der Abstimmung ist die Reise noch nicht aktiv. Der Admin hält das Ergebnis fest und kümmert sich um die Buchung. Zimmer lassen sich weiter ändern.',
