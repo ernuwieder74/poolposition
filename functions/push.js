@@ -2,7 +2,7 @@
    Geräte-Schlüssel liegen unter pushtokens/{uid}: { tokens: {<token>: {at, ua}}, prefs: {chat, fluester, termine, morgen, admin} }.
    - Gruppenchat, Event-Chat, Flüstern, Morgenbericht, neue Termine, Termin-Erinnerung 30 Minuten vorher, neue Meldungen für die Badeaufsicht.
    - Wer blockiert ist, löst beim Blockierenden keine Benachrichtigung aus. Ungültige Geräte-Schlüssel werden automatisch entfernt. */
-const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated, onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
@@ -118,4 +118,20 @@ exports.knisterBote = onSchedule({ schedule: 'every 10 minutes', region: 'europe
       await db.doc(`nachrichten/knister_${d.id}`).create({ rid: a.rid, typ: 'system', knister: true, offen, text: knisterText(a, u => n[u] || 'Jemand'), by: 'system', createdAt: Date.now() }).catch(e => { if (e.code !== 6) throw e; });
       await d.ref.update({ knisterGepostet: true, ...(offen ? { offengelegt: true } : {}) }); }
     catch (e) { logger.error('Knister', d.id, e); } }
+});
+
+/* Wie viele Mitglieder würden Urlaubsherzen nutzen? Nur eine Zahl an der Reise, nie, wer. */
+exports.herzInteresseZaehler = onDocumentWritten({ ...TRIG, document: 'herzinteresse/{id}' }, async ev => {
+  const rid = (ev.data?.after?.data() || ev.data?.before?.data() || {}).rid; if (!rid) return;
+  const s = await db.collection('herzinteresse').where('rid', '==', rid).where('offen', '==', true).get();
+  return db.doc(`reisen/${rid}`).update({ herzInteresse: s.size }).catch(e => logger.warn('herzInteresse', rid, e.message));
+});
+
+/* Budget-Spanne: Die einzelnen Angaben sind privat. An der Reise steht nur Spanne und Schnitt, und erst ab 3 Angaben. */
+exports.zimmerBudgetZaehler = onDocumentWritten({ ...TRIG, document: 'zimmerbudget/{id}' }, async ev => {
+  const rid = (ev.data?.after?.data() || ev.data?.before?.data() || {}).rid; if (!rid) return;
+  const s = await db.collection('zimmerbudget').where('rid', '==', rid).get();
+  const l = s.docs.map(d => +d.data().betrag).filter(x => x > 0);
+  const info = l.length >= 3 ? { n: l.length, min: Math.min(...l), max: Math.max(...l), avg: Math.round(l.reduce((a, b) => a + b, 0) / l.length) } : null;
+  return db.doc(`reisen/${rid}`).update({ zimmerBudget: info }).catch(e => logger.warn('zimmerBudget', rid, e.message));
 });

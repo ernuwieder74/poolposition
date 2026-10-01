@@ -242,6 +242,42 @@ service cloud.firestore {
           || (resource.data.von == me() && onlyChanges(['vonZeigen', 'offengelegt'])));
       allow delete: if signedIn() && (resource.data.von == me() || resource.data.an == me());
     }
+    // Private, anonyme Angabe „Urlaubsherzen wären etwas für mich“: nur die Person selbst sieht ihre Angabe, den Zähler setzt der Server
+    match /herzinteresse/{id} {
+      allow read: if signedIn() && id.matches('.*_' + me());
+      allow create, update: if signedIn() && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
+        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'offen', 'at']);
+      allow delete: if signedIn() && id.matches('.*_' + me());
+    }
+    // Umfragen im Gruppenchat: eine Stimme pro Mitglied und Umfrage; alle Mitglieder der Reise sehen die Stimmen
+    match /umfragestimmen/{id} {
+      allow read: if isMember(resource.data.rid) || isAdmin();
+      allow create, update: if request.resource.data.uid == me() && id == request.resource.data.mid + '_' + me()
+        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'mid', 'uid', 'opt', 'opts', 'at']);
+      allow delete: if id.matches('.*_' + me());
+    }
+    // Bettenmanager: Zimmer legt der Reise-Admin an; Zimmerwünsche sind für alle Mitglieder der Reise sichtbar
+    match /zimmer/{id} {
+      allow read: if isMember(resource.data.rid) || isAdmin();
+      allow create: if isTripAdmin(request.resource.data.rid) || isAdmin();
+      allow update, delete: if isTripAdmin(resource.data.rid) || isAdmin();
+    }
+    // Jedes Mitglied trägt seinen eigenen Wunsch ein, für Begleitpersonen ohne App deren Ersteller, der Admin für alle
+    match /zimmerwahl/{id} {
+      allow read: if isMember(resource.data.rid) || isAdmin();
+      allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'zimmerId', 'einzel', 'mit', 'claimAt', 'gast', 'name', 'by', 'updatedAt'])
+          && ((request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me())
+              || (request.resource.data.gast == true && request.resource.data.by == me() && id == request.resource.data.rid + '_' + request.resource.data.uid)))
+        || isTripAdmin(request.resource.data.rid) || isAdmin();
+      allow delete: if (resource.data.get('gast', false) == true && resource.data.by == me()) || resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
+    }
+    // Budget: privat, nur die Person selbst liest ihre Angabe; die Spanne an der Reise setzt der Server
+    match /zimmerbudget/{id} {
+      allow read: if signedIn() && id.matches('.*_' + me());
+      allow create, update: if signedIn() && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
+        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'betrag', 'at']) && request.resource.data.betrag is number;
+      allow delete: if signedIn() && id.matches('.*_' + me());
+    }
     match /mitbringen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
       allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me()
