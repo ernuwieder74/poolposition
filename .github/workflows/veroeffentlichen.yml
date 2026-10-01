@@ -43,8 +43,8 @@ jobs:
         run: firebase deploy --only hosting,firestore:rules,storage --project "$PROJECT" --non-interactive
       - name: Server-Funktionen veröffentlichen
         run: |
-          firebase deploy --only functions --project "$PROJECT" --non-interactive --force || {
-            echo "Erster Versuch hat nicht geklappt, neuer Versuch in 60 Sekunden …"; sleep 60
-            firebase deploy --only functions --project "$PROJECT" --non-interactive --force; }
+          versuch() { firebase deploy --only functions --project "$PROJECT" --non-interactive --force 2>&1 | tee deploy.log; return ${PIPESTATUS[0]}; }
+          melden() { grep -iE "error|fehl|denied|permission|failed" deploy.log | grep -v "^i " | tail -8 | while read -r z; do echo "::error title=Server-Funktionen::${z:0:400}"; done; }
+          versuch || { echo "Erster Versuch hat nicht geklappt, neuer Versuch in 60 Sekunden …"; sleep 60; versuch || { melden; exit 1; }; }
       - name: Fertig
         run: echo "Veröffentlicht – Version $(cat VERSION) – https://$PROJECT.web.app"
