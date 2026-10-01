@@ -1,0 +1,14 @@
+{
+  "name": "Poolposition",
+  "short_name": "Poolposition",
+  "description": "Alles im Blick. Alle im Pool.",
+  "lang": "de",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141211",
+  "theme_color": "#141211",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

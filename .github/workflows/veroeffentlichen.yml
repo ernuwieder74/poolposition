@@ -1,0 +1,50 @@
+# Poolposition – automatische Veröffentlichung bei Firebase
+# Jede neue Version im Zweig „main“ wird automatisch eingespielt: App, Datenbank-Regeln, Speicher-Regeln und Server-Funktionen.
+# Benötigte Secrets (GitHub → Settings → Secrets and variables → Actions):
+#   FIREBASE_SA  Zugangsschlüssel des Dienstkontos github-deploy (wird von github-einrichten.sh erzeugt)
+#   ADMINS       E-Mail-Adresse(n) der System-Admins (Oberbademeister), mit Komma getrennt
+#   VAPID        Web-Push-Schlüssel aus der Firebase-Konsole (Projekteinstellungen → Cloud Messaging)
+name: Veröffentlichen
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: veroeffentlichen
+  cancel-in-progress: false
+env:
+  PROJECT: poolposition-46f4c
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Bei Google anmelden
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Firebase-Werkzeuge installieren
+        run: npm install -g firebase-tools
+      - name: Konfiguration erzeugen
+        env:
+          ADMINS: ${{ secrets.ADMINS }}
+          VAPID: ${{ secrets.VAPID }}
+        run: python3 tools/konfig.py
+      - name: Foto-Speicher für Downloads freischalten
+        run: gcloud storage buckets update "gs://$(cat .bucket)" --cors-file=cors.json --project "$PROJECT" || echo "CORS übersprungen"
+      - name: Pakete der Server-Funktionen
+        run: cd functions && npm install --no-audit --no-fund
+      - name: App und Regeln veröffentlichen
+        run: firebase deploy --only hosting,firestore:rules,storage --project "$PROJECT" --non-interactive
+      - name: Server-Funktionen veröffentlichen
+        run: |
+          firebase deploy --only functions --project "$PROJECT" --non-interactive --force || {
+            echo "Erster Versuch hat nicht geklappt, neuer Versuch in 60 Sekunden …"; sleep 60
+            firebase deploy --only functions --project "$PROJECT" --non-interactive --force; }
+      - name: Fertig
+        run: echo "Veröffentlicht – Version $(cat VERSION) – https://$PROJECT.web.app"

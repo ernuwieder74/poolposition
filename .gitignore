@@ -1,0 +1,8 @@
+node_modules/
+functions/node_modules/
+firestore.rules
+functions/region.json
+.bucket
+.sdk.json
+.projekt
+*.zip
