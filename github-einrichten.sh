@@ -12,8 +12,13 @@ gcloud services enable firebase.googleapis.com firebasehosting.googleapis.com fi
   pubsub.googleapis.com cloudscheduler.googleapis.com fcm.googleapis.com iamcredentials.googleapis.com cloudresourcemanager.googleapis.com >/dev/null
 echo "2/4 Dienstkonto github-deploy …"
 gcloud iam service-accounts describe "$SA" >/dev/null 2>&1 || gcloud iam service-accounts create github-deploy --display-name="GitHub: Poolposition veröffentlichen" >/dev/null
+# Ein neues Dienstkonto braucht bei Google manchmal etwas, bis man ihm Rechte geben kann – deshalb mit Wiederholung
 for R in roles/editor roles/firebase.admin roles/run.admin roles/cloudfunctions.admin roles/iam.serviceAccountUser; do
-  gcloud projects add-iam-policy-binding "$PROJECT" --member="serviceAccount:$SA" --role="$R" --condition=None >/dev/null
+  for V in 1 2 3 4 5 6 7 8 9 10; do
+    if gcloud projects add-iam-policy-binding "$PROJECT" --member="serviceAccount:$SA" --role="$R" --condition=None >/dev/null 2>&1; then echo "   Recht $R vergeben"; break; fi
+    if [ "$V" = 10 ]; then echo "FEHLER: Recht $R ließ sich nicht vergeben. Bitte Skript in ein paar Minuten erneut starten."; exit 1; fi
+    echo "   Google ist noch nicht so weit, neuer Versuch in 10 Sekunden …"; sleep 10
+  done
 done
 echo "3/4 Recht für die Support-Ansicht …"
 PNUM=$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')
