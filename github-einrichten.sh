@@ -24,6 +24,7 @@ echo "3/4 Recht für die Support-Ansicht …"
 PNUM=$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')
 CSA="$PNUM-compute@developer.gserviceaccount.com"
 gcloud iam service-accounts add-iam-policy-binding "$CSA" --member="serviceAccount:$CSA" --role="roles/iam.serviceAccountTokenCreator" >/dev/null 2>&1 || echo "   (übersprungen, wird beim ersten Veröffentlichen erneut versucht)"
+bash <(curl -sL https://raw.githubusercontent.com/ernuwieder74/poolposition/main/rechte-funktionen.sh) || true
 echo "4/4 Zugangsschlüssel wird erzeugt …"
 TMP=$(mktemp); gcloud iam service-accounts keys create "$TMP" --iam-account="$SA" >/dev/null
 echo ""
