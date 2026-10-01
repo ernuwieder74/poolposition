@@ -602,6 +602,26 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .kdetail>div{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line2)}
 .kdetail>div:first-child{border-top:0}
 .kdzeile{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.ortknopf{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:8px 12px;border-radius:14px;background:var(--chip);border:1px solid var(--line);color:var(--tx);font-size:14px;font-weight:600}
+.ortknopf span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ortknopf .tiny{color:var(--yelt);font-weight:800;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.ortknopf:focus-visible{outline:2px solid var(--yel)}
+.termzeit{min-width:46px;font-weight:800;color:var(--yelt)}
+.herzwahl{background:linear-gradient(135deg,#ff5c7a,#d7262c)!important;color:#fff!important}
+.herzhinweis{padding:10px 12px;border-radius:14px;background:rgba(255,92,122,.12);border:1px solid rgba(255,92,122,.35)}
+.herzkarte{background:linear-gradient(135deg,#ff6b88,#d7262c 60%,#a3123a);color:#fff;border:0;gap:12px;box-shadow:0 14px 30px -16px rgba(215,38,44,.9)}
+.herzkarte .toggle{color:#fff}
+.herzkarte .btn.herzja{background:#fff;color:#d7262c}
+.herzkarte .btn.sec{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
+.herzstatus{align-self:flex-start;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--chip);color:var(--mut)}
+.herzstatus.ok{background:rgba(255,92,122,.16);color:#ff7d95}
+.herzmitav{position:relative;display:inline-flex;flex-shrink:0}
+.herzmini{position:absolute;right:-3px;bottom:-3px;width:22px;height:22px;border-radius:50%;background:#d7262c;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.knister{align-self:center;display:flex;align-items:center;gap:10px;max-width:92%;margin:8px 0;padding:10px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(255,92,122,.22),rgba(215,38,44,.14));border:1px solid rgba(255,92,122,.45);font-size:14px;font-weight:600}
+.knister.offen{background:linear-gradient(135deg,#ff6b88,#d7262c);color:#fff;border:0}
+.knisterherz{font-size:26px;animation:knisterpuls 1.6s ease-in-out infinite}
+@keyframes knisterpuls{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){.knisterherz{animation:none}}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -614,7 +634,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.21";
+const APP_VERSION = "Beta 2.22";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -845,12 +865,13 @@ function syncReisen(){
 }
 function setTrip(rid){
   if(S.rid===rid) return;
-  unsubs.trip.forEach(u=>u()); unsubs.trip=[]; S.rid=rid; S.tripAt=now(); S.rt={mitglied:[],vorschlaege:[],stimmen:[],akt:[],msgs:[],kasse:[],mitbringen:[]}; S.myVote=null; S.voteDirty=false;
+  unsubs.trip.forEach(u=>u()); unsubs.trip=[]; S.rid=rid; S.tripAt=now(); S.rt={mitglied:[],vorschlaege:[],stimmen:[],akt:[],msgs:[],kasse:[],mitbringen:[],herzAn:[],herzVon:[]}; S.myVote=null; S.voteDirty=false;
   if(!rid) return;
   const db=S.db, T=unsubs.trip, q=c=>db.collection(c).where('rid','==',rid);
   T.push(q('mitglied').onSnapshot(s=>{ S.rt.mitglied=snapDocs(s); render(); refreshProfiles(); awPruefenBald(); konfPruefenBald(); setTimeout(morgenPruefen, 5500); }, e=>console.warn(e)));
   T.push(q('vorschlaege').onSnapshot(s=>{ S.rt.vorschlaege=snapDocs(s).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)); render(); }, e=>console.warn(e)));
   T.push(q('stimmen').onSnapshot(s=>{ S.rt.stimmen=snapDocs(s); if(!S.voteDirty){ const mine=S.rt.stimmen.find(x=>x.uid===S.uid); S.myVote={zeiten:{...(mine?.zeiten||{})}, orte:{...(mine?.orte||{})}, wahl:{...(mine?.wahl||{})}}; } render(); refreshProfiles(); konfPruefenBald(); }, e=>console.warn(e)));
+  herzAbos(rid, T);
   T.push(q('mitbringen').onSnapshot(s=>{ S.rt.mitbringen=snapDocs(s); render(); }, e=>console.warn('Mitbringen',e)));
   T.push(q('kasse').onSnapshot(s=>{ S.rt.kasse=snapDocs(s); render(); kasseWarnBald(); }, e=>console.warn('Kasse',e)));
   T.push(q('aktivitaeten').onSnapshot(s=>{ S.rt.akt=snapDocs(s); checkNeueTermine(); render(); kasseWarnBald(); }, e=>console.warn(e)));
@@ -972,7 +993,7 @@ function meBtn(){ return `<button class="avbtn" data-act="go" data-v="profil" ar
 function hdrTrip(label, sub=''){ const r=cur(); return `<header class="hdr${sub?' mitsub':''}">${sub?'<div class="hdrrow">':''}<button class="homebtn" data-act="home" aria-label="Zu Meine Reisen">${I.logo()}</button>${verTag()}<button class="pill" data-act="reisewahl" aria-label="Reise wechseln, aktuell ${esc(r?.titel)}"><span style="color:var(--yelt);display:flex">${ic(art(r).icon,18)}</span><span>${esc(r?.titel||'Reise')}</span>${ic('down',16,'style="color:var(--mut);flex-shrink:0"')}</button><span class="seclabel">${esc(label)}</span>${meBtn()}${sub?`</div><div class="hdrsub">${sub}</div>`:''}</header>`; }
 function backBtn(label='Zurück'){ return `<button class="back" data-act="back">${ic('back',20)} ${esc(label)}</button>`; }
 function navBar(){ return ''; }
-const TRIPMAP = {tag:'tag',herde:'tag',aktivitaet:'tag',neueAkt:'tag',chat:'chat',fluester:'chat',fneu:'chat',fcode:'chat',person:'chat',album:'album',papierkorb:'album',reise:'reise',mitglieder:'reise',mitglied:'reise',reiseEinst:'reise',einladen:'reise',kasseNeu:'reise',packliste:'reise',heimreise:'reise',reiseDaten:'reise',anreise:'reise',infos:'reise',notfall:'reise',barometer:'barometer'};
+const TRIPMAP = {termine:'reise',tag:'tag',herde:'tag',aktivitaet:'tag',neueAkt:'tag',chat:'chat',fluester:'chat',fneu:'chat',fcode:'chat',person:'chat',album:'album',papierkorb:'album',reise:'reise',mitglieder:'reise',mitglied:'reise',reiseEinst:'reise',einladen:'reise',kasseNeu:'reise',packliste:'reise',heimreise:'reise',reiseDaten:'reise',anreise:'reise',infos:'reise',notfall:'reise',barometer:'barometer'};
 const HOMEMAP = {home:'home',neu:'home',konferenz:'home',dabei:'home',vorschlag:'home',freigabe:'home',fliste:'fliste',fluester:'fliste',fneu:'fliste',fcode:'fliste',person:'fliste',beitreten:'beitreten',profil:'profil',profilEdit:'profil',einstellungen:'profil',sysadmin:'profil',reiseDaten:'profil',herzen:'profil',einladen:'home',konto:'profil',gastAkt:'home'};
 function navHtml(){
   if(S.boot!=='ok' || !S.profilesLoaded || !S.profile[S.uid] || gesperrt()) return '';
@@ -1325,7 +1346,7 @@ V.tag = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), a=art(r), m=my
   return `${hdrTrip('Mein Tag')}${geschlossenBanner()}<!--pushhinweis-->
   <div class="col" style="gap:10px">${reiseSzene(r, '', false, `${greet()}, ${nm(S.uid)}`, true)}<div class="row wrap">${vorChip(r)}<span class="chip yel">${ic('sun',16)} ${esc(cnt)}</span><span class="chip">${ic('tag',16)} ${dayLabel(day)} ${acts.length} ${acts.length===1?'Termin':'Termine'}</span>${wlanKnopf()}</div>${isToday?herdeLeiste():''}</div>
   ${days.length>1?`<div class="scrollx" role="group" aria-label="Tag wählen">${days.map((d,i)=>{ const dd=parseDay(d); const out=d<md.von||d>md.bis; const gap=i>0 && addDays(days[i-1],1)!==d; return `${gap?'<span class="daygap" aria-hidden="true">…</span>':''}<button class="daybtn ${out?'out':''}" aria-pressed="${d===day}" data-act="ui" data-k="day" data-val="${d}" aria-label="${dayLabel(d)}${out?', außerhalb der Reise':''}"><span>${d===today()?'Heute':out?`${pad(dd.getDate())}.${pad(dd.getMonth()+1)}.`:WD[dd.getDay()]}</span><b class="num">${out?WD[dd.getDay()]:dd.getDate()}</b></button>`; }).join('')}</div>`:''}
-  ${tafelKarte(day)}${packKarte()}${heimKarte()}
+  ${herzAnfrageKarte()}${tafelKarte(day)}${packKarte()}${heimKarte()}
   ${kasseMini()}
   ${isToday && !r.geschlossen?(istZu('platz')?zuKarte('platz',a.platzIcon,myPlatz?`Mein Platz: ${myPlatz}`:'Mein Platz heute','umbruch','',myPlatz?'':'noch nicht geteilt'):`<div class="card tight"><div class="row between"><div class="row"><span style="color:var(--yelt)">${ic(a.platzIcon,22)}</span><span class="ttl">Mein Platz heute</span></div><span class="row" style="gap:6px">${myPlatz?`<button class="link" data-act="platzEdit">Ändern</button>`:''}${klappBtn('platz','Mein Platz heute')}</span></div>
     ${myPlatz && !S.ui.platzEdit?`<div class="row"><span class="grow" style="font-size:16px;font-weight:700">${esc(myPlatz)}</span>${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).length?`<div class="stack">${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).map(([u])=>av(u,26)).join('')}</div>`:''}</div>`
@@ -1362,27 +1383,31 @@ A.platzDabei = async el => { const u=el.dataset.uid; const x=rtM(u); const on=(x
   await W(()=>mDoc(S.rid,u).update({platzDabei:{[S.uid]: on?'':today()}}),'Speichern'); };
 
 /* ---------- Neue Aktivität ---------- */
-V.neueAkt = ()=>{ const r=cur(); const a=art(r); const f=S.form; if(f.serie && !f.serieBis) f.serieBis=r.bis; if(!f.datum) f.datum=S.route.datum||(today()>r.von&&today()<=r.bis?today():r.von); const outD=f.datum&&(f.datum<r.von||f.datum>r.bis); const priv=!!f.privat; const inv=f.inv||{};
-  return `${hdrTrip('Neuer Termin')}${backBtn()}<h1>Neuer Termin</h1>
+V.neueAkt = ()=>{ const r=cur(); const a=art(r); const f=S.form; const edit=S.route.id?S.rt.akt.find(x=>x.id===S.route.id):null; if(f.serie && !f.serieBis) f.serieBis=r.bis; if(!f.datum) f.datum=S.route.datum||(today()>r.von&&today()<=r.bis?today():r.von); const outD=f.datum&&(f.datum<r.von||f.datum>r.bis); const priv=!!f.privat; const inv=f.inv||{};
+  return `${hdrTrip(edit?'Termin':'Neuer Termin')}${backBtn()}<h1>${edit?'Termin bearbeiten':'Neuer Termin'}</h1>
+  ${edit?.serieId?`<div class="seg" role="group" aria-label="Änderung gilt für"><button type="button" aria-pressed="${!f.serieAlle}" data-act="setForm" data-k="serieAlle" data-val="">Nur ${dayLabel(edit.datum)}</button><button type="button" aria-pressed="${!!f.serieAlle}" data-act="setForm" data-k="serieAlle" data-val="1">${ic('repeat',14)} Alle Tage der Serie</button></div>`:''}
   <label class="f">Was?<input class="in" id="f_titel" maxlength="50" placeholder="z. B. ${esc(a.ideen[0])}"></label>
   <div class="seg">${a.ideen.map(t=>`<button type="button" data-act="setForm" data-k="titel" data-val="${esc(t)}" aria-pressed="${f.titel===t}">${esc(t)}</button>`).join('')}</div>
   <label class="f">Tag<input class="in" type="date" id="f_datum" data-live="1"></label><div class="grid2"><label class="f">Beginn<input class="in" type="text" inputmode="decimal" maxlength="5" placeholder="z. B. 14:00" data-zeit="1" id="f_zeit"></label><label class="f">Ende (freiwillig)<input class="in" type="text" inputmode="decimal" maxlength="5" placeholder="z. B. 14:00" data-zeit="1" id="f_bis"></label></div>
   <div class="seg">${[...new Set([today()>=r.von&&today()<=r.bis?today():null, r.von, addDays(r.von,1)].filter(Boolean))].map(d=>`<button type="button" aria-pressed="${f.datum===d}" data-act="setForm" data-k="datum" data-val="${d}">${d===r.von?'1. Reisetag':dayLabel(d)}</button>`).join('')}</div>
-  ${!outD&&f.datum?`<label class="toggle"><input type="checkbox" id="f_serie" data-live="1"> Jeden Tag wiederholen</label>${f.serie?`<label class="f">Bis einschließlich<input class="in" type="date" id="f_serieBis" min="${f.datum}" max="${r.bis}" data-live="1"></label><span class="tiny mut">Der Termin erscheint jeden Tag vom ${fD(f.datum)} bis ${fD(f.serieBis&&f.serieBis<=r.bis&&f.serieBis>=f.datum?f.serieBis:r.bis)} Zusagen gelten pro Tag. Im Chat kann man sich mit einem Tipp für alle Tage eintragen.</span>`:''}`:''}
+  ${!outD&&f.datum&&!edit?`<label class="toggle"><input type="checkbox" id="f_serie" data-live="1"> Jeden Tag wiederholen</label>${f.serie?`<label class="f">Bis einschließlich<input class="in" type="date" id="f_serieBis" min="${f.datum}" max="${r.bis}" data-live="1"></label><span class="tiny mut">Der Termin erscheint jeden Tag vom ${fD(f.datum)} bis ${fD(f.serieBis&&f.serieBis<=r.bis&&f.serieBis>=f.datum?f.serieBis:r.bis)} Zusagen gelten pro Tag. Im Chat kann man sich mit einem Tipp für alle Tage eintragen.</span>`:''}`:''}
   ${outD?`<p class="small" style="color:var(--yelt)">Dieser Termin liegt ${f.datum<r.von?'vor':'nach'} der Reise, zum Beispiel für ein Vortreffen. Er erscheint trotzdem im Tagesplan.</p>`:''}
-  <label class="f">Wo? (freiwillig)<input class="in" id="f_ort" maxlength="60" placeholder="z. B. Strandbar"></label>
+  <label class="f">Wo? (freiwillig)<input class="in" id="f_ort" maxlength="100" placeholder="z. B. Strandbar Ses Covetes oder eine Adresse" data-live="1"></label>
+  ${(f.ort||'').trim()?`<span class="tiny mut" style="margin-top:-8px">Im Termin lässt sich der Ort mit einem Tipp in Karten öffnen. <a class="link" href="${esc(mapsUrl(f.ort,'google'))}" target="_blank" rel="noopener">${ic('pin',12)} Jetzt auf der Karte prüfen</a></span>`:''}
+  <label class="f">Link (freiwillig)<input class="in" id="f_link" type="url" inputmode="url" maxlength="300" placeholder="z. B. Speisekarte, Tickets, Buchung" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
   <label class="f">Beschreibung (freiwillig)<textarea class="in" id="f_beschreibung" maxlength="400"></textarea></label>
   <label class="f">Höchstzahl Teilnehmer (freiwillig)<input class="in" type="number" min="1" max="99" id="f_max" placeholder="unbegrenzt"></label>
-  <div class="seg" role="group" aria-label="Sichtbarkeit"><button type="button" aria-pressed="${!priv}" data-act="setPriv" data-val="0">Öffentlich</button><button type="button" aria-pressed="${priv}" data-act="setPriv" data-val="1">${ic('lock',16)} Privat</button></div>
+  ${edit?`<span class="small mut">${priv?`${ic('lock',14)} Privater Termin`:'Öffentlicher Termin'}${priv?' · Eingeladene kannst du hier ergänzen.':''}</span>`:`<div class="seg" role="group" aria-label="Sichtbarkeit"><button type="button" aria-pressed="${!priv}" data-act="setPriv" data-val="0">Öffentlich</button><button type="button" aria-pressed="${priv}" data-act="setPriv" data-val="1">${ic('lock',16)} Privat</button></div>`}
   ${priv?`<p class="small mut">Nur du und die Eingeladenen sehen diesen Termin. Absagen sieht niemand sonst.</p><div class="list">${zugesagt().filter(m=>m.uid!==S.uid).map(m=>`<button class="li" style="color:var(--tx)" data-act="invToggle" data-uid="${m.uid}">${av(m.uid,32)}<span class="grow">${esc(nm(m.uid))}</span>${inv[m.uid]?`<span style="color:var(--yelt)">${ic('check',22)}</span>`:''}</button>`).join('')}</div>`:''}
-  <button class="btn block" data-act="saveAkt">Termin anlegen</button>`; };
+  <button class="btn block" data-act="saveAkt">${edit?'Änderungen speichern':'Termin anlegen'}</button>
+  ${edit?`<button class="btn ghost block" style="color:var(--pinktx)" data-act="delAkt" data-id="${edit.id}">${ic('trash',16)} ${edit.serieId?'Nur diesen Tag löschen':'Termin löschen'}</button>${edit.serieId?`<button class="btn ghost block" style="color:var(--pinktx)" data-act="delSerie" data-sid="${edit.serieId}">${ic('trash',16)} Ganze Serie löschen</button>`:''}`:''}`; };
 A.setPriv = el => { S.form.privat = el.dataset.val==='1'; render(); };
 A.invToggle = el => { const u=el.dataset.uid; S.form.inv={...(S.form.inv||{})}; S.form.inv[u]=!S.form.inv[u]; render(); };
 const zeitOk = v => /^\d{2}:\d{2}$/.test(v);
-A.saveAkt = async el => { const f=S.form; f.zeit=zeitNorm(f.zeit); f.bis=zeitNorm(f.bis); if(f.zeit && !zeitOk(f.zeit)) return toast('Bitte die Uhrzeit wie 14 oder 14:30 eingeben.'); if(f.bis && !zeitOk(f.bis)) return toast('Bitte das Ende wie 16 oder 16:30 eingeben.'); const t=(f.titel||'').trim(); if(!t) return toast('Was habt ihr vor?'); if(!f.datum) return toast('An welchem Tag?'); if(f.datum<today()) return toast('Dieser Tag liegt in der Vergangenheit.'); if(!f.zeit) return toast('Um wie viel Uhr?');
+A.saveAkt = async el => { if(S.route.id) return aktAendern(el); const f=S.form; f.zeit=zeitNorm(f.zeit); f.bis=zeitNorm(f.bis); const link=linkNorm(f.link); if(link===false) return toast('Der Link sieht nicht richtig aus. Beispiel: www.restaurant.de'); if(f.zeit && !zeitOk(f.zeit)) return toast('Bitte die Uhrzeit wie 14 oder 14:30 eingeben.'); if(f.bis && !zeitOk(f.bis)) return toast('Bitte das Ende wie 16 oder 16:30 eingeben.'); const t=(f.titel||'').trim(); if(!t) return toast('Was habt ihr vor?'); if(!f.datum) return toast('An welchem Tag?'); if(f.datum<today()) return toast('Dieser Tag liegt in der Vergangenheit.'); if(!f.zeit) return toast('Um wie viel Uhr?');
   const eing=Object.entries(f.inv||{}).filter(([u,v])=>v).map(([u])=>u); if(f.privat && !eing.length) return toast('Wen möchtest du einladen?');
   el.disabled=true;
-  const d={rid:S.rid, titel:t, datum:f.datum, zeit:f.zeit, ort:(f.ort||'').trim(), beschreibung:(f.beschreibung||'').trim(), max: +f.max>0?+f.max:null, privat:!!f.privat, ...(f.bis?{bis:f.bis}:{}), eingeladen:eing, by:S.uid, createdAt:now(), dabei:{[S.uid]:true}};
+  const d={rid:S.rid, titel:t, datum:f.datum, zeit:f.zeit, ort:(f.ort||'').trim(), ...(link?{link}:{}), beschreibung:(f.beschreibung||'').trim(), max: +f.max>0?+f.max:null, privat:!!f.privat, ...(f.bis?{bis:f.bis}:{}), eingeladen:eing, by:S.uid, createdAt:now(), dabei:{[S.uid]:true}};
   const r=cur(); let tage=[f.datum];
   if(f.serie && f.datum>=r.von && f.datum<=r.bis){ const bis=(f.serieBis&&f.serieBis>=f.datum&&f.serieBis<=r.bis)?f.serieBis:r.bis; tage=[]; for(let x=f.datum; x<=bis && tage.length<60; x=addDays(x,1)) tage.push(x); }
   if(tage.length>1){ d.serieId=rid16(); d.serieVon=tage[0]; d.serieBis=tage[tage.length-1]; }
@@ -1396,8 +1421,8 @@ V.aktivitaet = ()=>{ const g=tripGuard(); if(g) return g; const x=S.rt.akt.find(
   const closed = x.chatZu || cur().geschlossen;
   return `${hdrTrip(x.privat?'Privat':'Termin')}${backBtn()}
   ${eventKasseWarn(x,false)}
-  <div class="card"><div class="row between"><span class="chip yel">${dayLabel(x.datum)} · ${esc(aktZeit(x))} Uhr</span>${x.privat?`<span class="chip">${ic('lock',14)} privat</span>`:''}</div>
-  <h1>${esc(x.titel)}</h1>${x.serieId?`<span class="chip yel" style="align-self:flex-start">${ic('repeat',14)} täglich ${fD(x.serieVon)}–${fD(x.serieBis)}</span>`:''}${x.ort?`<div class="small">${ic('pin',14)} ${esc(x.ort)}</div>`:''}${x.beschreibung?`<p>${esc(x.beschreibung)}</p>`:''}
+  <div class="card"><div class="row between"><span class="row" style="gap:6px;flex-wrap:wrap"><span class="chip yel">${dayLabel(x.datum)} · ${esc(aktZeit(x))} Uhr</span>${x.privat?`<span class="chip">${ic('lock',14)} privat</span>`:''}</span>${aktDarfAendern(x)?`<button class="btn xs sec" data-act="aktBearbeiten" data-id="${x.id}">${ic('pencil',14)} Bearbeiten</button>`:''}</div>
+  <h1>${esc(x.titel)}</h1>${x.serieId?`<span class="chip yel" style="align-self:flex-start">${ic('repeat',14)} täglich ${fD(x.serieVon)}–${fD(x.serieBis)}</span>`:''}${x.ort||x.link?`<div class="row wrap" style="gap:8px">${x.ort?`<button class="ortknopf" data-act="kartenWahl" data-ort="${esc(x.ort)}" aria-label="${esc(x.ort)} in Karten öffnen">${ic('pin',16)}<span>${esc(x.ort)}</span><span class="tiny">Karte</span></button>`:''}${x.link?`<a class="ortknopf" href="${esc(x.link)}" target="_blank" rel="noopener">${ic('link',16)}<span>${esc(linkName(x.link))}</span><span class="tiny">öffnen</span></a>`:''}</div>`:''}${x.beschreibung?`<p>${esc(x.beschreibung)}</p>`:''}
   <div class="tiny mut">Erstellt von <b style="color:${nameColor(x.by)}">${esc(nm(x.by))}</b>${x.max?` · max. ${x.max} Personen`:''}</div>
   <div class="row wrap">${d.map(u=>`<span class="row" style="gap:6px">${av(u,26)}<span class="small">${esc(nm(u))}</span></span>`).join('')||'<span class="small mut">Noch niemand dabei.</span>'}${aktGaeste(x).map(u=>`<span class="row" style="gap:6px">${gastAv(u,26)}<span class="small">${esc(nm(u))} <span class="gastchip">Gast</span></span><button class="icbtn sm0" style="width:26px;height:26px;color:var(--mut)" data-act="melden" data-gegen="${u}" data-art="gast" data-akt="${x.id}" aria-label="Gast ${esc(nm(u))} melden" title="Gast melden">${ic('flag',13)}</button></span>`).join('')}</div>
   ${x.privat && !own ? privRsvp(x) : `<button class="btn block ${on?'on':'sec'}" data-act="aktDabei" data-id="${x.id}">${on?ic('check',18)+' Bin dabei':'Bin dabei'}</button>`}
@@ -1408,7 +1433,7 @@ V.aktivitaet = ()=>{ const g=tripGuard(); if(g) return g; const x=S.rt.akt.find(
   <h3>${x.privat?'Kommentare':'Chat zum Termin'}</h3>${x.gastCode?`<span class="tiny" style="color:var(--yelt);margin-top:-8px">Gäste lesen mit: Nachrichten von ${fStamp(gastAb(x))} bis ${fStamp(gastEnde(x))}, Fotos bis ${NACH_FOTOS_H} Stunden danach.</span>`:''}
   <div class="msgs">${msgs.length?msgs.map(msgHtml).join(''):`<div class="sysnote">${x.privat?'Noch keine Kommentare.':'Noch keine Nachrichten. Fotos von hier landen im Aktivitäten-Album.'}</div>`}</div>
   ${closed?`<div class="sysnote">${ic('lock',14)} Der Chat ist geschlossen.</div>`:`<div class="chatpad"></div>${composer('aktSend', !x.privat)}`}`; };
-A.delAkt = async el => { openOv('confirm',{title:'Termin löschen?', text:'Der Termin verschwindet für alle.', ok:'Löschen', fn: async ()=>{ await W(()=>S.db.doc(`aktivitaeten/${el.dataset.id}`).delete(),'Löschen'); const card=S.rt.msgs.find(m=>m.aktId===el.dataset.id && m.typ==='aktivitaet' && !m.serieId); if(card) await S.db.doc(`nachrichten/${card.id}`).delete().catch(()=>{}); back(); toast('Termin gelöscht'); setTimeout(syncVortreffen,800); }}); };
+A.delAkt = async el => { openOv('confirm',{title:'Termin löschen?', text:'Der Termin verschwindet für alle.', ok:'Löschen', fn: async ()=>{ await W(()=>S.db.doc(`aktivitaeten/${el.dataset.id}`).delete(),'Löschen'); const card=S.rt.msgs.find(m=>m.aktId===el.dataset.id && m.typ==='aktivitaet' && !m.serieId); if(card) await S.db.doc(`nachrichten/${card.id}`).delete().catch(()=>{}); aktZurueck([el.dataset.id]); toast('Termin gelöscht'); setTimeout(syncVortreffen,800); }}); };
 A.aktChatZu = async el => { const x=S.rt.akt.find(a=>a.id===el.dataset.id); await W(()=>S.db.doc(`aktivitaeten/${x.id}`).update({chatZu:!x.chatZu}),'Speichern'); };
 A.aktSend = ()=>sendMsg({aktId:S.route.id});
 
@@ -1425,6 +1450,7 @@ V.chat = ()=>{ const g=tripGuard(); if(g) return g; const tab=S.ui.chatTab||'gru
 function msgHtml(x){
   if(x.typ==='morgen') return morgenHtml(x);
   if(x.typ==='system' && x.aw && AW[x.aw]) return `<div class="awnote"><span class="awic">${AW[x.aw](26)}</span><span>${esc(x.text)} <span class="tiny mut">${fTime(x.createdAt)}</span></span></div>`;
+  if(x.typ==='system' && x.knister) return knisterHtml(x);
   if(x.typ==='system' && x.kwarn) return kwarnHtml(x);
   if(x.typ==='system' && x.gname) return `<div class="konfnote"><span class="konfic">${ic('pencil',18)}</span><span>${esc(x.text)} <span class="tiny mut">${fTime(x.createdAt)}</span></span></div>`;
   if(x.typ==='meldstatus') return meldStatusHtml(x);
@@ -1596,7 +1622,7 @@ V.person = ()=>{ const uid=S.route.uid; const p=pr(uid); const z=zodiac(p.geb); 
 A.serieDabei = async el => { const sid=el.dataset.sid; const kom=S.rt.akt.filter(y=>y.serieId===sid && y.datum>=today()); const allOn=kom.every(y=>(y.dabei||{})[S.uid]===true);
   try{ for(const y of kom){ if(!allOn && y.max && aktDabei(y).length>=y.max && (y.dabei||{})[S.uid]!==true) continue; await S.db.doc(`aktivitaeten/${y.id}`).update({dabei:{[S.uid]:!allOn}}); } toast(allOn?'Für alle Tage ausgetragen':'Du bist jeden Tag dabei'); }catch(e){ fail(e,'Speichern'); } };
 A.delSerie = el => { const sid=el.dataset.sid; openOv('confirm',{title:'Ganze Serie löschen?', text:'Alle Tage dieses Termins verschwinden für alle.', ok:'Serie löschen', fn: async ()=>{
-  try{ for(const y of S.rt.akt.filter(a=>a.serieId===sid)) await S.db.doc(`aktivitaeten/${y.id}`).delete(); const card=S.rt.msgs.find(m=>m.typ==='aktivitaet' && m.serieId===sid); if(card) await S.db.doc(`nachrichten/${card.id}`).delete().catch(()=>{}); back(); toast('Serie gelöscht'); setTimeout(syncVortreffen,800); }catch(e){ fail(e,'Löschen'); } }}); };
+  try{ for(const y of S.rt.akt.filter(a=>a.serieId===sid)) await S.db.doc(`aktivitaeten/${y.id}`).delete(); const card=S.rt.msgs.find(m=>m.typ==='aktivitaet' && m.serieId===sid); if(card) await S.db.doc(`nachrichten/${card.id}`).delete().catch(()=>{}); aktZurueck(S.rt.akt.filter(a=>a.serieId===sid).map(a=>a.id)); toast('Serie gelöscht'); setTimeout(syncVortreffen,800); }catch(e){ fail(e,'Löschen'); } }}); };
 /* ===================== Ansichten: Mitglieder, Barometer, Profil, Herzen, Admin ===================== */
 /* Getränke: gezählt wird pro Tag. Für Statistik und Auszeichnungen zählen nur Tage im Reisezeitraum. */
 const imReise = (d,r=cur()) => !!r && !!r.von && d>=r.von && d<=r.bis;
@@ -1775,14 +1801,15 @@ V.herzen = ()=>{ const g=tripGuard(); if(g) return g; const r=cur();
   <div class="col" style="gap:2px"><h1>Urlaubsherzen</h1><span class="mut">Wen hast du ${r.ort?`in ${esc(r.ort)}`:'im Urlaub'} kennengelernt?</span></div>
   <div class="card gold" style="flex-direction:row;align-items:center;gap:14px"><span style="width:52px;height:52px;border-radius:50%;background:rgba(245,197,24,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">${iLead&&lead.shared?AW.trikotGeteilt(34):AW.trikot(34)}</span>
     <div class="grow"><div class="ttl">${iLead?(lead.shared?'Ihr teilt euch gerade den ersten Platz':'Du trägst das gelbe Trikot!'):lead.max?`${esc(lead.ids.map(nm).join(' & '))} ${lead.shared?'teilen sich':'trägt'} das Trikot`:'Noch hat niemand ein Herz vergeben'}</div><div class="small" style="color:var(--goldtx)">Du: ${mine} ${mine===1?'Herz':'Herzen'}${others[0]?` · ${esc(nm(others[0].uid))}: ${+others[0].herzen||0}`:''}</div></div></div>
-  <p class="small mut">Was ein Herz bedeutet, entscheidest du. Deine Einträge sieht niemand außer dir. Die Gruppe sieht nur die Anzahl.</p>
-  ${list===null?'<p class="mut">Wird geladen …</p>':list.length?`<div class="list">${list.map(p=>`<div class="li" style="align-items:flex-start">${p.foto?`<button class="avlink" data-act="herzBild" data-id="${p.id}" aria-label="Foto von ${esc(p.name)} ansehen"><img class="av herzav" src="${esc(blob(p.foto))}" width="52" height="52" alt=""></button>`:`<span style="color:var(--red2);width:52px;display:flex;justify-content:center;padding-top:12px">${I.s(P.heart,24,'fill="currentColor" stroke="none"')}</span>`}
-    <div class="grow col" style="gap:4px"><b>${esc(p.name)}</b><span class="tiny mut">${esc([p.woher,p.wann?fD(p.wann):''].filter(Boolean).join(' · '))}</span>
+  ${herzAnfrageKarte()}
+  <p class="small mut">Was ein Herz bedeutet, entscheidest du. Deine Einträge sieht niemand außer dir. Die Gruppe sieht nur die Anzahl. Schenkst du einem Gruppenmitglied ein Herz, kann es dein Herz erwidern.</p>
+  ${list===null?'<p class="mut">Wird geladen …</p>':list.length?`<div class="list">${list.map(p=>`<div class="li" style="align-items:flex-start">${p.foto?`<button class="avlink" data-act="herzBild" data-id="${p.id}" aria-label="Foto von ${esc(p.name)} ansehen"><img class="av herzav" src="${esc(blob(p.foto))}" width="52" height="52" alt=""></button>`:p.uid?`<span class="herzmitav">${av(p.uid,52)}<span class="herzmini">${I.s(P.heart,14,'fill="currentColor" stroke="none"')}</span></span>`:`<span style="color:var(--red2);width:52px;display:flex;justify-content:center;padding-top:12px">${I.s(P.heart,24,'fill="currentColor" stroke="none"')}</span>`}
+    <div class="grow col" style="gap:4px"><b>${esc(p.uid?nm(p.uid):p.name)}</b><span class="tiny mut">${esc([p.uid?'aus eurer Gruppe':p.woher,p.wann?fD(p.wann):''].filter(Boolean).join(' · '))}</span>${herzStatusZeile(p)}
     ${p.notiz?`<div class="herznotiz">${esc(p.notiz)}</div>`:''}
     ${sterneWahl(p.sterne, n=>`data-act="herzSterne" data-id="${p.id}" data-n="${n}"`)}
-    <div class="row wrap" style="gap:6px">${S.assets?`<label class="btn xs sec" style="cursor:pointer">${ic('cam',14)} ${p.foto?'Foto ändern':'Foto'}<input type="file" accept="image/*" hidden data-file="herzFotoFile" data-id="${p.id}"></label>`:''}<button class="btn xs ${p.geteilt?'on':'sec'}" data-act="herzTeilen" data-id="${p.id}">${p.geteilt?ic('check',14)+' im Chat geteilt':ic('chat',14)+' Im Chat teilen'}</button></div></div>
+    <div class="row wrap" style="gap:6px">${S.assets?`<label class="btn xs sec" style="cursor:pointer">${ic('cam',14)} ${p.foto?'Foto ändern':'Foto'}<input type="file" accept="image/*" hidden data-file="herzFotoFile" data-id="${p.id}"></label>`:''}${p.uid?'':`<button class="btn xs ${p.geteilt?'on':'sec'}" data-act="herzTeilen" data-id="${p.id}">${p.geteilt?ic('check',14)+' im Chat geteilt':ic('chat',14)+' Im Chat teilen'}</button>`}</div></div>
     <div class="col" style="gap:6px"><button class="icbtn" style="width:34px;height:34px" data-act="herzEdit" data-id="${p.id}" aria-label="${esc(p.name)} bearbeiten">${ic('pencil',16)}</button><button class="icbtn" style="width:34px;height:34px" data-act="herzWeg" data-id="${p.id}" aria-label="Herz entfernen">${ic('x',16)}</button></div></div>`).join('')}</div>`:'<div class="empty small">Noch kein Herz vergeben.</div>'}
-  <div class="card"><h3>Person hinzufügen</h3><input class="in" id="f_hname" maxlength="40" placeholder="Name oder Spitzname"><div class="grid2"><input class="in" id="f_hwoher" maxlength="40" placeholder="Woher? (freiwillig)"><input class="in" type="date" id="f_hwann"></div>
+  <div class="card"><h3>Person hinzufügen</h3>${herzMitgliedWahl()}${S.form.huid?'':`<input class="in" id="f_hname" maxlength="40" placeholder="Name oder Spitzname">`}<div class="grid2">${S.form.huid?'':`<input class="in" id="f_hwoher" maxlength="40" placeholder="Woher? (freiwillig)">`}<input class="in" type="date" id="f_hwann" aria-label="Wann"></div>
     <textarea class="in" id="f_hnotiz" maxlength="1000" placeholder="Notizen (freiwillig, nur für dich)"></textarea>
     <div class="col" style="gap:4px"><span class="small mut">Deine Bewertung (freiwillig)</span>${sterneWahl(S.form.hsterne, n=>`data-act="setSterneForm" data-n="${n}"`)}</div>
     ${herzFotoWahl()}
@@ -1794,15 +1821,17 @@ async function shrinkBlob(blob, max=1600){ const bmp=await createImageBitmap(blo
 async function herzUpload(file){ if(!/^image\//.test(file.type)) { toast('Bitte ein Foto wählen.'); return null; } try{ toast('Foto wird gespeichert …'); const b=await shrinkBlob(file); const r=await S.assets.upload(b,{type:'image/jpeg'}); return r.id; }catch(e){ console.error(e); toast('Das Foto ließ sich nicht speichern.'); return null; } }
 A.herzFotoNeu = el => { const f=el.files?.[0]; el.value=''; if(!f) return; if(S.ui.herzNeuUrl) URL.revokeObjectURL(S.ui.herzNeuUrl); S.ui.herzNeuFile=f; S.ui.herzNeuUrl=URL.createObjectURL(f); render(); };
 A.herzFotoNeuWeg = ()=>{ if(S.ui.herzNeuUrl) URL.revokeObjectURL(S.ui.herzNeuUrl); S.ui.herzNeuFile=null; S.ui.herzNeuUrl=null; render(); };
-A.herzDazu = async el => { const f=S.form; const n=(f.hname||'').trim(); if(!n) return toast('Wie heißt die Person?'); el.disabled=true;
+A.herzDazu = async el => { const f=S.form; const hu=f.huid||''; const n=hu?nm(hu):(f.hname||'').trim(); if(!n) return toast('Wie heißt die Person?'); el.disabled=true;
+  let anfrage=null; if(hu){ try{ anfrage=await herzAnMitglied(hu, !!f.hzeigen); }catch(e){ el.disabled=false; return e.nutzer?toast(e.nutzer):fail(e,'Herz vergeben'); }
+    if(anfrage.match){ f.huid=''; f.hzeigen=false; A.herzFotoNeuWeg(); return toast(`💞 ${vorname(hu)} hatte dir schon ein Herz geschenkt. Jetzt ist es gegenseitig!`); } }
   let foto=null; if(S.ui.herzNeuFile){ foto=await herzUpload(S.ui.herzNeuFile); if(!foto){ el.disabled=false; return; } }
-  const list=[...(S.ui.herz||[]), {id:rid16(), name:n, woher:(f.hwoher||'').trim(), wann:f.hwann||urlaubsTag(), ...(foto?{foto}:{}), ...(sterneOk(f.hsterne)?{sterne:+f.hsterne}:{}), ...((f.hnotiz||'').trim()?{notiz:f.hnotiz.trim()}:{})}];
-  S.form.hname=''; S.form.hwoher=''; S.form.hwann=''; S.form.hnotiz=''; S.form.hsterne=null; A.herzFotoNeuWeg(); await saveHerzen(list); toast('Herz vergeben'); };
+  const list=[...(S.ui.herz||[]), {id:rid16(), name:n, woher:hu?'':(f.hwoher||'').trim(), wann:f.hwann||urlaubsTag(), ...(hu?{uid:hu, anfrage:anfrage.id}:{}), ...(foto?{foto}:{}), ...(sterneOk(f.hsterne)?{sterne:+f.hsterne}:{}), ...((f.hnotiz||'').trim()?{notiz:f.hnotiz.trim()}:{})}];
+  S.form.hname=''; S.form.hwoher=''; S.form.hwann=''; S.form.hnotiz=''; S.form.hsterne=null; S.form.huid=''; S.form.hzeigen=false; A.herzFotoNeuWeg(); await saveHerzen(list); toast(hu?`💘 Herz vergeben. ${vorname(hu)} bekommt Bescheid.`:'Herz vergeben'); };
 A.herzFotoFile = async el => { const f=el.files?.[0]; const id=el.dataset.id; el.value=''; if(!f) return; const foto=await herzUpload(f); if(!foto) return;
   const alt=(S.ui.herz||[]).find(p=>p.id===id); if(alt?.foto && !alt.geteilt) S.assets.delete(alt.foto).catch(()=>{});
   await saveHerzen((S.ui.herz||[]).map(p=>p.id===id?{...p, foto, geteilt:false}:p)); toast('Foto gespeichert'); };
 A.herzWeg = el => { const p=(S.ui.herz||[]).find(x=>x.id===el.dataset.id); if(!p) return;
-  openOv('confirm',{title:'Herz entfernen?', text: p.foto&&!p.geteilt?'Das Foto dazu wird ebenfalls gelöscht.':'', ok:'Entfernen', fn: async ()=>{ if(p.foto && !p.geteilt) S.assets?.delete(p.foto).catch(()=>{}); await saveHerzen((S.ui.herz||[]).filter(x=>x.id!==p.id)); toast('Herz entfernt'); }}); };
+  openOv('confirm',{title:'Herz entfernen?', text: p.foto&&!p.geteilt?'Das Foto dazu wird ebenfalls gelöscht.':'', ok:'Entfernen', fn: async ()=>{ if(p.foto && !p.geteilt) S.assets?.delete(p.foto).catch(()=>{}); const an=p.anfrage&&herzAnfrage(p.anfrage); if(an && an.von===S.uid && an.status==='offen') S.db.doc(`herzanfragen/${an.id}`).delete().catch(()=>{}); await saveHerzen((S.ui.herz||[]).filter(x=>x.id!==p.id)); toast('Herz entfernt'); }}); };
 A.herzBild = el => { const p=(S.ui.herz||[]).find(x=>x.id===el.dataset.id); if(p) openOv('herzBild',{p}); };
 /* ---------- Sterne für Urlaubsherzen: 0 = ging gar nicht, 5 = Premium ---------- */
 const sterneOk = n => n!==null && n!==undefined && n!=='' && +n>=0 && +n<=5;
@@ -2401,26 +2430,29 @@ OV.anhang = o => `<div class="sheet" role="dialog" aria-modal="true" aria-label=
   </div><button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`;
 
 /* ---------- Urlaubsherz direkt aus dem Chat ---------- */
-A.herzSchnellAuf = ()=>{ S.form.hsterne=null; S.form.hnotiz=''; S.form.hname=''; S.form.hwoher=''; S.form.hteilen=false; A.herzFotoNeuWeg(); openOv('herzNeu',{}); };
+A.herzSchnellAuf = ()=>{ S.form.hsterne=null; S.form.hnotiz=''; S.form.hname=''; S.form.hwoher=''; S.form.hteilen=false; S.form.huid=''; S.form.hzeigen=false; A.herzFotoNeuWeg(); openOv('herzNeu',{}); };
 OV.herzNeu = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label="Urlaubsherz vergeben"><div class="row"><span style="color:var(--red2)">${I.s(P.heart,26,'fill="currentColor" stroke="none"')}</span><h2 class="grow">Urlaubsherz vergeben</h2></div>
-  <input class="in" id="f_hname" maxlength="40" placeholder="Name oder Spitzname" value="${esc(S.form.hname||'')}"><input class="in" id="f_hwoher" maxlength="40" placeholder="Woher? (freiwillig)" value="${esc(S.form.hwoher||'')}">
+  ${herzMitgliedWahl()}
+  ${S.form.huid?'':`<input class="in" id="f_hname" maxlength="40" placeholder="Name oder Spitzname" value="${esc(S.form.hname||'')}"><input class="in" id="f_hwoher" maxlength="40" placeholder="Woher? (freiwillig)" value="${esc(S.form.hwoher||'')}">`}
   <textarea class="in" id="f_hnotiz" maxlength="1000" placeholder="Notizen (freiwillig, nur für dich)">${esc(S.form.hnotiz||'')}</textarea>
   <div class="col" style="gap:4px"><span class="small mut">Deine Bewertung (freiwillig)</span>${sterneWahl(S.form.hsterne, n=>`data-act="setSterneForm" data-n="${n}"`)}</div>
   ${herzFotoWahl()}
-  <label class="toggle" style="align-items:flex-start"><input type="checkbox" id="f_hteilen" ${S.form.hteilen?'checked':''}> <span class="small">Im Gruppenchat zeigen: „${esc(nm(S.uid))} hat ein neues Herz erobert“${S.ui.herzNeuUrl?' mit dem Foto':''}${sterneOk(S.form.hsterne)?' und deiner Bewertung':''}. Der Name wird nicht gezeigt.</span></label>
-  <p class="tiny mut">Ohne Häkchen sieht nur du das Herz und das Foto. Ins Album kommt es nie.</p>
+  ${S.form.huid?'':`<label class="toggle" style="align-items:flex-start"><input type="checkbox" id="f_hteilen" ${S.form.hteilen?'checked':''}> <span class="small">Im Gruppenchat zeigen: „${esc(nm(S.uid))} hat ein neues Herz erobert“${S.ui.herzNeuUrl?' mit dem Foto':''}${sterneOk(S.form.hsterne)?' und deiner Bewertung':''}. Der Name wird nicht gezeigt.</span></label>
+  <p class="tiny mut">Ohne Häkchen sieht nur du das Herz und das Foto. Ins Album kommt es nie.</p>`}
   <button class="btn block" data-act="herzSchnell">${I.s(P.heart,18,'fill="#fff" stroke="none"')} Herz vergeben</button><button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`;
 function herzFotoWahl(){ if(!S.assets) return '';
   return S.ui.herzNeuUrl?`<div class="row"><img class="av herzav" src="${esc(S.ui.herzNeuUrl)}" width="72" height="72" alt="Vorschau"><div class="col" style="gap:6px"><label class="btn xs sec" style="cursor:pointer">${ic('cam',14)} Anderes Foto<input type="file" accept="image/*" hidden data-file="herzFotoNeu"></label><button class="link" style="color:var(--mut)" data-act="herzFotoNeuWeg">Foto entfernen</button></div></div>`
    :`<div class="row"><label class="btn sm sec grow" style="cursor:pointer">${ic('cam',16)} Foto aufnehmen<input type="file" accept="image/*" capture="environment" hidden data-file="herzFotoNeu"></label><label class="btn sm sec grow" style="cursor:pointer">${ic('album',16)} Aus der Galerie<input type="file" accept="image/*" hidden data-file="herzFotoNeu"></label></div>`; }
-A.herzSchnell = async el => { const n=(S.form.hname||'').trim(); if(!n) return toast('Wie heißt die Person?'); el.disabled=true;
+A.herzSchnell = async el => { const hu=S.form.huid||''; const n=hu?nm(hu):(S.form.hname||'').trim(); if(!n) return toast('Wie heißt die Person?'); el.disabled=true;
+  let anfrage=null; if(hu){ try{ anfrage=await herzAnMitglied(hu, !!S.form.hzeigen); }catch(e){ el.disabled=false; return e.nutzer?toast(e.nutzer):fail(e,'Herz vergeben'); }
+    if(anfrage.match){ closeOv(); A.herzFotoNeuWeg(); return toast(`💞 ${vorname(hu)} hatte dir schon ein Herz geschenkt. Jetzt ist es gegenseitig!`); } }
   try{ let foto=null; if(S.ui.herzNeuFile){ foto=await herzUpload(S.ui.herzNeuFile); if(!foto){ el.disabled=false; return; } }
     const s=await herzDocRef().get(); const alt=s.exists?(s.data().personen||[]):[];
-    const teilen=!!S.form.hteilen;
-    const list=[...alt, {id:rid16(), name:n, woher:(S.form.hwoher||'').trim(), wann:today(), ...(foto?{foto}:{}), ...(sterneOk(S.form.hsterne)?{sterne:+S.form.hsterne}:{}), ...((S.form.hnotiz||'').trim()?{notiz:S.form.hnotiz.trim()}:{}), ...(teilen?{geteilt:true}:{})}];
+    const teilen=!hu && !!S.form.hteilen;
+    const list=[...alt, {id:rid16(), name:n, woher:hu?'':(S.form.hwoher||'').trim(), wann:today(), ...(hu?{uid:hu, anfrage:anfrage.id}:{}), ...(foto?{foto}:{}), ...(sterneOk(S.form.hsterne)?{sterne:+S.form.hsterne}:{}), ...((S.form.hnotiz||'').trim()?{notiz:S.form.hnotiz.trim()}:{}), ...(teilen?{geteilt:true}:{})}];
     await saveHerzen(list);
     if(teilen) await S.db.collection('nachrichten').add({rid:S.rid, typ:'herz', ...(foto?{bild:foto, mime:'image/jpeg'}:{}), ...(sterneOk(S.form.hsterne)?{sterne:+S.form.hsterne}:{}), by:S.uid, createdAt:now()});
-    S.form.hname=''; S.form.hwoher=''; S.form.hteilen=false; A.herzFotoNeuWeg(); closeOv(); toast(teilen?'Herz vergeben und im Chat gezeigt':'Herz vergeben'); nachUnten();
+    S.form.hname=''; S.form.hwoher=''; S.form.hteilen=false; S.form.huid=''; S.form.hzeigen=false; A.herzFotoNeuWeg(); closeOv(); toast(hu?`💘 Herz vergeben. ${vorname(hu)} bekommt Bescheid.`:teilen?'Herz vergeben und im Chat gezeigt':'Herz vergeben'); nachUnten();
   }catch(e){ fail(e,'Speichern'); el.disabled=false; } };
 
 /* ---------- Person antippen ---------- */
@@ -2544,6 +2576,91 @@ OV.herzEdit = o => { const p=(S.ui.herz||[]).find(x=>x.id===o.id); if(!p) return
   <div class="col" style="gap:4px"><span class="small mut">Bewertung</span>${sterneWahl(f.esterne, n=>`data-act="setEditSterne" data-n="${n}"`)}</div>
   <p class="tiny mut">Name und Notizen sieht nur du. ${p.geteilt?'Eine schon im Chat geteilte Nachricht ändert sich dadurch nicht.':''}</p>
   <button class="btn block" data-act="herzEditSpeichern">Speichern</button><button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`; };
+/* ===================== Urlaubsherzen für Gruppenmitglieder =====================
+   Wählt man beim Herz ein Mitglied der Gruppe, entsteht eine Herz-Anfrage (herzanfragen/{id}), die nur die beiden sehen:
+   { rid, von, an, status:'offen'|'bestaetigt', vonZeigen, anZeigen, knisterAm, knisterGepostet, offengelegt, ... }
+   - Die andere Person bekommt eine Benachrichtigung und kann das Herz erwidern. Dann landet es automatisch auch in ihren Herzen.
+   - Lehnt sie ab, wird die Anfrage still gelöscht. Der Absender erfährt davon nichts („noch nicht erwidert“).
+   - Nach dem Erwidern kommt 1–3 Stunden später „Es knistert“ in den Gruppenchat (ohne Namen) und am nächsten Morgen in den Morgenbericht.
+     Namen erscheinen nur, wenn BEIDE „Die Gruppe darf es wissen“ angehakt haben.
+   - Für das gelbe Trikot zählt ein erwidertes Herz für beide. */
+
+const herzAnMich = () => (S.rt.herzAn||[]).filter(a=>a.rid===S.rid);
+const herzVonMir = () => (S.rt.herzVon||[]).filter(a=>a.rid===S.rid);
+const herzOffenFuerMich = () => herzAnMich().filter(a=>a.status==='offen');
+const herzAnfrage = id => [...(S.rt.herzAn||[]), ...(S.rt.herzVon||[])].find(a=>a.id===id);
+const herzKandidaten = () => zugesagt().map(m=>m.uid).filter(u=>u!==S.uid);
+const istClaudeVorschau = () => typeof PPAuth==='undefined';
+
+/* Abos: was an mich ging und was ich vergeben habe (nur diese Reise) */
+function herzAbos(rid, T){ const c=S.db.collection('herzanfragen');
+  T.push(c.where('an','==',S.uid).where('rid','==',rid).onSnapshot(s=>{ S.rt.herzAn=snapDocs(s); render(); knisterFaellig(); }, e=>console.warn('Herzen an mich',e)));
+  T.push(c.where('von','==',S.uid).where('rid','==',rid).onSnapshot(s=>{ S.rt.herzVon=snapDocs(s); render(); knisterFaellig(); }, e=>console.warn('Herzen von mir',e))); }
+
+/* ---------- Auswahl im Formular ---------- */
+function herzMitgliedWahl(){ const l=herzKandidaten(); if(!l.length) return ''; const u=S.form.huid||'';
+  return `<div class="col" style="gap:6px"><span class="small mut">Ist es jemand aus eurer Gruppe? (freiwillig)</span>
+    <div class="row wrap" style="gap:6px">${l.map(x=>`<button type="button" class="chip ${u===x?'herzwahl':''}" style="border:0;cursor:pointer;height:36px;gap:6px" data-act="herzMitglied" data-uid="${x}" aria-pressed="${u===x}">${av(x,22)} ${esc(nm(x))}</button>`).join('')}</div>
+    ${u?`<div class="herzhinweis small">💘 <b>${esc(nm(u))}</b> bekommt eine Nachricht und kann dein Herz erwidern. Lehnt ${esc(vorname(u))} ab, erfährst du davon nichts. Deine Notizen, Sterne und Fotos bleiben nur bei dir.</div>
+      <label class="toggle" style="align-items:flex-start"><input type="checkbox" id="f_hzeigen" ${S.form.hzeigen?'checked':''}> <span class="small">Die Gruppe darf erfahren, dass wir es sind. Das passiert nur, wenn ${esc(vorname(u))} es auch erlaubt. Sonst heißt es nur: „In der Gruppe knistert es“.</span></label>`:''}</div>`; }
+A.herzMitglied = el => { const u=el.dataset.uid; S.form.huid = S.form.huid===u ? '' : u; S.form.hname = S.form.huid ? nm(u) : ''; S.ov?renderOv():render(); };
+
+/* Herz an ein Mitglied: Anfrage anlegen (oder, falls die Person mir schon eines geschickt hat, direkt erwidern) */
+async function herzAnMitglied(u, zeigen){ const offen=herzAnMich().find(a=>a.von===u && a.status==='offen');
+  if(offen){ await herzErwidern(offen.id, zeigen); return {match:true}; }
+  if(herzVonMir().some(a=>a.an===u)) throw Object.assign(new Error('doppelt'),{nutzer:`Du hast ${nm(u)} schon ein Herz geschenkt.`});
+  const ref=await S.db.collection('herzanfragen').add({rid:S.rid, von:S.uid, an:u, status:'offen', vonZeigen:!!zeigen, anZeigen:false, knisterGepostet:false, offengelegt:false, createdAt:now()});
+  return {id:ref.id}; }
+
+/* ---------- Empfänger: erwidern oder still ablehnen ---------- */
+async function herzErwidern(id, zeigen){ const a=herzAnfrage(id); if(!a || a.an!==S.uid) return;
+  const knisterAm = now() + Math.round((60 + Math.random()*120) * 60000);   // 1–3 Stunden später
+  await S.db.doc(`herzanfragen/${id}`).update({status:'bestaetigt', anZeigen:!!zeigen, bestaetigtAm:now(), bestaetigtTag:urlaubsTag(), knisterAm});
+  // Herz automatisch in meine eigene Liste übernehmen
+  let list=S.ui.herzRid===S.rid && S.ui.herz ? S.ui.herz : null;
+  if(!list){ const s=await herzDocRef().get(); list=s.exists?(s.data().personen||[]):[]; }
+  if(!list.some(p=>p.anfrage===id)) await saveHerzen([...list, {id:rid16(), name:nm(a.von), uid:a.von, anfrage:id, erwidert:true, wann:urlaubsTag()}]);
+  else await saveHerzen(list.map(p=>p.anfrage===id?{...p, erwidert:true}:p)); }
+A.herzJa = async el => { const id=el.dataset.id; const a=herzAnfrage(id); if(!a) return; el.disabled=true;
+  const zeigen=!!document.getElementById(`hz_${id}`)?.checked;
+  try{ await herzErwidern(id, zeigen); toast(`💞 Herz erwidert! ${vorname(a.von)} freut sich.`); }catch(e){ el.disabled=false; fail(e,'Erwidern'); } };
+A.herzNein = el => { const a=herzAnfrage(el.dataset.id); if(!a) return;
+  openOv('confirm',{title:'Herz nicht erwidern?', text:`${nm(a.von)} erfährt davon nichts. Für ${vorname(a.von)} bleibt es einfach unbeantwortet.`, ok:'Nicht erwidern', fn: async ()=>{
+    await W(()=>S.db.doc(`herzanfragen/${a.id}`).delete(),'Speichern'); toast('Erledigt'); }}); };
+
+/* Karte für offene Herzen an mich (auf „Mein Tag“ und bei den Herzen) */
+function herzAnfrageKarte(){ const l=herzOffenFuerMich(); if(!l.length) return '';
+  return l.map(a=>`<div class="card herzkarte"><div class="row" style="gap:12px">${av(a.von,48)}<div class="grow col" style="gap:2px"><b>💘 ${esc(nm(a.von))} hat dir ein Urlaubsherz geschenkt</b><span class="small" style="opacity:.85">Magst du es erwidern? Dann landet ${esc(vorname(a.von))} auch bei deinen Herzen.</span></div></div>
+    <label class="toggle" style="align-items:flex-start"><input type="checkbox" id="hz_${a.id}"> <span class="small">Die Gruppe darf erfahren, dass wir es sind (nur wenn ${esc(vorname(a.von))} das auch erlaubt)</span></label>
+    <div class="row" style="gap:8px"><button class="btn grow herzja" data-act="herzJa" data-id="${a.id}">${I.s(P.heart,18,'fill="currentColor" stroke="none"')} Erwidern</button><button class="btn sec" data-act="herzNein" data-id="${a.id}">Nein, danke</button></div></div>`).join(''); }
+
+/* ---------- Status und „Gruppe darf es wissen“ an einem Herz in meiner Liste ---------- */
+function herzStatusZeile(p){ if(!p.anfrage) return ''; const a=herzAnfrage(p.anfrage); const ich=a?(a.von===S.uid?'vonZeigen':'anZeigen'):null; const er=a?(a.von===S.uid?'anZeigen':'vonZeigen'):null;
+  if(!a) return p.erwidert?`<span class="herzstatus ok">💞 Gegenseitig</span>`:`<span class="herzstatus">⏳ Noch nicht erwidert</span>`;
+  if(a.status!=='bestaetigt') return `<span class="herzstatus">⏳ Noch nicht erwidert</span>`;
+  return `<span class="herzstatus ok">💞 Gegenseitig</span>
+    <label class="toggle small" style="align-items:flex-start"><input type="checkbox" data-change="herzZeigen" data-id="${a.id}" ${a[ich]?'checked':''}> <span>Die Gruppe darf erfahren, dass wir es sind${a.offengelegt?' (ist geteilt)':a[ich]&&!a[er]?` · wartet auf ${esc(vorname(a.von===S.uid?a.an:a.von))}`:''}</span></label>`; }
+A.herzZeigen = async el => { const a=herzAnfrage(el.dataset.id); if(!a) return; const feld=a.von===S.uid?'vonZeigen':'anZeigen';
+  await W(()=>S.db.doc(`herzanfragen/${a.id}`).update({[feld]:!!el.checked}),'Speichern');
+  const nachher={...a, [feld]:!!el.checked}; if(nachher.vonZeigen && nachher.anZeigen && nachher.knisterGepostet && !nachher.offengelegt) await herzOffenlegen(nachher);
+  else toast(el.checked?(nachher.vonZeigen&&nachher.anZeigen?'Wird mit der nächsten Knister-Nachricht geteilt':'Gespeichert. Geteilt wird nur, wenn ihr beide zustimmt.'):'Bleibt geheim'); };
+/* Beide wollen es öffentlich machen, nachdem das anonyme „Es knistert“ schon kam */
+async function herzOffenlegen(a){ try{ await S.db.collection('nachrichten').add({rid:a.rid, typ:'system', knister:true, offen:true, text:`💞 Das Geheimnis ist gelüftet: Zwischen ${nm(a.von)} und ${nm(a.an)} knistert es!`, by:S.uid, createdAt:now()});
+  await S.db.doc(`herzanfragen/${a.id}`).update({offengelegt:true}); toast('In der Gruppe geteilt 💞'); }catch(e){ fail(e,'Teilen'); } }
+
+/* Text der Knister-Nachricht (auch vom Server benutzt, dort mit Namen aus den Profilen) */
+const knisterText = (a, name) => a.vonZeigen && a.anZeigen ? `💞 Es knistert! Zwischen ${name(a.von)} und ${name(a.an)} hat es gefunkt.` : '💘 In der Gruppe knistert es gerade … Ein Urlaubsherz wurde erwidert. Wer das wohl ist? 😉';
+/* Nur in der Claude-Vorschau (ohne Server): die App selbst schreibt die fällige Knister-Nachricht.
+   In der Firebase-Version macht das der Server, damit niemand an den Daten sieht, wer sie ausgelöst hat. */
+let knisterLaeuft=false;
+async function knisterFaellig(){ if(!istClaudeVorschau() || knisterLaeuft) return; const f=[...(S.rt.herzAn||[]), ...(S.rt.herzVon||[])].filter(a=>a.status==='bestaetigt' && !a.knisterGepostet && (a.knisterAm||0)<=now());
+  if(!f.length) return; knisterLaeuft=true;
+  try{ for(const a of f){ await S.db.doc(`nachrichten/knister_${a.id}`).set({rid:a.rid, typ:'system', knister:true, offen:!!(a.vonZeigen&&a.anZeigen), text:knisterText(a, nm), by:'system', createdAt:now()});
+      await S.db.doc(`herzanfragen/${a.id}`).update({knisterGepostet:true, ...(a.vonZeigen&&a.anZeigen?{offengelegt:true}:{})}); } }catch(e){ console.warn('Knister', e); } knisterLaeuft=false; }
+setInterval(()=>knisterFaellig(), 60000);
+
+/* Darstellung im Chat */
+const knisterHtml = x => `<div class="knister ${x.offen?'offen':''}" role="note"><span class="knisterherz" aria-hidden="true">${x.offen?'💞':'💘'}</span><span>${esc(x.text)} <span class="tiny" style="opacity:.75">${fTime(x.createdAt)}</span></span></div>`;
 /* ===================== Konto: E-Mail und Passwort ändern (nur eigenständige Version) ===================== */
 P.mail = '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3.5 7l8.5 6.5L20.5 7"/>';
 const kontoMsg = e => ({'auth/invalid-credential':'Das aktuelle Passwort stimmt nicht.','auth/wrong-password':'Das aktuelle Passwort stimmt nicht.','auth/requires-recent-login':'Bitte melde dich einmal neu an und versuch es dann noch einmal.','auth/operation-not-allowed':'Das Ändern der E-Mail ist gerade nicht möglich. Bitte melde dich beim Support.'})[e?.code] || authMsg(e);
@@ -2733,7 +2850,7 @@ function medienZaehlen(msgs, tag, tagVon){ let bilder=0, videos=0;
   for(const m of msgs||[]){ if(m.typ!=='bild' || !m.bild || m.geloescht || m.ausgeblendet) continue; if(tagVon(m.createdAt||0)!==tag) continue;
     if(String(m.mime||'').startsWith('video')) videos++; else bilder++; }
   return {bilder, videos}; }
-function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter, medien} = d;
+function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter, medien, knister=[]} = d;
   const name = uid => { const p=profil(uid)||{}; return p.spitzname || (p.vorname ? `${p.vorname}${p.nachname?` ${p.nachname[0].toUpperCase()}.`:''}` : '') || p.name || 'Jemand'; };
   const kat = {}; ['Bier','Wein','Gin Tonic','Sex on the Beach'].forEach(n=>kat[n]=n); Object.entries(r.getraenkeKat||{}).forEach(([id,e])=>{ if(e&&e.name) kat[id]=e.name; });
   const trinkName = id => kat[id] || id;
@@ -2755,6 +2872,10 @@ function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter
   const hv=ms.map(m=>[m.uid,+m.herzen||0]); const hmax=Math.max(0,...hv.map(v=>v[1])); const hids=hmax>0?hv.filter(v=>v[1]===hmax).map(v=>v[0]):[];
   const trikot = hids.length ? (hids.length>1?`Das gelbe Trikot teilen sich ${liste(hids.map(name))}.`:`Das gelbe Trikot trägt ${neueH?'nun':'weiterhin'} ${name(hids[0])}.`) : '';
   z.push(neueH ? `❤️ Es ${neueH===1?'wurde ein neues Herz':`wurden ${neueH} neue Herzen`} vergeben. ${trikot}` : (trikot?`Gestern wurden keine neuen Herzen vergeben. ${trikot}`:''));
+  // Erwiderte Urlaubsherzen: Namen nur, wenn beide es erlaubt haben
+  if(knister.length){ const offen=knister.filter(a=>a.vonZeigen&&a.anZeigen); const geheim=knister.length-offen.length;
+    const t=[]; if(geheim) t.push(geheim===1?'💘 Und es knistert: Gestern wurde in der Gruppe ein Urlaubsherz erwidert. Wer das wohl ist? 😉':`💘 Und es knistert gewaltig: Gestern wurden ${geheim} Urlaubsherzen erwidert. Wer das wohl ist? 😉`);
+    offen.forEach(a=>t.push(`💞 Zwischen ${name(a.von)} und ${name(a.an)} hat es gefunkt!`)); z.push(t.join('\n')); }
   if(medien && (medien.bilder||medien.videos)){ const b=medien.bilder, v=medien.videos;
     const was=[b?`${b} ${b===1?'neues Bild':'neue Bilder'}`:'', v?`${v} ${v===1?'neues Video':'neue Videos'}`:''].filter(Boolean).join(' und ');
     z.push(`📸 Gestern ${b+v===1?'ist':'sind'} ${was} ins Album gekommen.`); }
@@ -3693,6 +3814,67 @@ function eventChatListe(){ const alle=visibleAkt().filter(a=>!a.serieId || a.dat
   if(!meine.length && !andere.length) return `<div class="empty">${ic('tag',30)}<span>Noch keine Events. Termine legst du unter „Mein Tag“ an, jeder hat seinen eigenen Chat.</span></div>`;
   return `${meine.length?`<h3>Deine Events</h3><div class="list">${meine.map(zeile).join('')}</div>`:''}
     ${andere.length?`<h3>Weitere Events mit Chat</h3><p class="tiny mut" style="margin-top:-6px">Hier bist du nicht dabei, kannst aber mitlesen.</p><div class="list">${andere.map(zeile).join('')}</div>`:''}`; }
+/* ===================== Termine bearbeiten, Link, Ort in Karten, Terminliste =====================
+   Wer einen Termin erstellt hat (und der Gruppenadmin), kann ihn jederzeit ändern oder löschen.
+   Bei Änderungen an Tag, Uhrzeit, Ort oder Titel erscheint ein Hinweis im Chat des Termins, damit alle Bescheid wissen. */
+P.link = '<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/>';
+const aktDarfAendern = x => !!x && (x.by===S.uid || canMod());
+/* Nach dem Löschen zurück, dabei Seiten gelöschter Termine überspringen */
+function aktZurueck(weg=[]){ const tot = id => weg.includes(id) || !S.rt.akt.some(a=>a.id===id);
+  back(); for(let i=0; i<6 && ['aktivitaet','neueAkt'].includes(S.route.v) && S.route.id && tot(S.route.id) && S.hist.length; i++) back(); }
+
+/* Link prüfen: „www.x.de“ wird zu „https://www.x.de“; leer = kein Link; false = ungültig */
+function linkNorm(v){ let t=String(v||'').trim(); if(!t) return ''; if(!/^https?:\/\//i.test(t)) t='https://'+t;
+  try{ const u=new URL(t); if(!/^https?:$/.test(u.protocol) || !u.hostname.includes('.')) return false; return u.href; }catch(e){ return false; } }
+const linkName = l => { try{ const u=new URL(l); return u.hostname.replace(/^www\./,'') + (u.pathname.length>1?'/…':''); }catch(e){ return 'Link'; } };
+
+/* Ort in Karten: Reiseort ergänzen, wenn der Ort nur ein Name ist („Strandbar“ → „Strandbar, Palma“) */
+function kartenOrt(ort){ const o=String(ort||'').trim(); const r=cur(); const reise=String(r?.wetterOrt?.name||String(r?.ort||'').split(/[,/(]/)[0]).trim();
+  return reise && !o.toLowerCase().includes(reise.toLowerCase()) && !/\d{4,5}/.test(o) && !o.includes(',') ? `${o}, ${reise}` : o; }
+function mapsUrl(ort, wo){ const q=encodeURIComponent(kartenOrt(ort));
+  return wo==='apple' ? `https://maps.apple.com/?q=${q}` : `https://www.google.com/maps/search/?api=1&query=${q}`; }
+A.kartenWahl = el => openOv('karten',{ort:el.dataset.ort});
+OV.karten = o => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Ort öffnen"><div class="row between"><h2 style="margin:0">${ic('pin',20)} ${esc(o.ort)}</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <a class="btn block" href="${esc(mapsUrl(o.ort,'apple'))}" target="_blank" rel="noopener">In Apple Karten öffnen</a>
+  <a class="btn sec block" href="${esc(mapsUrl(o.ort,'google'))}" target="_blank" rel="noopener">In Google Maps öffnen</a>
+  <button class="btn ghost block" data-act="copy" data-text="${esc(kartenOrt(o.ort))}">${ic('copy',16)} Adresse kopieren</button>
+  <span class="tiny mut" style="text-align:center">Von dort aus kannst du dir auch den Weg anzeigen lassen.</span></div>`;
+
+/* ---------- Bearbeiten ---------- */
+A.aktBearbeiten = el => { const x=S.rt.akt.find(a=>a.id===el.dataset.id); if(!aktDarfAendern(x)) return;
+  go('neueAkt',{id:x.id, form:{titel:x.titel, datum:x.datum, zeit:x.zeit||'', bis:x.bis||'', ort:x.ort||'', link:x.link||'', beschreibung:x.beschreibung||'', max:x.max||'', privat:!!x.privat,
+    inv:Object.fromEntries((x.eingeladen||[]).map(u=>[u,true])), serieAlle:''}}); };
+async function aktAendern(el){ const x=S.rt.akt.find(a=>a.id===S.route.id); if(!aktDarfAendern(x)) return toast('Ändern kann nur, wer den Termin erstellt hat.');
+  const f=S.form; f.zeit=zeitNorm(f.zeit); f.bis=zeitNorm(f.bis);
+  if(f.zeit && !zeitOk(f.zeit)) return toast('Bitte die Uhrzeit wie 14 oder 14:30 eingeben.'); if(f.bis && !zeitOk(f.bis)) return toast('Bitte das Ende wie 16 oder 16:30 eingeben.');
+  const t=(f.titel||'').trim(); if(!t) return toast('Was habt ihr vor?'); if(!f.zeit) return toast('Um wie viel Uhr?'); if(!f.datum) return toast('An welchem Tag?');
+  const alle=!!(x.serieId && f.serieAlle);
+  if(!alle && f.datum!==x.datum && f.datum<today()) return toast('Dieser Tag liegt in der Vergangenheit.');
+  const link=linkNorm(f.link); if(link===false) return toast('Der Link sieht nicht richtig aus. Beispiel: www.restaurant.de');
+  const eing=Object.entries(f.inv||{}).filter(([u,v])=>v).map(([u])=>u); if(x.privat && !eing.length) return toast('Wen möchtest du einladen?');
+  const d={titel:t, zeit:f.zeit, bis:f.bis||null, ort:(f.ort||'').trim(), link:link||null, beschreibung:(f.beschreibung||'').trim(), max:+f.max>0?+f.max:null, geaendertAm:now(), geaendertVon:S.uid, ...(x.privat?{eingeladen:eing}:{})};
+  if(f.zeit!==x.zeit) d.erinnert=false;
+  const ziele = alle ? S.rt.akt.filter(a=>a.serieId===x.serieId) : [x];
+  // Was hat sich geändert? (für den Hinweis im Termin-Chat)
+  const was=[]; if(t!==x.titel) was.push(`Titel „${t}“`); if(!alle && f.datum!==x.datum) was.push(`Tag ${dayLabel(x.datum)} → ${dayLabel(f.datum)}`);
+  if(f.zeit!==x.zeit || (f.bis||'')!==(x.bis||'')) was.push(`Uhrzeit ${aktZeit(x)} → ${aktZeit({zeit:f.zeit, bis:f.bis})} Uhr`);
+  if(d.ort!==(x.ort||'')) was.push(d.ort?`Ort ${d.ort}`:'Ort entfernt'); if((link||'')!==(x.link||'')) was.push(link?'neuer Link':'Link entfernt');
+  if(d.beschreibung!==(x.beschreibung||'')) was.push('Beschreibung'); if((d.max||null)!==(x.max||null)) was.push(d.max?`max. ${d.max} Personen`:'keine Höchstzahl mehr');
+  el.disabled=true;
+  try{ for(const y of ziele) await S.db.doc(`aktivitaeten/${y.id}`).update({...d, ...(!alle && f.datum!==x.datum?{datum:f.datum, erinnert:false}:{})});
+    if(was.length) await S.db.collection('nachrichten').add({rid:x.rid, aktId:x.id, typ:'system', text:`${nm(S.uid)} hat den Termin geändert: ${was.join(' · ')}`, by:S.uid, createdAt:now()}).catch(()=>{});
+    toast(alle?'Alle Tage der Serie geändert':'Änderungen gespeichert'); if(!alle && f.datum!==x.datum) S.ui.day=f.datum; back(); setTimeout(syncVortreffen,800); }
+  catch(e){ el.disabled=false; fail(e,'Speichern'); } }
+
+/* ---------- Terminliste (Kachel „Termine“ im Reiter „Reise“) ---------- */
+V.termine = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const alle=visibleAkt().sort((a,b)=>(a.datum+a.zeit).localeCompare(b.datum+b.zeit));
+  const vorbei=S.ui.termVorbei; const l=alle.filter(a=>vorbei ? a.datum<today() : a.datum>=today()); const tage=[...new Set(l.map(a=>a.datum))]; if(vorbei) tage.reverse();
+  const zeile = a => { const d=aktDabei(a); return `<button class="li" style="color:var(--tx)" data-act="openAkt" data-id="${a.id}"><span class="termzeit num">${esc(a.zeit||'–')}</span><span class="grow col" style="gap:1px;min-width:0"><b class="ell">${a.privat?ic('lock',13)+' ':''}${esc(a.titel)}</b><span class="tiny mut ell">${a.ort?`${esc(a.ort)} · `:''}${d.length} dabei${a.by===S.uid?' · von dir':''}</span></span>${(a.dabei||{})[S.uid]===true?`<span class="tiny" style="color:var(--grntx)">${ic('check',14)}</span>`:''}${aktDarfAendern(a)?`<span class="tiny mut">${ic('pencil',14)}</span>`:''}</button>`; };
+  return `${hdrTrip('Termine')}${backBtn()}<div class="row between"><h1>Termine</h1>${r.geschlossen?'':`<button class="btn sm" data-act="go" data-v="neueAkt">${ic('plus',16)} Neu</button>`}</div>
+    <div class="tabs" role="tablist"><button role="tab" aria-selected="${!vorbei}" data-act="ui" data-k="termVorbei" data-val="">Kommende</button><button role="tab" aria-selected="${!!vorbei}" data-act="ui" data-k="termVorbei" data-val="1">Vergangene</button></div>
+    ${tage.length?tage.map(t=>`<h3 style="margin:6px 0 -4px">${dayLabel(t)}</h3><div class="list">${l.filter(a=>a.datum===t).map(zeile).join('')}</div>`).join('')
+      :`<div class="empty small">${vorbei?'Noch keine vergangenen Termine.':'Keine kommenden Termine. Leg den ersten an!'}</div>`}
+    <p class="tiny mut">Deine eigenen Termine erkennst du am Stift. Antippen, dann oben auf „Bearbeiten“.</p>`; };
 /* ===================== Beta-Feedback (vorübergehend) =====================
    Das Versions-Schild oben neben dem Logo wird zum türkisen Feedback-Knopf. Nur für angemeldete Nutzer.
    Feedback landet in einem eigenen Postfach, das nur der Superadmin lesen darf. */
@@ -4639,7 +4821,7 @@ V.reise = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), m=myM(); con
     packliste: ph==='abreise' ? {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:`${hc.ok}/${hc.n}`, zahlLang:`Heimreise-Check ${hc.ok} von ${hc.n}`, warn:hc.ok<hc.n, extra:'data-v="packliste" data-tab="heim"'}
       : {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:n?`${ok}/${n}`:'', zahlLang:`${ok} von ${n} eingepackt`, extra:'data-v="packliste" data-tab="mein"'},
     mitbringen:{titel:'Mit&shy;bringen', ic:'mitbringen', farbe:'pink', zahl:mbOffen?`${mbOffen} offen`:'', warn:mbOffen>0, extra:'data-v="packliste" data-tab="gruppe"'},
-    termine:{titel:'Termine', ic:'termine', farbe:'blau', zahl:kommend?String(kommend):'', zahlLang:`${kommend} kommende`, extra:'data-v="neueAkt"'},
+    termine:{titel:'Termine', ic:'termine', farbe:'blau', zahl:kommend?String(kommend):'', zahlLang:`${kommend} kommende`, extra:'data-v="termine"'},
     herde:{titel:'Herde', ic:'herde', icHtml:art(r).platzIcon!=='pin'?ic(art(r).platzIcon,26):'', farbe:'tuerkis', zahl:herde?String(herde):'', zahlLang:`${herde} teilen heute ihren Platz`, extra:'data-v="herde"'},
     anreise:{titel:ph==='abreise'?'Rück&shy;reise':'Anreise', ic:'daten', farbe:'nacht', zahl:anFehlt&&['vorfreude','abreise'].includes(ph)?'fehlt':'', warn:true, extra:`data-v="anreise" data-tab="${ph==='abreise'?'rueck':'an'}"`},
     infos:{titel:'Infos', ic:'infos', farbe:'gelb', zahl:'', extra:'data-v="infos"'},

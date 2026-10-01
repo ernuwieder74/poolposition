@@ -68,7 +68,10 @@ async function berichtFuer(doc) {
   let wetter = '';
   if (ort && heute <= r.bis) { const w = await wetterZeile(ort, heute); wetter = w.zeile; if (w.tz && !r.tz) tz = w.tz; }
   if (!r.tz && tz) { r.tz = tz; await doc.ref.update({ tz }).catch(() => {}); }  // Zeitzone merken
-  const text = berichtText({ r, mitglied, akt, profil: u => prof[u], gestern, heute, wetter, medien });
+  // Erwiderte Urlaubsherzen von gestern (Namen nur, wenn beide es erlaubt haben)
+  const hz = await db.collection('herzanfragen').where('rid', '==', r.id).where('status', '==', 'bestaetigt').get().catch(() => null);
+  const knister = hz ? hz.docs.map(x => x.data()).filter(a => a.bestaetigtTag === gestern) : [];
+  const text = berichtText({ r, mitglied, akt, profil: u => prof[u], gestern, heute, wetter, medien, knister });
   try { await ref.create({ rid: r.id, typ: 'morgen', tag: gestern, text, by: 'system', createdAt: Date.now() }); logger.info('Morgenbericht', r.id, heute); }
   catch (e) { if (e.code !== 6) throw e; }                      // 6 = gibt es schon (paralleler Lauf)
 }

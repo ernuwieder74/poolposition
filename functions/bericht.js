@@ -6,7 +6,7 @@ function medienZaehlen(msgs, tag, tagVon){ let bilder=0, videos=0;
   for(const m of msgs||[]){ if(m.typ!=='bild' || !m.bild || m.geloescht || m.ausgeblendet) continue; if(tagVon(m.createdAt||0)!==tag) continue;
     if(String(m.mime||'').startsWith('video')) videos++; else bilder++; }
   return {bilder, videos}; }
-function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter, medien} = d;
+function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter, medien, knister=[]} = d;
   const name = uid => { const p=profil(uid)||{}; return p.spitzname || (p.vorname ? `${p.vorname}${p.nachname?` ${p.nachname[0].toUpperCase()}.`:''}` : '') || p.name || 'Jemand'; };
   const kat = {}; ['Bier','Wein','Gin Tonic','Sex on the Beach'].forEach(n=>kat[n]=n); Object.entries(r.getraenkeKat||{}).forEach(([id,e])=>{ if(e&&e.name) kat[id]=e.name; });
   const trinkName = id => kat[id] || id;
@@ -28,6 +28,10 @@ function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter
   const hv=ms.map(m=>[m.uid,+m.herzen||0]); const hmax=Math.max(0,...hv.map(v=>v[1])); const hids=hmax>0?hv.filter(v=>v[1]===hmax).map(v=>v[0]):[];
   const trikot = hids.length ? (hids.length>1?`Das gelbe Trikot teilen sich ${liste(hids.map(name))}.`:`Das gelbe Trikot trägt ${neueH?'nun':'weiterhin'} ${name(hids[0])}.`) : '';
   z.push(neueH ? `❤️ Es ${neueH===1?'wurde ein neues Herz':`wurden ${neueH} neue Herzen`} vergeben. ${trikot}` : (trikot?`Gestern wurden keine neuen Herzen vergeben. ${trikot}`:''));
+  // Erwiderte Urlaubsherzen: Namen nur, wenn beide es erlaubt haben
+  if(knister.length){ const offen=knister.filter(a=>a.vonZeigen&&a.anZeigen); const geheim=knister.length-offen.length;
+    const t=[]; if(geheim) t.push(geheim===1?'💘 Und es knistert: Gestern wurde in der Gruppe ein Urlaubsherz erwidert. Wer das wohl ist? 😉':`💘 Und es knistert gewaltig: Gestern wurden ${geheim} Urlaubsherzen erwidert. Wer das wohl ist? 😉`);
+    offen.forEach(a=>t.push(`💞 Zwischen ${name(a.von)} und ${name(a.an)} hat es gefunkt!`)); z.push(t.join('\n')); }
   if(medien && (medien.bilder||medien.videos)){ const b=medien.bilder, v=medien.videos;
     const was=[b?`${b} ${b===1?'neues Bild':'neue Bilder'}`:'', v?`${v} ${v===1?'neues Video':'neue Videos'}`:''].filter(Boolean).join(' und ');
     z.push(`📸 Gestern ${b+v===1?'ist':'sind'} ${was} ins Album gekommen.`); }

@@ -2,7 +2,7 @@
    Geräte-Schlüssel liegen unter pushtokens/{uid}: { tokens: {<token>: {at, ua}}, prefs: {chat, fluester, termine, morgen, admin} }.
    - Gruppenchat, Event-Chat, Flüstern, Morgenbericht, neue Termine, Termin-Erinnerung 30 Minuten vorher, neue Meldungen für die Badeaufsicht.
    - Wer blockiert ist, löst beim Blockierenden keine Benachrichtigung aus. Ungültige Geräte-Schlüssel werden automatisch entfernt. */
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
@@ -96,4 +96,26 @@ exports.terminErinnerung = onSchedule({ schedule: 'every 10 minutes', region: 'e
       const dabei = Object.entries(x.dabei || {}).filter(([u, v]) => v === true).map(([u]) => u).concat(x.by ? [x.by] : []);
       try { await senden(dabei, 'termine', { title: `⏰ Gleich geht's los: ${x.titel || 'Termin'}`, body: `Um ${x.zeit} Uhr${x.ort ? ' · ' + x.ort : ''} · ${reiseTitel(r)}`, tag: `erinnerung_${a.id}` }); }
       catch (e) { logger.error('Erinnerung', a.id, e); } } }
+});
+
+/* ---------- Urlaubsherzen an Gruppenmitglieder ----------
+   Anfrage: Empfänger bekommt eine diskrete Nachricht (ohne Namen auf dem Sperrbildschirm).
+   Erwidert: Absender bekommt Bescheid. 1–3 Stunden später schreibt knisterBote „Es knistert“ in den Gruppenchat. */
+exports.pushHerz = onDocumentCreated({ ...TRIG, document: 'herzanfragen/{id}' }, async ev => {
+  const a = ev.data?.data(); if (!a || a.status !== 'offen') return;
+  return senden([a.an], 'fluester', { title: '💘 Ein Urlaubsherz für dich', body: 'Jemand aus eurer Gruppe hat dir ein Urlaubsherz geschenkt. Tippe, um nachzusehen.', tag: `herz_${ev.params.id}` });
+});
+exports.pushHerzErwidert = onDocumentUpdated({ ...TRIG, document: 'herzanfragen/{id}' }, async ev => {
+  const vor = ev.data?.before?.data(), nach = ev.data?.after?.data(); if (!vor || !nach || vor.status === 'bestaetigt' || nach.status !== 'bestaetigt') return;
+  const n = await namen([nach.an]);
+  return senden([nach.von], 'fluester', { title: '💞 Dein Urlaubsherz wurde erwidert', body: `${vorname(n[nach.an])} hat dein Herz erwidert!`, tag: `herz_${ev.params.id}` });
+});
+const knisterText = (a, name) => a.vonZeigen && a.anZeigen ? `💞 Es knistert! Zwischen ${name(a.von)} und ${name(a.an)} hat es gefunkt.` : '💘 In der Gruppe knistert es gerade … Ein Urlaubsherz wurde erwidert. Wer das wohl ist? 😉';
+exports.knisterBote = onSchedule({ schedule: 'every 10 minutes', region: 'europe-west3', timeoutSeconds: 120, maxInstances: 1 }, async () => {
+  const s = await db.collection('herzanfragen').where('status', '==', 'bestaetigt').where('knisterGepostet', '==', false).get();
+  for (const d of s.docs) { const a = d.data(); if ((a.knisterAm || 0) > Date.now()) continue;
+    try { const offen = !!(a.vonZeigen && a.anZeigen); const n = offen ? await namen([a.von, a.an]) : {};
+      await db.doc(`nachrichten/knister_${d.id}`).create({ rid: a.rid, typ: 'system', knister: true, offen, text: knisterText(a, u => n[u] || 'Jemand'), by: 'system', createdAt: Date.now() }).catch(e => { if (e.code !== 6) throw e; });
+      await d.ref.update({ knisterGepostet: true, ...(offen ? { offengelegt: true } : {}) }); }
+    catch (e) { logger.error('Knister', d.id, e); } }
 });

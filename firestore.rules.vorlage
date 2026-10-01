@@ -227,6 +227,21 @@ service cloud.firestore {
       allow read: if isSuper() || recht('support');
     }
     // „Wer bringt was mit?“: Mitglieder der Reise tragen ein und übernehmen; löschen darf, wer es eingetragen hat, oder der Reise-Admin
+    // Urlaubsherzen an Gruppenmitglieder: sehen dürfen nur die beiden Beteiligten
+    match /herzanfragen/{id} {
+      allow read: if signedIn() && (resource.data.von == me() || resource.data.an == me());
+      allow create: if request.resource.data.von == me() && request.resource.data.an != me()
+        && isMember(request.resource.data.rid)
+        && exists(mDoc(request.resource.data.rid, request.resource.data.an))
+        && get(mDoc(request.resource.data.rid, request.resource.data.an)).data.status == 'zugesagt'
+        && request.resource.data.status == 'offen' && request.resource.data.knisterGepostet == false
+        && request.resource.data.keys().hasOnly(['rid', 'von', 'an', 'status', 'vonZeigen', 'anZeigen', 'knisterGepostet', 'offengelegt', 'createdAt']);
+      // Empfänger erwidert (oder ändert seine Freigabe), Absender ändert nur seine Freigabe; offengelegt setzt, wer das Geheimnis lüftet
+      allow update: if signedIn() && (
+          (resource.data.an == me() && onlyChanges(['status', 'anZeigen', 'bestaetigtAm', 'bestaetigtTag', 'knisterAm', 'offengelegt']) && request.resource.data.status in ['offen', 'bestaetigt'])
+          || (resource.data.von == me() && onlyChanges(['vonZeigen', 'offengelegt'])));
+      allow delete: if signedIn() && (resource.data.von == me() || resource.data.an == me());
+    }
     match /mitbringen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
       allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me()
