@@ -4,12 +4,20 @@ public/config.js (Firebase-Zugangsdaten der Web-App, Admin-Adressen, Web-Push-Sc
 firestore.rules (aus der Vorlage mit den Admin-Adressen), functions/region.json und .bucket."""
 import json, os, re, subprocess, sys
 P = os.environ.get('PROJECT', 'poolposition-46f4c')
+def fehler(t):  # als Hinweis in der GitHub-Übersicht sichtbar
+    print(f'::error title=Konfiguration::{t}'); sys.exit(1)
 admins = [a.strip().lower() for a in os.environ.get('ADMINS', '').split(',') if a.strip()]
 vapid = os.environ.get('VAPID', '').strip()
-if not admins: sys.exit('FEHLER: Secret ADMINS fehlt (E-Mail-Adresse des Oberbademeisters).')
-def fb(*a): return json.loads(subprocess.check_output(['firebase', *a, '--project', P, '--json']))
+if not admins: fehler('Secret ADMINS fehlt oder ist leer (E-Mail-Adresse des Oberbademeisters).')
+if not vapid: print('::warning title=Web-Push::Secret VAPID fehlt – Push-Benachrichtigungen bleiben aus.')
+def fb(*a):
+    r = subprocess.run(['firebase', *a, '--project', P, '--json'], capture_output=True, text=True)
+    try: d = json.loads(r.stdout)
+    except Exception: fehler(f'firebase {" ".join(a)}: {(r.stderr or r.stdout)[-500:]}')
+    if d.get('status') == 'error': fehler(f'firebase {" ".join(a)}: {d.get("error")}')
+    return d
 apps = (fb('apps:list', 'WEB').get('result') or [])
-if not apps: sys.exit('FEHLER: Keine Web-App im Firebase-Projekt gefunden.')
+if not apps: fehler('Keine Web-App im Firebase-Projekt gefunden.')
 r = fb('apps:sdkconfig', 'WEB', apps[0]['appId']).get('result', {})
 cfg = r.get('sdkConfig') or json.loads(re.search(r'\{.*\}', r.get('fileContents', ''), re.S).group(0))
 open('public/config.js', 'w').write('self.PP_CONFIG = ' + json.dumps({'firebase': cfg, 'admins': admins, 'vapid': vapid}, indent=2) + ';\n')
