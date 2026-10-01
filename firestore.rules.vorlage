@@ -46,7 +46,9 @@ service cloud.firestore {
       // Normale Mitglieder dürfen nur Vortreffen-Hinweis, neue Getränke und den Stand der Auszeichnungen eintragen – nie Admin, Sperren oder Reisedaten.
       allow update: if isTripAdmin(rid) || isAdmin()
         || (recht('ausschliessen') && onlyChanges(['gesperrt']))
-        || (isMember(rid) && onlyChanges(['naechstesVortreffen', 'getraenkeKat', 'auszeichnungen']));
+        || (isMember(rid) && onlyChanges(['naechstesVortreffen', 'getraenkeKat', 'auszeichnungen']))
+        // Infos der Unterkunft: alle Mitglieder, wenn der Gruppenadmin es erlaubt hat
+        || (isMember(rid) && resource.data.get('infosOffen', false) == true && onlyChanges(['infos', 'infosVon', 'infosAm']));
       allow delete: if isAdmin();
     }
 
@@ -64,7 +66,7 @@ service cloud.firestore {
       allow update: if signedIn() && (
         (resource.data.uid == me() && resource.data.status != 'entfernt' && request.resource.data.status != 'entfernt')
         || isTripAdmin(resource.data.rid)
-        || (isMember(resource.data.rid) && onlyChanges(['platzDabei']))
+        || (isMember(resource.data.rid) && onlyChanges(['platzDabei', 'abholer']))
         || (recht('ausschliessen') && onlyChanges(['status', 'entferntAm']))
         || (recht('reisedaten') && onlyChanges(['anreise', 'abreise']))
         || isAdmin());

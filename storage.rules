@@ -6,7 +6,7 @@ service firebase.storage {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == uid && !('supportVon' in request.auth.token)
         && request.resource.size < 20 * 1024 * 1024
-        && request.resource.contentType.matches('image/(jpeg|png|gif|webp)|video/(mp4|webm|quicktime)|audio/(mp4|webm|ogg|mpeg|aac)');
+        && request.resource.contentType.matches('image/(jpeg|png|gif|webp)|application/pdf|video/(mp4|webm|quicktime)|audio/(mp4|webm|ogg|mpeg|aac)');
       allow delete: if request.auth != null && !('supportVon' in request.auth.token);
     }
   }

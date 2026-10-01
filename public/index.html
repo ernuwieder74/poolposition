@@ -513,6 +513,95 @@ body.adminmodus::after{content:'';position:fixed;inset:0;border:4px solid var(--
 .packhaken{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:7px 0}
 .packzeile.ok .grow{color:var(--mut);text-decoration:line-through}
 .mbfrei{width:32px;height:32px;border-radius:50%;border:2px dashed #e8780c;color:#e8780c;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+/* ===== Reiter „Reise“: bunte Kacheln ===== */
+.hubkopf{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hubkopf h1{margin:0;font-size:30px;letter-spacing:-.02em}
+.hubphase{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--yelt)}
+.hubgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hk{all:unset;cursor:pointer;box-sizing:border-box;position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;gap:6px;
+  aspect-ratio:1/1;padding:11px;border-radius:22px;color:#fff;background:var(--hk1);
+  background-image:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.28),transparent 55%),linear-gradient(145deg,var(--hk1),var(--hk2));
+  box-shadow:0 8px 20px -12px var(--hk2),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s}
+.hk:hover{transform:translateY(-2px)} .hk:active{transform:scale(.95)}
+.hk:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.hk.fokus{box-shadow:0 0 0 2.5px var(--bg),0 0 0 5px var(--hk1),0 10px 26px -8px var(--hk2)}
+.hk.fokus::after{content:'';position:absolute;top:11px;left:11px;width:40px;height:40px;border-radius:13px;box-shadow:0 0 0 0 rgba(255,255,255,.6);animation:hkpuls 2.4s ease-out infinite;z-index:-1}
+@keyframes hkpuls{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}70%,100%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+.hkic{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hk .f{fill:rgba(255,255,255,.3)}
+.hktitel{font-size:clamp(12px,3.7vw,15px);font-weight:800;line-height:1.12;letter-spacing:-.01em;hyphens:auto;overflow-wrap:break-word}
+.hkzahl{position:absolute;top:9px;right:9px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.24);font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.hkzahl.warn{background:#fff;color:var(--hk2)}
+.hkwasser{position:absolute;right:-20px;bottom:-22px;opacity:.14;transform:rotate(-14deg);z-index:-1;pointer-events:none}
+@media (min-width:560px){.hktitel{font-size:16px}.hk{padding:14px}}
+@media (max-width:360px){.hk{padding:9px;border-radius:18px}.hkic{width:34px;height:34px;border-radius:11px}.hkic svg{width:22px;height:22px}.hkzahl{font-size:10px;padding:2px 6px}}
+.hk-violett{--hk1:#8a63ff;--hk2:#5a33e6} .hk-gruen{--hk1:#22c58b;--hk2:#0b8f63} .hk-orange{--hk1:#ff9a3c;--hk2:#f2541b}
+.hk-pink{--hk1:#ff5c97;--hk2:#d81f68} .hk-blau{--hk1:#3d95ff;--hk2:#1c56d6} .hk-tuerkis{--hk1:#19c7c9;--hk2:#08869a}
+.hk-koralle{--hk1:#ff6f61;--hk2:#d7262c} .hk-nacht{--hk1:#4a5a85;--hk2:#253154} .hk-graphit{--hk1:#5d5a57;--hk2:#2e2b29}
+@media (prefers-reduced-motion:reduce){.hk{transition:none}.hk.fokus::after{animation:none}}
+.hk-rot{--hk1:#ff4d5e;--hk2:#b5121b} .hk-gelb{--hk1:#ffb72b;--hk2:#e0700b}
+.hubkopf{align-items:flex-start}
+/* Ankunftstafel */
+.tafel{display:flex;flex-direction:column;border-radius:18px;overflow:hidden;background:#141a2b;border:1.5px solid #2a3557;color:#e9eefc}
+.tzeile{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid #243052}
+.tzeile:first-child{border-top:0}
+.tzeit{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;font-size:17px;color:#ffd23f;letter-spacing:.02em;min-width:50px}
+.tic{width:28px;height:28px;border-radius:9px;background:#24305a;color:#9fb3ff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.tic.gross{width:40px;height:40px;border-radius:12px;background:var(--chip);color:var(--tx2)}
+.tnr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;padding:1px 6px;border-radius:6px;background:#24305a;color:#c9d4ff;margin-left:4px}
+.tafel .mut{color:#9aa6c8}
+.tafel.kompakt .tzeile{padding:7px 10px} .tafel.kompakt .tzeit{font-size:15px}
+.tafelkarte{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:20px;background:var(--glass);border:1.5px solid var(--line)}
+/* Infos */
+.infokarte{gap:0}
+.izeile{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:1px;padding:9px 0;border-top:1px solid var(--line2);color:var(--tx);cursor:default;width:100%}
+a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
+.izeile span:last-child{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.wlanchip{border:0;cursor:pointer;font-weight:700}
+.dokvorschau{all:unset;cursor:pointer;width:46px;height:46px;border-radius:12px;overflow:hidden;background:var(--chip);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dokvorschau img{width:100%;height:100%;object-fit:cover} .dokvorschau.pdf{background:#d7262c;color:#fff;font-weight:800;font-size:12px;text-decoration:none}
+/* Notfall */
+.notruf{display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:24px;color:#fff;text-decoration:none;background:linear-gradient(145deg,#ff4d5e,#b5121b);box-shadow:0 14px 30px -12px #b5121b}
+.notrufnr{font-size:44px;font-weight:900;line-height:1;letter-spacing:-.02em}
+.notrufe{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.notrufmini{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:16px;background:var(--redbg);color:var(--tx);text-decoration:none;border:1.5px solid rgba(215,38,44,.4)}
+.notrufmini b{font-size:20px}
+.notfallliste .izeile span:last-child{font-weight:700}
+.qrrahmen{background:#fff;border-radius:18px;padding:10px;margin:4px auto;width:min(78vw,300px);box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.qrbild{display:block;width:100%;height:auto}
+.szene{position:relative;border-radius:26px;overflow:hidden;min-height:132px;display:flex;align-items:flex-end;isolation:isolate;box-shadow:0 14px 30px -18px rgba(0,0,0,.6)}
+.szenebild{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.szenetext{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:14px 16px;max-width:70%}
+.szenetext h1{margin:0;font-size:26px;line-height:1.05;color:#fff;letter-spacing:-.02em;text-shadow:0 2px 10px rgba(0,0,0,.45),0 1px 2px rgba(0,0,0,.35);overflow-wrap:anywhere}
+.szenephase{background:#f5c518;color:#1c1714;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #d7262c}
+.szene .szenetext{align-self:flex-start;margin-top:0}
+.thema-strand .szenetext,.thema-land .szenetext{align-self:flex-start}
+.szenegear{all:unset;cursor:pointer;position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(20,18,17,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.szenegear:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.thflocken{animation:thschnee 7s linear infinite}
+@keyframes thschnee{0%{transform:translateY(-6px)}100%{transform:translateY(10px)}}
+.hk::before{content:'';position:absolute;left:0;right:0;bottom:0;height:34%;background:var(--boden) bottom/100% 100% no-repeat;opacity:.24;z-index:-1;pointer-events:none}
+.hubgrid .hk{background-image:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.28),transparent 55%),linear-gradient(145deg,var(--hk1),var(--hk2))}
+.hubgrid .hk>.hkmuster{position:absolute;inset:0;background:var(--muster) 0 0/34px 34px repeat;opacity:.13;z-index:-1;pointer-events:none;-webkit-mask:linear-gradient(160deg,#000 10%,transparent 75%);mask:linear-gradient(160deg,#000 10%,transparent 75%)}
+.hk{text-shadow:0 1px 3px rgba(0,0,0,.25)}
+.hubgrid.thema-ski .hk::before{opacity:.32}
+@media (max-height:700px){.szene{min-height:96px}.szenetext{padding:10px 14px}.szenetext h1{font-size:21px}.hubgrid{gap:8px}}
+@media (prefers-reduced-motion:reduce){.thflocken{animation:none}}
+.szene.klein{min-height:108px}
+.szene.klein .szenetext h1{font-size:24px}
+@media (max-height:700px){.szene.klein{min-height:88px}.szene.klein .szenetext h1{font-size:20px}}
+.kbetragzeile{gap:8px}
+.kwsel{flex:0 1 58%;min-width:0;width:auto}
+.kbetragzeile #f_kbetrag{min-width:0;flex:1 1 42%}
+[data-weiter]{white-space:normal;line-height:1.25;height:auto;min-height:48px;padding-top:10px;padding-bottom:10px}
+.kurskarte{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:16px;background:var(--chip);margin-top:-6px}
+.kursin{width:110px;flex:0 0 auto}
+.dokvorschau.gross{width:100%;height:auto;max-height:260px}
+.dokvorschau.gross img{object-fit:contain}
+.kdetail{display:flex;flex-direction:column;gap:0;border-radius:18px;background:var(--chip);padding:4px 14px}
+.kdetail>div{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line2)}
+.kdetail>div:first-child{border-top:0}
+.kdzeile{display:flex;justify-content:space-between;gap:10px;font-size:14px}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -525,7 +614,7 @@ body.adminmodus::after{content:'';position:fixed;inset:0;border:4px solid var(--
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.20";
+const APP_VERSION = "Beta 2.21";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -883,14 +972,14 @@ function meBtn(){ return `<button class="avbtn" data-act="go" data-v="profil" ar
 function hdrTrip(label, sub=''){ const r=cur(); return `<header class="hdr${sub?' mitsub':''}">${sub?'<div class="hdrrow">':''}<button class="homebtn" data-act="home" aria-label="Zu Meine Reisen">${I.logo()}</button>${verTag()}<button class="pill" data-act="reisewahl" aria-label="Reise wechseln, aktuell ${esc(r?.titel)}"><span style="color:var(--yelt);display:flex">${ic(art(r).icon,18)}</span><span>${esc(r?.titel||'Reise')}</span>${ic('down',16,'style="color:var(--mut);flex-shrink:0"')}</button><span class="seclabel">${esc(label)}</span>${meBtn()}${sub?`</div><div class="hdrsub">${sub}</div>`:''}</header>`; }
 function backBtn(label='Zurück'){ return `<button class="back" data-act="back">${ic('back',20)} ${esc(label)}</button>`; }
 function navBar(){ return ''; }
-const TRIPMAP = {tag:'tag',herde:'tag',aktivitaet:'tag',neueAkt:'tag',chat:'chat',fluester:'chat',fneu:'chat',fcode:'chat',person:'chat',album:'album',papierkorb:'album',mitglieder:'mitglieder',mitglied:'mitglieder',reiseEinst:'mitglieder',einladen:'mitglieder',kasseNeu:'mitglieder',barometer:'barometer'};
+const TRIPMAP = {tag:'tag',herde:'tag',aktivitaet:'tag',neueAkt:'tag',chat:'chat',fluester:'chat',fneu:'chat',fcode:'chat',person:'chat',album:'album',papierkorb:'album',reise:'reise',mitglieder:'reise',mitglied:'reise',reiseEinst:'reise',einladen:'reise',kasseNeu:'reise',packliste:'reise',heimreise:'reise',reiseDaten:'reise',anreise:'reise',infos:'reise',notfall:'reise',barometer:'barometer'};
 const HOMEMAP = {home:'home',neu:'home',konferenz:'home',dabei:'home',vorschlag:'home',freigabe:'home',fliste:'fliste',fluester:'fliste',fneu:'fliste',fcode:'fliste',person:'fliste',beitreten:'beitreten',profil:'profil',profilEdit:'profil',einstellungen:'profil',sysadmin:'profil',reiseDaten:'profil',herzen:'profil',einladen:'home',konto:'profil',gastAkt:'home'};
 function navHtml(){
   if(S.boot!=='ok' || !S.profilesLoaded || !S.profile[S.uid] || gesperrt()) return '';
   if(S.route?.v==='sysadmin') return ''; // Adminbereich: kein Fußzeilenmenü
   const n=fluesterUnread(), nc=navChatBadge();
   if(tripNav()){ const v=TRIPMAP[S.route.v];
-    const it=[['tag','Mein Tag','tag'],['chat','Chat','chat'],['album','Album','album'],['mitglieder','Mitglieder','mitgl'],['barometer','Barometer','baro']];
+    const it=[['tag','Mein Tag','tag'],['chat','Chat','chat'],['album','Album','album'],['barometer','Barometer','baro'],['reise','Reise','suitcase']];
     return `<nav class="nav" aria-label="Menü der Reise">${it.map(([k,l,i])=>`<button data-act="nav" data-v="${k}" ${v===k?'aria-current="page"':''}>${ic(i,24)}<span>${l}</span>${k==='chat'&&nc?`<span class="badge">${nc>99?'99+':nc}</span>`:''}</button>`).join('')}</nav>`; }
   const v=HOMEMAP[S.route.v];
   const it=[['home','Reisen','suitcase'],['fliste','Flüstern','chat'],['beitreten','Beitreten','ticket'],['profil','Profil','mitgl']];
@@ -1234,9 +1323,9 @@ V.tag = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), a=art(r), m=my
   // Mein Platz heute
   const myPlatz = m.platz?.datum===today() ? m.platz.text : '';
   return `${hdrTrip('Mein Tag')}${geschlossenBanner()}<!--pushhinweis-->
-  <div class="col" style="gap:10px"><h1>${greet()}, ${esc(nm(S.uid))}</h1><div class="row wrap">${vorChip(r)}<span class="chip yel">${ic('sun',16)} ${esc(cnt)}</span><span class="chip">${ic('tag',16)} ${dayLabel(day)} ${acts.length} ${acts.length===1?'Termin':'Termine'}</span></div>${isToday?herdeLeiste():''}</div>
+  <div class="col" style="gap:10px">${reiseSzene(r, '', false, `${greet()}, ${nm(S.uid)}`, true)}<div class="row wrap">${vorChip(r)}<span class="chip yel">${ic('sun',16)} ${esc(cnt)}</span><span class="chip">${ic('tag',16)} ${dayLabel(day)} ${acts.length} ${acts.length===1?'Termin':'Termine'}</span>${wlanKnopf()}</div>${isToday?herdeLeiste():''}</div>
   ${days.length>1?`<div class="scrollx" role="group" aria-label="Tag wählen">${days.map((d,i)=>{ const dd=parseDay(d); const out=d<md.von||d>md.bis; const gap=i>0 && addDays(days[i-1],1)!==d; return `${gap?'<span class="daygap" aria-hidden="true">…</span>':''}<button class="daybtn ${out?'out':''}" aria-pressed="${d===day}" data-act="ui" data-k="day" data-val="${d}" aria-label="${dayLabel(d)}${out?', außerhalb der Reise':''}"><span>${d===today()?'Heute':out?`${pad(dd.getDate())}.${pad(dd.getMonth()+1)}.`:WD[dd.getDay()]}</span><b class="num">${out?WD[dd.getDay()]:dd.getDate()}</b></button>`; }).join('')}</div>`:''}
-  ${packKarte()}
+  ${tafelKarte(day)}${packKarte()}${heimKarte()}
   ${kasseMini()}
   ${isToday && !r.geschlossen?(istZu('platz')?zuKarte('platz',a.platzIcon,myPlatz?`Mein Platz: ${myPlatz}`:'Mein Platz heute','umbruch','',myPlatz?'':'noch nicht geteilt'):`<div class="card tight"><div class="row between"><div class="row"><span style="color:var(--yelt)">${ic(a.platzIcon,22)}</span><span class="ttl">Mein Platz heute</span></div><span class="row" style="gap:6px">${myPlatz?`<button class="link" data-act="platzEdit">Ändern</button>`:''}${klappBtn('platz','Mein Platz heute')}</span></div>
     ${myPlatz && !S.ui.platzEdit?`<div class="row"><span class="grow" style="font-size:16px;font-weight:700">${esc(myPlatz)}</span>${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).length?`<div class="stack">${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).map(([u])=>av(u,26)).join('')}</div>`:''}</div>`
@@ -1526,13 +1615,13 @@ const legend = ()=>`<div class="legend"><span>${AW.trikot(16)} meiste Herzen</sp
 
 /* ---------- Mitglieder ---------- */
 V.mitglieder = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const all=S.rt.mitglied; const tab=S.ui.mitTab||'mit';
-  if(tab==='kasse') return `${hdrTrip('Kassenbuch')}${geschlossenBanner()}${mitgliederTabs('kasse')}${kasseView()}`;
+  if(tab==='kasse') return `${hdrTrip('Kassenbuch')}${S.hist.length?backBtn('Reise'):''}${geschlossenBanner()}${mitgliederTabs('kasse')}${kasseView()}`;
   const act=all.filter(m=>m.status==='zugesagt'); const aus=act.filter(m=>daysUntil(m.abreise||r.bis)<0); const da=act.filter(m=>!aus.includes(m)).sort((a,b)=>(a.abreise||'').localeCompare(b.abreise||''));
   const weg=all.filter(m=>['entfernt','ausgetreten'].includes(m.status)); const offen=all.filter(m=>['teilnehmer','eingeladen'].includes(m.status));
   const row=(m,kind)=>{ const dd=daysUntil(m.abreise||r.bis); const st = kind==='weg' ? `<span class="row" style="gap:4px;color:var(--pinktx)">${m.status==='entfernt'?AW.rote(14)+' Entfernt':'Ausgetreten'}</span>` : kind==='aus' ? `Ausgecheckt · ${fD(m.abreise||r.bis)}` : dd===0?'reist heute ab':dd===1?'morgen':`in ${dd} Tagen`;
     return `<button class="mrow ${kind!=='da'?'faded':''}" data-act="go" data-v="mitglied" data-p='{"uid":"${m.uid}"}'><span class="avwrap">${avAw(m.uid,40,kind==='weg'?'gray':'')}${kind==='aus'?`<span class="bdg" style="color:var(--yelt)">${ic('plane',13)}</span>`:kind==='weg'&&m.status==='entfernt'?`<span class="bdg">${AW.rote(13)}</span>`:''}</span>
     <span class="row" style="gap:6px;min-width:0"><span class="ell" style="font-size:16px;font-weight:600">${esc(nm(m.uid))}</span>${awards(m.uid)}${m.uid===r.admin?'<span class="tiny mut">Admin</span>':''}</span><span class="small num" style="color:var(--tx2);text-align:right">${st}</span><span class="hpill num" aria-label="${+m.herzen||0} Herzen">${I.s(P.heart,13,'fill="#e8353b" stroke="none"')}${+m.herzen||0}</span></button>`; };
-  return `${hdrTrip('Mitglieder')}${geschlossenBanner()}${mitgliederTabs('mit')}
+  return `${hdrTrip('Mitglieder')}${S.hist.length?backBtn('Reise'):''}${geschlossenBanner()}${mitgliederTabs('mit')}
   <div class="row between"><h2>${act.length} ${act.length===1?'Mitglied':'Mitglieder'}</h2>${isAdmin()?`<button class="btn xs sec" data-act="go" data-v="reiseEinst">${ic('gear',14)} Reise verwalten</button>`:''}</div>
   <div class="list">${da.map(m=>row(m,'da')).join('')}${aus.map(m=>row(m,'aus')).join('')}${!act.length?'<div class="empty small">Noch niemand.</div>':''}</div>
   ${offen.length?`<h3>Noch nicht zugesagt</h3><div class="list">${offen.map(m=>`<div class="li">${av(m.uid,32)}<span class="grow">${esc(nm(m.uid))}</span><span class="chip">${m.status==='eingeladen'?'eingeladen':'offen'}</span></div>`).join('')}</div>`:''}
@@ -1925,7 +2014,7 @@ function renderOv(){ const o=S.ov; if(!o){ $ov.hidden=true; $ov.innerHTML=''; re
   if(gleich){ $ov.querySelectorAll('input[id],textarea[id],select[id]').forEach(el=>{ if(el.type!=='file') alt[el.id]= el.type==='checkbox'||el.type==='radio' ? {c:el.checked} : {v:el.value}; });
     const a=document.activeElement; if(a && $ov.contains(a) && a.id){ fid=a.id; try{ ss=a.selectionStart; se=a.selectionEnd; }catch(e){} } }
   renderOv.letzt=o;
-  $ov.className = 'ov'+(o.v==='bild'||o.v==='herzBild'||o.v==='profilbild'||o.v==='beweis'?' lightbox':''); $ov.innerHTML=h;
+  $ov.className = 'ov'+(o.v==='bild'||o.v==='herzBild'||o.v==='profilbild'||o.v==='beweis'||o.v==='beleg'?' lightbox':''); $ov.innerHTML=h;
   for(const [id,x] of Object.entries(alt)){ const el=document.getElementById(id); if(!el || !$ov.contains(el)) continue; if('c' in x) el.checked=x.c; else if(el.value!==x.v) el.value=x.v; }
   if(fid){ const el=document.getElementById(fid); if(el && $ov.contains(el)){ el.focus(); try{ el.setSelectionRange(ss,se); }catch(e){} } } }
 $ov.addEventListener('click', ev=>{ if(ev.target===$ov) closeOv(); });
@@ -2984,7 +3073,8 @@ function kasseView(){ const r=cur(); const k=S.rt.kasse||[]; const {s, plan:plan
   ${!liste.length&&nurIch?'<div class="empty small">Keine Einträge, die dich betreffen.</div>':''}
   ${liste.length?`<div class="list">${liste.map(e=> e.typ==='ausgleich'
     ? `<div class="li"><span style="color:var(--grntx)">${ic('check',20)}</span><span class="grow col" style="gap:1px;min-width:0"><span class="small ell">${esc(nameK(e.von))} hat ${esc(e.an===S.uid?'dir':nameK(e.an))} zurückgezahlt</span><span class="tiny mut ell">${fD(e.datum)}${e.aktId?` · Event: ${esc(aktTitel(e.aktId))}`:''}</span></span><b class="num small">${eur(e.betrag)}</b>${darf(e)?`<button class="icbtn sm0" data-act="kasseWeg" data-id="${e.id}" aria-label="Eintrag löschen">${ic('x',16)}</button>`:''}</div>`
-    : `<button class="li" style="color:var(--tx)" data-act="kasseAuf" data-id="${e.id}" ${darf(e)?'':'disabled'}>${av(e.zahler,32)}<span class="grow col" style="gap:1px;min-width:0"><b class="ell">${esc(e.titel)}</b><span class="tiny mut ell">${fD(e.datum)}${e.aktId?` · Event: ${esc(aktTitel(e.aktId))}`:''} · bezahlt von ${esc(e.zahler===S.uid?'dir':nameK(e.zahler))} · für ${(e.fuer||[]).length===(e.aktId?eventLeute(e.aktId):kasseLeute()).length?'alle':`${(e.fuer||[]).length} ${(e.fuer||[]).length===1?'Person':'Personen'}`}</span></span><b class="num" style="white-space:nowrap">${eur(e.betrag)}</b></button>`).join('')}</div>`:''}
+    : `<button class="li" style="color:var(--tx)" data-act="kasseAuf" data-id="${e.id}">${av(e.zahler,32)}<span class="grow col" style="gap:1px;min-width:0"><b class="ell">${esc(e.titel)}</b><span class="tiny mut ell">${fD(e.datum)}${e.aktId?` · Event: ${esc(aktTitel(e.aktId))}`:''} · bezahlt von ${esc(e.zahler===S.uid?'dir':nameK(e.zahler))} · für ${(e.fuer||[]).length===(e.aktId?eventLeute(e.aktId):kasseLeute()).length?'alle':`${(e.fuer||[]).length} ${(e.fuer||[]).length===1?'Person':'Personen'}`}</span></span><span class="col" style="align-items:flex-end;gap:1px"><b class="num" style="white-space:nowrap">${e.beleg?'<span aria-label="mit Beleg" title="mit Beleg">🧾 </span>':''}${eur(e.betrag)}</b>${e.orig?`<span class="tiny mut num" style="white-space:nowrap">${fremd(e.orig.b,e.orig.w)}</span>`:''}</span></button>`).join('')}</div>`:''}
+  ${k.length&&!nurIch?`<button class="btn sec block" data-act="kasseExport">${ic('dl',16)} Abrechnung exportieren oder teilen</button>`:''}
   ${navBar()}`; }
 A.kasseErledigt = el => { const von=el.dataset.von, an=el.dataset.an, b=+el.dataset.b; const aid=el.dataset.aid||''; const rid=aid?(eventAkt(aid)?.rid||S.rid):S.rid;
   if(an!==S.uid) return toast('Nur wer das Geld bekommt, kann es als erhalten markieren.');
@@ -2993,31 +3083,32 @@ A.kasseErledigt = el => { const von=el.dataset.von, an=el.dataset.an, b=+el.data
 A.kasseWeg = el => openOv('confirm',{title:'Eintrag löschen?', text:'Der Stand wird danach neu berechnet.', ok:'Löschen', fn: async ()=>{ await W(()=>S.db.doc(`kasse/${el.dataset.id}`).delete(),'Löschen'); toast('Gelöscht'); if(S.route.v==='kasseNeu') back(); }});
 
 /* ---------- Ausgabe eintragen / bearbeiten ---------- */
-A.kasseNeu = ()=>go('kasseNeu',{form:{kzahler:S.uid, kfuer:Object.fromEntries(kasseLeute().map(u=>[u,true])), kdatum:today()}});
+A.kasseNeu = ()=>{ const w=kasseStdW(); go('kasseNeu',{form:{kzahler:S.uid, kfuer:Object.fromEntries(kasseLeute().map(u=>[u,true])), kdatum:today(), kw:w}}); if(w!=='EUR') A.kasseWaehrung({value:w}); };
 A.kasseAuf = el => { const e=alleKasse().find(x=>x.id===el.dataset.id); if(!e) return;
-  go('kasseNeu',{id:e.id, aktId:e.aktId||'', form:{ktitel:e.titel, kbetrag:(e.betrag/100).toFixed(2).replace('.',','), kzahler:e.zahler, kfuer:Object.fromEntries((e.fuer||[]).map(u=>[u,true])), kdatum:e.datum}}); };
-V.kasseNeu = ()=>{ const aid=S.route.aktId||''; const gm=kasseGastModus(aid); if(!gm){ const g=tripGuard(); if(g) return g; } const f=S.form; const leute=aid?eventLeute(aid):kasseLeute(); const fuer=f.kfuer||{}; const n=Object.values(fuer).filter(Boolean).length; const c=centAus(f.kbetrag); const edit=S.route.id;
+  if(!(e.by===S.uid || canMod())) return A.kasseZeigen(el);
+  go('kasseNeu',{id:e.id, aktId:e.aktId||'', form:{ktitel:e.titel, kbetrag:((e.orig?.b||e.betrag)/100).toFixed(2).replace('.',','), kw:e.orig?.w||'EUR', kkurs:e.orig?kursText(e.orig.kurs):'', kkursQuelle:e.orig?'eigen':'', kbeleg:e.beleg||null, kzahler:e.zahler, kfuer:Object.fromEntries((e.fuer||[]).map(u=>[u,true])), kdatum:e.datum}}); };
+V.kasseNeu = ()=>{ const aid=S.route.aktId||''; const gm=kasseGastModus(aid); if(!gm){ const g=tripGuard(); if(g) return g; } const f=S.form; const leute=aid?eventLeute(aid):kasseLeute(); const fuer=f.kfuer||{}; const n=Object.values(fuer).filter(Boolean).length; const c=kasseBetragAus(f).betrag||null; const edit=S.route.id;
   return `${gm?hdrPlain('Event-Kasse'):hdrTrip('Kassenbuch')}${backBtn()}<h1>${edit?'Ausgabe bearbeiten':'Ausgabe eintragen'}</h1>${aid?`<span class="chip yel" style="align-self:flex-start">${ic('tag',14)} ${esc(aktTitel(aid))}</span>`:''}
   <label class="f">Wofür?<input class="in" id="f_ktitel" maxlength="50" placeholder="z. B. Bootstour, Abendessen, Taxi"></label>
-  <label class="f">Betrag in Euro<input class="in" id="f_kbetrag" inputmode="decimal" maxlength="12" placeholder="z. B. 48,50" data-live="1"></label>
-  ${(f.kbetrag||'').trim()?(c?`<span class="small" style="margin-top:-8px">Erkannt: <b class="num">${eur(c)}</b></span>`:`<span class="small" style="margin-top:-8px;color:var(--pinktx)">Betrag nicht erkannt. Bitte so eingeben: 48,50 oder 1.250,00</span>`):''}
+  ${kasseBetragFeld()}
   <label class="f">Bezahlt von<select class="in" id="f_kzahler">${leute.map(u=>`<option value="${u}" ${u===f.kzahler?'selected':''}>${esc(u===S.uid?`${nm(u)} (ich)`:nm(u)+(aid&&gastIn(aid,u)?' (Gast)':''))}</option>`).join('')}</select></label>
   <div class="col" style="gap:6px"><div class="row between"><span class="f" style="font-size:13px;font-weight:600;color:var(--mut)">Für wen?</span><span class="row" style="gap:10px"><button class="link tiny" data-act="kasseFuerAlle" data-val="1">Alle</button><button class="link tiny" data-act="kasseFuerAlle" data-val="0">Keiner</button></span></div>
     <div class="row wrap" style="gap:6px">${leute.map(u=>`<button class="chip ${fuer[u]?'yel':''}" style="border:0;cursor:pointer;height:34px" data-act="kasseFuer" data-uid="${u}" aria-pressed="${!!fuer[u]}">${fuer[u]?ic('check',14):''} ${esc(aid?(u===S.uid?'ich':nm(u)+(gastIn(aid,u)?' (Gast)':'')):kasseName(u))}</button>`).join('')}</div>
     ${leute.length<2&&!aid?'<span class="tiny" style="color:var(--yelt)">Hier erscheinen alle, die der Reise beigetreten sind. Lade weitere Leute ein, um Ausgaben mit ihnen zu teilen.</span>':''}
     ${n&&c?`<div class="kanteile"><span class="tiny mut">So wird aufgeteilt (${n} ${n===1?'Person':'Personen'}):</span>${Object.entries(anteile({betrag:c, fuer:Object.keys(fuer).filter(u=>fuer[u])})).map(([u,v])=>`<span class="row between small"><span>${esc(u===S.uid?'ich':nm(u))}</span><b class="num">${eur(v)}</b></span>`).join('')}</div>`:'<span class="tiny mut">Der Betrag wird gleichmäßig aufgeteilt.</span>'}</div>
   <label class="f">Datum<input class="in" type="date" id="f_kdatum"></label>
+  ${kasseBelegFeld()}
   <button class="btn block" data-act="kasseSpeichern">${edit?'Speichern':'Eintragen'}</button>
   ${edit?`<button class="btn ghost block" style="color:var(--pinktx)" data-act="kasseWeg" data-id="${edit}">${ic('trash',16)} Eintrag löschen</button>`:`<button class="btn sec block" data-act="kasseSpeichern" data-weiter="1">Eintragen und weitere Zahlung zum selben Anlass</button>`}`; };
 A.kasseFuer = el => { const u=el.dataset.uid; S.form.kfuer={...(S.form.kfuer||{}), [u]:!(S.form.kfuer||{})[u]}; render(); };
 A.kasseFuerAlle = el => { const aid=S.route.aktId; S.form.kfuer=Object.fromEntries((aid?eventLeute(aid):kasseLeute()).map(u=>[u, el.dataset.val==='1'])); render(); };
-A.kasseSpeichern = async el => { const f=S.form; const titel=(f.ktitel||'').trim(); const c=centAus(f.kbetrag); const fuer=Object.entries(f.kfuer||{}).filter(([u,v])=>v).map(([u])=>u);
-  if(!titel) return toast('Wofür war die Ausgabe?'); if(!c) return toast('Bitte einen Betrag eingeben, z. B. 48,50.'); if(c>10000000) return toast('Der Betrag ist sehr hoch. Bitte prüfen.');
+A.kasseSpeichern = async el => { const f=S.form; const titel=(f.ktitel||'').trim(); const fuer=Object.entries(f.kfuer||{}).filter(([u,v])=>v).map(([u])=>u);
+  if(!titel) return toast('Wofür war die Ausgabe?'); const B=kasseBetragAus(f); if(B.fehler) return toast(B.fehler); const c=B.betrag; if(c>10000000) return toast('Der Betrag ist sehr hoch. Bitte prüfen.');
   if(!fuer.length) return toast('Für wen war die Ausgabe? Bitte mindestens eine Person wählen.'); if(!f.kzahler) return toast('Wer hat bezahlt?');
-  const aid=S.route.aktId||''; const d={rid:aid?(eventAkt(aid)?.rid||S.rid):S.rid, typ:'ausgabe', titel, betrag:c, zahler:f.kzahler, fuer, datum:f.kdatum||today(), ...(aid?{aktId:aid}:{})};
+  const aid=S.route.aktId||''; const d={rid:aid?(eventAkt(aid)?.rid||S.rid):S.rid, typ:'ausgabe', titel, betrag:c, zahler:f.kzahler, fuer, datum:f.kdatum||today(), orig:B.orig||null, beleg:f.kbeleg||null, ...(aid?{aktId:aid}:{})};
   el.disabled=true;
   try{ if(S.route.id) await S.db.doc(`kasse/${S.route.id}`).update(d); else await S.db.collection('kasse').add({...d, by:S.uid, createdAt:now()});
-    if(el.dataset.weiter){ const keep={ktitel:titel, kfuer:f.kfuer, kdatum:f.kdatum}; const naechster=(aid?eventLeute(aid):kasseLeute()).find(u=>u!==f.kzahler)||S.uid; S.form={...keep, kzahler:naechster}; el.disabled=false; toast(`${eur(c)} eingetragen. Jetzt die nächste Zahlung.`); render(); return; }
+    if(el.dataset.weiter){ const keep={ktitel:titel, kfuer:f.kfuer, kdatum:f.kdatum, kw:f.kw, kkurs:f.kkurs, kkursQuelle:f.kkursQuelle}; const naechster=(aid?eventLeute(aid):kasseLeute()).find(u=>u!==f.kzahler)||S.uid; S.form={...keep, kzahler:naechster}; el.disabled=false; toast(`${eur(c)} eingetragen. Jetzt die nächste Zahlung.`); render(); return; }
     toast(S.route.id?'Gespeichert':`${eur(c)} eingetragen`); if(!aid) S.ui.mitTab='kasse'; back(); }
   catch(e){ el.disabled=false; fail(e,'Speichern'); } };
 
@@ -3465,6 +3556,105 @@ A.kwarnAuf = el => { const aid=el.dataset.id;
   if(S.rt.akt.some(a=>a.id===aid)){ go('aktivitaet',{id:aid}); [150,400,800].forEach(t=>setTimeout(()=>document.getElementById('ekasse')?.scrollIntoView({block:'center', behavior:'smooth'}), t)); }
   else if(S.gast?.akt?.[aid]){ S.ui.gastTab='kasse'; if(S.route.v==='gastAkt' && S.route.id===aid) render(); else go('gastAkt',{id:aid}); }
   else toast('Das Event ist nicht mehr verfügbar.'); };
+/* ===================== Kassenbuch 2.0: Fremdwährung, Belegfoto, Export =====================
+   Gerechnet wird weiter in Euro-Cent (betrag). Bei Fremdwährung steht zusätzlich orig = {w, b, kurs}:
+   w = Währung, b = Betrag in der Fremdwährung (×100), kurs = Fremdwährung je 1 Euro.
+   Der Kurs kommt automatisch (EZB-Referenzkurs über frankfurter.dev) und lässt sich von Hand ändern, z. B. auf den Kurs der Kreditkarte. */
+
+const WAEHRUNGEN = [['EUR','€','Euro'],['USD','$','US-Dollar'],['GBP','£','Pfund'],['CHF','CHF','Franken'],['DKK','kr','Dänische Krone'],['SEK','kr','Schwedische Krone'],['NOK','kr','Norwegische Krone'],
+  ['CZK','Kč','Tschechische Krone'],['PLN','zł','Złoty'],['HUF','Ft','Forint'],['RON','lei','Leu'],['TRY','₺','Türkische Lira'],['ISK','kr','Isländische Krone'],['AED','AED','Dirham (VAE)'],['EGP','E£','Ägyptisches Pfund'],
+  ['MAD','DH','Marokkanischer Dirham'],['TND','DT','Tunesischer Dinar'],['THB','฿','Baht'],['JPY','¥','Yen'],['CNY','¥','Yuan'],['KRW','₩','Won'],['INR','₹','Rupie'],['IDR','Rp','Rupiah'],['VND','₫','Dong'],
+  ['SGD','S$','Singapur-Dollar'],['HKD','HK$','Hongkong-Dollar'],['MYR','RM','Ringgit'],['PHP','₱','Peso (Philippinen)'],['AUD','A$','Austral. Dollar'],['NZD','NZ$','Neuseeland-Dollar'],['CAD','C$','Kanad. Dollar'],
+  ['MXN','Mex$','Mex. Peso'],['DOP','RD$','Dominik. Peso'],['BRL','R$','Real'],['ZAR','R','Rand'],['ILS','₪','Schekel']];
+const WMAP = Object.fromEntries(WAEHRUNGEN.map(w=>[w[0], w]));
+/* Währungen ohne Nachkommastellen im Alltag */
+const OHNE_CENT = ['JPY','KRW','HUF','ISK','IDR','VND'];
+const LAND_W = { ch:'CHF', li:'CHF', gb:'GBP', us:'USD', dk:'DKK', se:'SEK', no:'NOK', cz:'CZK', pl:'PLN', hu:'HUF', ro:'RON', tr:'TRY', is:'ISK', ae:'AED', eg:'EGP', ma:'MAD', tn:'TND', th:'THB', jp:'JPY',
+  cn:'CNY', kr:'KRW', in:'INR', id:'IDR', vn:'VND', sg:'SGD', hk:'HKD', my:'MYR', ph:'PHP', au:'AUD', nz:'NZD', ca:'CAD', mx:'MXN', do:'DOP', br:'BRL', za:'ZAR', il:'ILS' };
+const wSym = w => WMAP[w]?.[1] || w;
+function fremd(b, w){ const nk=OHNE_CENT.includes(w)?0:2; const z=(b/100).toLocaleString('de-DE',{minimumFractionDigits:nk, maximumFractionDigits:nk}); return w==='EUR'?`${z} €`:`${z} ${wSym(w)}`; }
+const kursText = k => Number(k).toLocaleString('de-DE',{maximumFractionDigits: k>=100?2:4});
+function kursAus(s){ const t=String(s||'').trim().replace(/\s/g,''); if(!t) return null; const n=Number(t.includes(',')?t.replace(/\./g,'').replace(',','.'):t); return isFinite(n)&&n>0?n:null; }
+/* Vorgabe-Währung: zuletzt in dieser Reise benutzt, sonst Landeswährung des Reiseziels, sonst Euro */
+function kasseStdW(){ const r=cur(); const zuletzt=(S.ui.kwZuletzt||{})[r?.id]; if(zuletzt) return zuletzt; try{ const l=r&&typeof landVon==='function'?landVon(r):null; if(l && LAND_W[l]) return LAND_W[l]; }catch(e){} return 'EUR'; }
+
+/* ---------- Tageskurs holen (zwischengespeichert) ---------- */
+const KURSE = {};
+async function kursHolen(w){ if(w==='EUR') return {k:1}; const c=KURSE[w]; if(c && (c.k || Date.now()-c.at<60000)) return c;
+  KURSE[w]={at:Date.now()};
+  try{ const j=await holJson(`https://api.frankfurter.dev/v1/latest?base=EUR&symbols=${w}`, 6000); const k=j?.rates?.[w]; if(k) return KURSE[w]={k, datum:j.date, at:Date.now()}; }catch(e){}
+  try{ const j=await holJson(`https://api.frankfurter.dev/v2/rates?base=EUR&quotes=${w}`, 6000); const x=Array.isArray(j)?j.find(y=>String(y.quote).toUpperCase()===w):(j?.rates?{rate:j.rates[w], date:j.date}:null);
+    if(x?.rate) return KURSE[w]={k:x.rate, datum:x.date, at:Date.now()}; }catch(e){}
+  return KURSE[w]={at:Date.now(), fehlt:true}; }
+A.kasseWaehrung = async el => { const w=el.value; S.form.kw=w; S.ui.kwZuletzt={...(S.ui.kwZuletzt||{}), [cur()?.id||'_']:w};
+  if(w==='EUR'){ S.form.kkurs=''; render(); return; }
+  S.form.kkurs=''; S.form.kkursQuelle='lädt'; render(); const c=await kursHolen(w); if(S.form.kw!==w) return;
+  S.form.kkurs=c.k?kursText(c.k):''; S.form.kkursQuelle=c.k?`EZB-Referenzkurs${c.datum?` vom ${fD(c.datum)}`:''}`:'fehlt'; render(); };
+
+/* Teil des Formulars: Betrag mit Währung, Kurs, Umrechnung */
+function kasseBetragFeld(){ const f=S.form; const w=f.kw||'EUR'; const b=centAus(f.kbetrag); const kurs=kursAus(f.kkurs); const eurC=w==='EUR'?b:(b&&kurs?Math.round(b/kurs):null);
+  const auswahl=`<select class="in kwsel" id="f_kw" data-change="kasseWaehrung" aria-label="Währung">${WAEHRUNGEN.map(([c,s,n])=>`<option value="${c}" ${c===w?'selected':''}>${c} · ${esc(n)}</option>`).join('')}</select>`;
+  return `<div class="f"><span>Betrag</span><div class="row kbetragzeile"><input class="in grow" id="f_kbetrag" inputmode="decimal" maxlength="14" placeholder="${w==='EUR'?'z. B. 48,50':'Betrag in '+esc(WMAP[w]?.[2]||w)}" data-live="1" aria-label="Betrag">${auswahl}</div></div>
+  ${(f.kbetrag||'').trim()&&!b?`<span class="small" style="margin-top:-8px;color:var(--pinktx)">Betrag nicht erkannt. Bitte so eingeben: 48,50 oder 1.250,00</span>`:''}
+  ${w!=='EUR'?`<div class="kurskarte"><label class="row" style="gap:8px;align-items:center"><span class="small">1 € =</span><input class="in kursin" id="f_kkurs" inputmode="decimal" maxlength="12" data-live="1" placeholder="${f.kkursQuelle==='lädt'?'lädt …':'Kurs'}" aria-label="Wechselkurs: so viel ${esc(w)} für 1 Euro"><span class="small">${esc(w)}</span></label>
+      <span class="tiny mut">${kursHinweis(f, w)}</span>
+      ${b&&eurC?`<span class="small">Das sind <b class="num">${eur(eurC)}</b>, abgerechnet wird in Euro.</span>`:''}</div>`
+    : (b?`<span class="small" style="margin-top:-8px">Erkannt: <b class="num">${eur(b)}</b></span>`:'')}`; }
+function kursHinweis(f, w){ const c=KURSE[w]; if(f.kkursQuelle==='lädt') return 'Tageskurs wird geholt …';
+  if(c?.k && kursText(c.k)===String(f.kkurs||'').trim()) return `EZB-Referenzkurs${c.datum?` vom ${fD(c.datum)}`:''} · änderbar, z. B. auf den Kurs deiner Kreditkarte`;
+  if(String(f.kkurs||'').trim()) return 'Eigener Kurs'; return 'Kein Tageskurs verfügbar. Bitte den Kurs eintragen, z. B. von der Kreditkartenabrechnung.'; }
+/* Betrag in Euro-Cent + Originalangaben aus dem Formular */
+function kasseBetragAus(f){ const w=f.kw||'EUR'; const b=centAus(f.kbetrag); if(!b) return {fehler:'Bitte einen Betrag eingeben, z. B. 48,50.'};
+  if(w==='EUR') return {betrag:b, orig:null}; const kurs=kursAus(f.kkurs); if(!kurs) return {fehler:'Bitte den Wechselkurs eintragen.'};
+  const c=Math.round(b/kurs); if(c<1) return {fehler:'Der Betrag ist zu klein.'}; return {betrag:c, orig:{w, b, kurs}}; }
+
+/* ---------- Belegfoto ---------- */
+function kasseBelegFeld(){ const x=S.form.kbeleg; if(!S.assets) return '';
+  return `<div class="f"><span>Beleg <span class="tiny mut">(freiwillig)</span></span>${x?`<div class="row" style="gap:10px">${belegVorschau(x)}<span class="grow small">Beleg angehängt</span><button class="btn xs ghost" data-act="kasseBelegWeg">${ic('x',14)} Entfernen</button></div>`
+    :`<label class="btn sec block" style="cursor:pointer">🧾 Beleg fotografieren oder wählen<input type="file" accept="image/*,application/pdf" hidden data-file="kasseBelegDatei"></label>`}</div>`; }
+const belegVorschau = (x, gross) => x.mime==='application/pdf' ? `<a class="dokvorschau pdf" href="${esc(blob(x.id))}" target="_blank" rel="noopener" aria-label="Beleg öffnen (PDF)">PDF</a>`
+  : `<button class="dokvorschau${gross?' gross':''}" data-act="belegAuf" data-id="${esc(x.id)}" aria-label="Beleg ansehen"><img src="${esc(blob(x.id))}" alt="Beleg"></button>`;
+A.kasseBelegDatei = async el => { const file=el.files?.[0]; el.value=''; if(!file) return; const pdf=file.type==='application/pdf'; if(!pdf && !file.type.startsWith('image/')) return toast('Bitte ein Foto oder PDF wählen.');
+  if(file.size>15*1024*1024) return toast('Die Datei ist zu groß (höchstens 15 MB).');
+  let up; try{ up = pdf ? await S.assets.upload(file,{type:'application/pdf'}) : await uploadFile(file); }catch(e){ return fail(e,'Hochladen'); } if(!up) return;
+  S.form.kbeleg={id:up.id, mime:pdf?'application/pdf':(up.mime||file.type)}; toast('Beleg angehängt'); render(); };
+A.kasseBelegWeg = ()=>{ S.form.kbeleg=null; render(); };
+A.belegAuf = el => openOv('beleg',{id:el.dataset.id});
+OV.beleg = o => `<button class="icbtn" style="align-self:flex-end" data-act="closeOv" aria-label="Schließen">${ic('x',20)}</button><button class="pbgross" data-act="closeOv" aria-label="Schließen"><img src="${esc(blob(o.id))}" alt="Beleg"></button><div class="small" style="text-align:center">Beleg</div>`;
+
+/* ---------- Ansicht eines Eintrags für alle (auch ohne Bearbeitungsrecht) ---------- */
+A.kasseZeigen = el => openOv('kasseDetail',{id:el.dataset.id});
+OV.kasseDetail = o => { const e=alleKasse().find(x=>x.id===o.id); if(!e) return ''; const a=anteile(e);
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Ausgabe"><div class="row between"><h2 style="margin:0">${esc(e.titel)}</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+    <div class="kdetail"><div><span class="tiny mut">Betrag</span><b class="num" style="font-size:22px">${eur(e.betrag)}</b>${e.orig?`<span class="small mut">${fremd(e.orig.b,e.orig.w)} · Kurs 1 € = ${kursText(e.orig.kurs)} ${esc(e.orig.w)}</span>`:''}</div>
+      <div><span class="tiny mut">Bezahlt von</span><b>${esc(nameK(e.zahler))}</b><span class="small mut">${fD(e.datum)}${e.aktId?` · Event: ${esc(aktTitel(e.aktId))}`:''}</span></div>
+      <div><span class="tiny mut">Aufgeteilt auf ${(e.fuer||[]).length} ${(e.fuer||[]).length===1?'Person':'Personen'}</span>${Object.entries(a).map(([u,v])=>`<div class="kdzeile"><span>${esc(nameK(u))}</span><b class="num">${eur(v)}</b></div>`).join('')}</div></div>
+    ${e.beleg?`<div class="col" style="gap:6px"><span class="tiny mut">Beleg</span>${belegVorschau(e.beleg, true)}</div>`:''}
+    <span class="tiny mut">Ändern kann nur, wer die Ausgabe eingetragen hat, oder der Gruppenadmin.</span></div>`; };
+
+/* ---------- Export: Tabelle (CSV für Excel/Numbers) und Text zum Teilen ---------- */
+A.kasseExport = ()=>openOv('kasseExport');
+OV.kasseExport = () => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Abrechnung exportieren"><div class="row between"><h2 style="margin:0">Abrechnung</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <p class="small mut" style="margin:0">Alle Ausgaben, wer wem was zahlt und der Stand jeder Person.</p>
+  ${S.downloads?`<button class="btn block" data-act="kasseCsv">${ic('dl',16)} Als Tabelle speichern (Excel, Numbers)</button>`:''}
+  <a class="btn wa block" href="https://wa.me/?text=${encodeURIComponent(kasseText())}" target="_blank" rel="noopener">Per WhatsApp teilen</a>
+  <button class="btn sec block" data-act="copy" data-text="${esc(kasseText())}">${ic('copy',16)} Text kopieren</button></div>`;
+function kasseText(){ const r=cur(); const k=S.rt.kasse||[]; const ausg=k.filter(e=>e.typ!=='ausgleich'); const {s, plan}=planGesamt(k);
+  const z=[`💰 Kassenbuch · ${r?.titel||'Reise'}`, `Ausgaben gesamt: ${eur(ausg.reduce((a,e)=>a+e.betrag,0))} (${ausg.length} ${ausg.length===1?'Ausgabe':'Ausgaben'})`, ''];
+  z.push(plan.length?'Wer zahlt wem?':'Alles ausgeglichen 🎉'); plan.forEach(p=>z.push(`• ${nm(p.von)} → ${nm(p.an)}: ${eur(p.betrag)}${p.aktId?` (Event: ${aktTitel(p.aktId)})`:''}`));
+  const st=Object.entries(s).filter(([u,v])=>v); if(st.length){ z.push('', 'Stand pro Person:'); st.sort((a,b)=>b[1]-a[1]).forEach(([u,v])=>z.push(`• ${nm(u)}: ${v>0?'+':''}${eur(v)}`)); }
+  if(ausg.some(e=>e.orig)) z.push('', 'Fremdwährungen sind zum eingetragenen Kurs in Euro umgerechnet.');
+  z.push('', 'Erstellt mit Poolposition'); return z.join('\n'); }
+A.kasseCsv = async ()=>{ const r=cur(); const k=[...(S.rt.kasse||[])].sort((a,b)=>(a.datum||'').localeCompare(b.datum||'')||(a.createdAt||0)-(b.createdAt||0));
+  const q=v=>{ const t=String(v??''); return /[;"\n]/.test(t)?`"${t.replace(/"/g,'""')}"`:t; }; const zahl=c=>(c/100).toFixed(2).replace('.',','); const datum=d=>d?d.split('-').reverse().join('.'):'';
+  const L=[['Datum','Art','Wofür','Bezahlt von','Für','Betrag (EUR)','Originalbetrag','Währung','Kurs (1 EUR =)','Beleg','Event'].join(';')];
+  for(const e of k){ if(e.typ==='ausgleich') L.push([datum(e.datum),'Rückzahlung',`${nm(e.von)} an ${nm(e.an)}`,nm(e.von),nm(e.an),zahl(e.betrag),'','','','',e.aktId?aktTitel(e.aktId):''].map(q).join(';'));
+    else L.push([datum(e.datum),'Ausgabe',e.titel,nm(e.zahler),(e.fuer||[]).map(nm).join(', '),zahl(e.betrag),e.orig?zahl(e.orig.b):'',e.orig?.w||'EUR',e.orig?String(e.orig.kurs).replace('.',','):'',e.beleg?'ja':'',e.aktId?aktTitel(e.aktId):''].map(q).join(';')); }
+  const {s, plan}=planGesamt(S.rt.kasse||[]);
+  L.push('', 'Wer zahlt wem?;;;Von;An;Betrag (EUR)'); plan.forEach(p=>L.push([ '', '', '', nm(p.von), nm(p.an), zahl(p.betrag)].map(q).join(';')));
+  L.push('', 'Stand pro Person;;;Person;;Stand (EUR)'); Object.entries(s).forEach(([u,v])=>L.push(['','','',nm(u),'',zahl(v)].map(q).join(';')));
+  const blob=new Blob(['﻿'+L.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  try{ await S.downloads.save({filename:`Kassenbuch_${safeName(r?.titel||'Reise')}.csv`, data:blob}); toast('Gespeichert'); closeOv(); }catch(e){ fail(e,'Speichern'); } };
 /* ===================== Neue Nachrichten in Event-Chats =====================
    Für Events, bei denen man dabei ist oder die man erstellt hat, zählen neue Nachrichten als ungelesen:
    im Menü am Chat-Symbol, oben im Gruppenchat als Hinweis und auf der Termin-Karte bei „Mein Tag“. */
@@ -4243,15 +4433,15 @@ function packStand(rid){ const it=Object.values(packVon(rid).items||{}); return 
 function packSpeichern(rid, items){ saveSettings({pack:{...(S.settings.pack||{}), [rid]:{items}}}); }
 
 /* Karte auf „Mein Tag“ (bis zum Ende der Reise) */
-function packKarte(){ const r=cur(); const m=myM(); if(!r || r.status!=='fest' || !m) return ''; const ab=m.abreise||r.bis; if(ab && ab<today()) return '';
+function packKarte(){ const r=cur(); const m=myM(); if(!r || r.status!=='fest' || !m) return ''; if(reisePhase(r,m)!=='vorfreude' || daysUntil(m.anreise||r.von)>14) return ''; // nur in den letzten 14 Tagen vor der eigenen Anreise
   const {n, ok}=packStand(r.id); const mb=S.rt.mitbringen||[]; const offen=mb.filter(x=>!x.wer).length, meins=mb.filter(x=>x.wer===S.uid).length; const vorher=(m.anreise||r.von)>today();
   return `<button class="card tight packkarte ${vorher?'vorfreude':''}" data-act="go" data-v="packliste"><span class="row" style="gap:10px;width:100%"><span class="admic">${ic('suitcase',20)}</span><span class="grow col" style="gap:2px;min-width:0"><b>Koffer packen</b>
     <span class="tiny mut">${n?`${ok} von ${n} eingepackt`:'Noch keine Packliste'} · ${mb.length?`${meins?`du bringst ${meins} mit · `:''}${offen?`<span class="warnt">${offen} ${offen===1?'Sache sucht':'Sachen suchen'} noch jemanden</span>`:'alles verteilt'}`:'Wer bringt was mit?'}</span></span>${ic('right',16,'style="color:var(--mut)"')}</span>
     ${n?`<span class="packbalken" aria-hidden="true"><span style="width:${Math.round(ok/n*100)}%"></span></span>`:''}</button>`; }
 
 V.packliste = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const tab=S.ui.packTab||'mein';
-  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='mein'}" data-act="ui" data-k="packTab" data-val="mein">Meine Liste</button><button role="tab" aria-selected="${tab==='gruppe'}" data-act="ui" data-k="packTab" data-val="gruppe">Wer bringt was mit?${(S.rt.mitbringen||[]).some(x=>!x.wer)?`<span class="badge orange">${(S.rt.mitbringen||[]).filter(x=>!x.wer).length}</span>`:''}</button></div>`;
-  return `${hdrTrip('Koffer packen')}${backBtn()}<h1>Koffer packen</h1>${tabs}${tab==='gruppe'?mitbringenView(r):packView(r)}`; };
+  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='mein'}" data-act="ui" data-k="packTab" data-val="mein">Meine Liste</button><button role="tab" aria-selected="${tab==='gruppe'}" data-act="ui" data-k="packTab" data-val="gruppe">Mitbringen${(S.rt.mitbringen||[]).some(x=>!x.wer)?`<span class="badge orange">${(S.rt.mitbringen||[]).filter(x=>!x.wer).length}</span>`:''}</button><button role="tab" aria-selected="${tab==='heim'}" data-act="ui" data-k="packTab" data-val="heim">Heimreise</button></div>`;
+  return `${hdrTrip('Packliste')}${backBtn()}<h1>${tab==='heim'?'Heimreise-Check':tab==='gruppe'?'Wer bringt was mit?':'Koffer packen'}</h1>${tabs}${tab==='gruppe'?mitbringenView(r):tab==='heim'?heimView(r):packView(r)}`; };
 
 function packView(r){ const items=packVon(r.id).items||{}; const l=Object.entries(items); const {n, ok}=packStand(r.id);
   const nachKat={}; l.forEach(([id,x])=>{ (nachKat[x.k||'sonst']=nachKat[x.k||'sonst']||[]).push([id,x]); });
@@ -4289,5 +4479,1605 @@ A.mbIdee = el => mbNeu(el.dataset.t);
 A.mbNehmen = async el => { const x=(S.rt.mitbringen||[]).find(y=>y.id===el.dataset.id); if(!x || x.wer) return toast('Das bringt schon jemand mit.'); await W(()=>S.db.doc(`mitbringen/${x.id}`).update({wer:S.uid, am:now()}),'Speichern'); toast(`Danke! Du bringst „${x.text}“ mit.`); };
 A.mbAbgeben = async el => { await W(()=>S.db.doc(`mitbringen/${el.dataset.id}`).update({wer:null, am:now()}),'Speichern'); };
 A.mbWeg = async el => { await W(()=>S.db.doc(`mitbringen/${el.dataset.id}`).delete(),'Entfernen'); };
+/* ===================== Urlaubsthema je Reiseart =====================
+   Poolposition-CD als Klammer: Logo-Rot #d7262c, Sonnengelb #f5c518, die Logo-Welle (gelb mit rotem Rand), Figtree, runde Logo-Ecken.
+   Je Reiseart: eine illustrierte Szene oben im Reiter „Reise“, eine eigene Farbwelt für die Kacheln
+   und ein Motiv-Abschluss unten in jeder Kachel (Welle, Schneehügel, Bugwelle, Hügel, Poolwasser). */
+
+const CD_ROT = '#d7262c', CD_GELB = '#f5c518';
+/* Logo-Welle: gelbe Welle mit rotem Rand, wie im Poolposition-Logo */
+const cdWelle = (y, x0=-10, x1=370, amp=5) => { let d=`M${x0} ${y}`; for(let x=x0; x<x1; x+=24) d+=` q6 ${-amp} 12 0 t12 0`;
+  return `<path d="${d}" fill="none" stroke="${CD_ROT}" stroke-width="7" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${CD_GELB}" stroke-width="3" stroke-linecap="round"/>`; };
+const welleLinie = (y, farbe, op=.5, w=2, x0=-10, x1=370, amp=3) => { let d=`M${x0} ${y}`; for(let x=x0; x<x1; x+=20) d+=` q5 ${-amp} 10 0 t10 0`;
+  return `<path d="${d}" fill="none" stroke="${farbe}" stroke-width="${w}" stroke-linecap="round" opacity="${op}"/>`; };
+
+const THEMEN = {
+  strand: {
+    muster:'<path d="M0 10q5-4 10 0t10 0 10 0 10 0M0 30q5-4 10 0t10 0 10 0 10 0" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>',
+    name:'Strand und Meer',
+    farben:{ termine:['#2fd0dc','#0a87a6'], herde:['#ff8a6a','#e0383a'], kasse:['#3ecf8e','#0f8a5c'], infos:['#ffc23a','#e47f00'], mitglieder:['#37b6ff','#0b66cc'],
+      notfall:['#ff4d5e','#b5121b'], anreise:['#ff9fc0','#e0457f'], mitbringen:['#ffa24a','#e85a1c'], packliste:['#5fd3c4','#108e86'] },
+    szene:()=>`<defs><linearGradient id="thS1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3cc8e6"/><stop offset=".62" stop-color="#9fe3ef"/><stop offset="1" stop-color="#ffe2a8"/></linearGradient>
+      <linearGradient id="thS2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14b3c7"/><stop offset="1" stop-color="#0a7f9e"/></linearGradient>
+      <radialGradient id="thS3"><stop offset="0" stop-color="#fff6c9"/><stop offset=".45" stop-color="${CD_GELB}"/><stop offset="1" stop-color="${CD_GELB}" stop-opacity="0"/></radialGradient></defs>
+      <rect width="360" height="140" fill="url(#thS1)"/>
+      <circle cx="292" cy="44" r="46" fill="url(#thS3)" opacity=".75"/><circle cx="292" cy="44" r="19" fill="${CD_GELB}"/>
+      <path d="M196 30c4-3 8-3 12 0M214 22c3-2 6-2 9 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+      <path d="M0 78h360v40H0z" fill="url(#thS2)"/>
+      ${welleLinie(86,'#fff',.55,1.6)}${welleLinie(97,'#fff',.35,1.4)}
+      ${cdWelle(106)}
+      <path d="M0 116c60-10 130-12 190-6s120 4 170-6v40H0z" fill="#f6d391"/><path d="M0 124c80-8 160-6 240 0s90 2 120-4v20H0z" fill="#efc479"/>
+      <g transform="translate(40 120)"><path d="M0 0c2-26 8-48 22-66" fill="none" stroke="#8a5a2b" stroke-width="5" stroke-linecap="round"/>
+        <path d="M22-66c-14-6-30-2-38 8 12-3 24-4 38-8zM22-66c-4-14-18-22-32-20 12 5 22 11 32 20zM22-66c8-12 24-16 36-10-14 1-26 5-36 10zM22-66c14-2 28 6 32 18-10-8-22-14-32-18zM22-66c-2 14-12 26-24 30 8-10 16-20 24-30z" fill="#1f9a62"/></g>
+      <g transform="translate(300 122)"><path d="M0 0V-44" stroke="#5b4636" stroke-width="2.4"/><path d="M-30-40a30 14 0 0 1 60 0z" fill="#fff"/>
+        <path d="M-30-40a30 14 0 0 1 10-10L-12-40zM-4-54a30 14 0 0 1 8 0L6-40H-6zM20-50a30 14 0 0 1 10 10H12z" fill="${CD_ROT}"/></g>`,
+    boden:'<path d="M0 22c8-6 16-6 24 0s16 6 24 0 16-6 24 0 16 6 24 0V40H0z" fill="#fff"/>'
+  },
+  ski: {
+    muster:'<g fill="#fff"><circle cx="6" cy="8" r="1.6"/><circle cx="26" cy="4" r="1"/><circle cx="18" cy="20" r="1.3"/><circle cx="34" cy="26" r="1.7"/><circle cx="8" cy="32" r="1"/></g><path d="M30 10v6M27 13h6M28 11l4 4M32 11l-4 4" stroke="#fff" stroke-width="1" stroke-linecap="round"/>',
+    name:'Skiurlaub',
+    farben:{ termine:['#5fb6ff','#1c5fd6'], herde:['#ff6b7a','#c41d33'], kasse:['#36b884','#0f6b4c'], infos:['#ffb53a','#d8650a'], mitglieder:['#8f7bff','#4b35c4'],
+      notfall:['#ff4d5e','#b5121b'], anreise:['#5a73b8','#243466'], mitbringen:['#d0577f','#8a1f45'], packliste:['#4cc6dc','#14799c'] },
+    szene:()=>`<defs><linearGradient id="thK1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#20305f"/><stop offset=".55" stop-color="#5677c0"/><stop offset="1" stop-color="#b9d4f3"/></linearGradient></defs>
+      <rect width="360" height="140" fill="url(#thK1)"/>
+      <circle cx="58" cy="34" r="13" fill="#fff5d6"/><circle cx="64" cy="30" r="12" fill="#2a3c72"/>
+      <path d="M-10 108 50 50l28 22 48-46 54 52 40-30 60 50 40-24 60 34v40H-10z" fill="#8ea8d9"/>
+      <path d="M50 50 38 62l10-2 6 6 8-4zM126 26l-18 18 12-3 8 8 10-6 6 2zM180 78l-10 8h8l4 4 6-4zM220 48l-12 10 8-1 6 5 6-5 6 1zM320 74l-12 8 9 0 5 4z" fill="#fff"/>
+      <path d="M-10 118c60-26 130-30 200-14s120 12 180-4v40H-10z" fill="#eef5fd"/><path d="M-10 128c80-14 170-12 250-2s90 4 130-2v20H-10z" fill="#d9e8f8"/>
+      <g fill="#1d5a40">${[[24,114],[40,118],[300,108],[318,112],[336,106]].map(([x,y])=>`<path d="M${x} ${y}l-9 0 9-26 9 26z"/><path d="M${x} ${y-12}l-7 0 7-18 7 18z"/>`).join('')}</g>
+      <path d="M150 10 360 66" stroke="#1b2442" stroke-width="1.4"/>
+      <g transform="translate(246 38) rotate(15)"><path d="M0-10v8" stroke="#1b2442" stroke-width="1.6"/><rect x="-11" y="-2" width="22" height="17" rx="4" fill="${CD_ROT}"/><rect x="-7" y="2" width="14" height="6" rx="1.5" fill="${CD_GELB}"/></g>
+      <g class="thflocken" fill="#fff">${[[20,10],[90,18],[140,6],[200,26],[260,12],[330,20],[110,48],[300,46],[175,60],[40,64]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i%3?1.4:2}"/>`).join('')}</g>`,
+    boden:'<path d="M0 26c14-10 30-12 46-6s26 6 50-6V40H0z" fill="#fff"/>'
+  },
+  kreuzfahrt: {
+    muster:'<path d="M0 20h40" stroke="#fff" stroke-width="2"/><circle cx="20" cy="20" r="6" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M0 4q5-3 10 0t10 0 10 0 10 0" fill="none" stroke="#fff" stroke-width="1.2"/>',
+    name:'Kreuzfahrt',
+    farben:{ termine:['#3d7be0','#13336f'], herde:['#ff7a45','#d7392c'], kasse:['#2ec4b6','#0a7c86'], infos:['#f0bf4a','#b0780e'], mitglieder:['#7a6cff','#3a2db0'],
+      notfall:['#ff4d5e','#b5121b'], anreise:['#5c7593','#24364f'], mitbringen:['#d48a55','#86491f'], packliste:['#24a6dc','#0b5c9a'] },
+    szene:()=>`<defs><linearGradient id="thC1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2d63"/><stop offset=".5" stop-color="#9a5c8e"/><stop offset=".85" stop-color="#ffab6b"/></linearGradient>
+      <linearGradient id="thC2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#174a86"/><stop offset="1" stop-color="#0a2550"/></linearGradient></defs>
+      <rect width="360" height="140" fill="url(#thC1)"/>
+      <g fill="#fff" opacity=".8"><circle cx="30" cy="16" r="1"/><circle cx="80" cy="30" r="1.2"/><circle cx="130" cy="12" r="1"/><circle cx="330" cy="20" r="1.2"/><circle cx="210" cy="10" r=".9"/></g>
+      <circle cx="78" cy="92" r="24" fill="${CD_GELB}"/>
+      <rect y="92" width="360" height="48" fill="url(#thC2)"/>
+      <path d="M62 98h32M66 104h24M70 110h16" stroke="${CD_GELB}" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+      <g transform="translate(150 54)">
+        <path d="M0 40h196l-14 26H18z" fill="#fff"/><path d="M14 58h174l-6 8H18z" fill="#13336f"/>
+        <rect x="26" y="22" width="150" height="18" rx="3" fill="#fff"/><rect x="44" y="8" width="110" height="15" rx="3" fill="#f3f6fb"/><rect x="64" y="-4" width="64" height="13" rx="3" fill="#e9eef7"/>
+        <path d="M96-4l4-20h22l2 20z" fill="${CD_ROT}"/><rect x="99" y="-16" width="24" height="5" fill="${CD_GELB}"/>
+        <g fill="${CD_GELB}">${Array.from({length:12},(_,i)=>`<rect x="${32+i*12}" y="28" width="7" height="4" rx="1"/>`).join('')}${Array.from({length:9},(_,i)=>`<rect x="${50+i*12}" y="13" width="7" height="4" rx="1"/>`).join('')}${Array.from({length:14},(_,i)=>`<circle cx="${22+i*12}" cy="49" r="2"/>`).join('')}</g></g>
+      ${welleLinie(124,'#fff',.4,1.6,140,360)}${cdWelle(132)}
+      <path d="M40 40q5-5 10 0q5-5 10 0M100 26q4-4 8 0q4-4 8 0" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>`,
+    boden:'<path d="M0 24c8-6 16-6 24 0s16 6 24 0 16-6 24 0 16 6 24 0V40H0z" fill="#fff"/><path d="M0 32c8-5 16-5 24 0s16 5 24 0 16-5 24 0 16 5 24 0V40H0z" fill="#fff"/>'
+  },
+  land: {
+    muster:'<path d="M-2 14c10-8 20-8 30-2s14 4 16 2M-2 28c10-8 20-8 30-2s14 4 16 2" fill="none" stroke="#fff" stroke-width="1.3"/><circle cx="32" cy="6" r="1.4" fill="#fff"/>',
+    name:'Land und Leute',
+    farben:{ termine:['#ff8a5c','#c2441f'], herde:['#e05a6e','#9e1f3a'], kasse:['#9cbf4a','#5a7a1a'], infos:['#f4b63c','#c0740c'], mitglieder:['#9a85e6','#5a42b8'],
+      notfall:['#ff4d5e','#b5121b'], anreise:['#5ab0ff','#2462c4'], mitbringen:['#c9965e','#835327'], packliste:['#47b07e','#1d6a48'] },
+    szene:()=>`<defs><linearGradient id="thL1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cc4ff"/><stop offset=".7" stop-color="#cfeefc"/><stop offset="1" stop-color="#fff0c9"/></linearGradient></defs>
+      <rect width="360" height="140" fill="url(#thL1)"/>
+      <circle cx="300" cy="34" r="17" fill="${CD_GELB}"/>
+      <path d="M60 26c4-6 14-6 18 0 6-2 12 2 10 7H52c-2-4 2-8 8-7z" fill="#fff" opacity=".9"/>
+      <path d="M-10 92c60-34 120-40 190-16s130 4 190-10v74H-10z" fill="#a9cf7c"/>
+      <g transform="translate(150 60)"><rect x="0" y="12" width="20" height="16" fill="#f6e3c4"/><path d="M-3 13 10 3l13 10z" fill="#c8553a"/><rect x="22" y="-6" width="10" height="34" fill="#f0d8b0"/><path d="M20-6 27-18l7 12z" fill="#c8553a"/>
+        <rect x="34" y="14" width="24" height="14" fill="#f6e3c4"/><path d="M31 15 46 5l15 10z" fill="#d86a45"/><rect x="60" y="16" width="16" height="12" fill="#efd6ae"/><path d="M58 17 68 9l10 8z" fill="#c8553a"/>
+        <g fill="#7a5a3c"><rect x="5" y="17" width="4" height="4"/><rect x="25" y="2" width="4" height="5"/><rect x="40" y="19" width="4" height="4"/><rect x="48" y="19" width="4" height="4"/></g></g>
+      <path d="M-10 112c70-26 150-26 220-6s110 10 160-2v40H-10z" fill="#76b05a"/>
+      <path d="M180 140c4-16 16-24 34-30" fill="none" stroke="#f3d9a4" stroke-width="7" stroke-linecap="round"/>
+      <path d="M-10 126c90-16 190-14 280-4s70 4 100 0v22H-10z" fill="#4f8f45"/>
+      <g fill="#245c38">${[[44,96,30],[58,100,24],[118,94,28],[262,90,32],[276,96,24]].map(([x,y,h])=>`<ellipse cx="${x}" cy="${y}" rx="5" ry="${h/2}"/>`).join('')}</g>
+      ${cdWelle(134,-10,370,4)}`,
+    boden:'<path d="M0 28c16-12 34-14 52-6s30 8 44-2V40H0z" fill="#fff"/><path d="M0 34c20-6 44-6 70 0s20 2 26 0V40H0z" fill="#fff"/>'
+  },
+  sonst: {
+    muster:'<path d="M40 0H0v40" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M20 0v40M0 20h40" stroke="#fff" stroke-width=".6"/>',
+    name:'Poolposition',
+    farben:{ termine:['#19c7c9','#08869a'], herde:['#ff6f61','#d7262c'], kasse:['#3ecf8e','#0f8a5c'], infos:['#ffc22e','#de8a00'], mitglieder:['#8a63ff','#5a33e6'],
+      notfall:['#ff4d5e','#b5121b'], anreise:['#3d95ff','#1c56d6'], mitbringen:['#ff5c97','#d81f68'], packliste:['#ff9a3c','#f2541b'] },
+    szene:()=>`<defs><linearGradient id="thP1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fd3e0"/><stop offset="1" stop-color="#0a8aa6"/></linearGradient>
+      <pattern id="thP2" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0v18" fill="none" stroke="#fff" stroke-width="1" opacity=".22"/></pattern></defs>
+      <rect width="360" height="140" fill="url(#thP1)"/><rect width="360" height="140" fill="url(#thP2)"/>
+      ${welleLinie(40,'#fff',.45,2)}${welleLinie(70,'#fff',.3,2)}
+      <rect y="0" width="360" height="12" fill="#f3efe9"/><rect y="12" width="360" height="3" fill="${CD_ROT}"/>
+      <g transform="translate(236 4)" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"><path d="M0 4v80M28 4v80"/><path d="M0 34h28M0 54h28M0 74h28" stroke-width="4"/></g>
+      ${cdWelle(104)}${cdWelle(122,-22)}
+      <g transform="translate(318 80)"><circle r="18" fill="#fff"/><path d="M0-18a18 18 0 0 1 18 18H0z" fill="${CD_ROT}"/><path d="M0 18a18 18 0 0 1-18-18H0z" fill="${CD_ROT}"/><circle r="8" fill="url(#thP1)"/></g>`,
+    boden:'<path d="M0 24c8-6 16-6 24 0s16 6 24 0 16-6 24 0 16 6 24 0V40H0z" fill="#fff"/>'
+  },
+};
+const thema = r => THEMEN[r?.reiseart] || THEMEN.sonst;
+const themaKey = r => THEMEN[r?.reiseart] ? r.reiseart : 'sonst';
+/* Motiv-Abschluss unten in den Kacheln als CSS-Variable (SVG als data-URI) */
+const svgUrl = (inhalt, vb, par='') => `url('data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" ${par}>${inhalt}</svg>`).replace(/'/g,'%27')}')`;
+const bodenUrl = t => svgUrl(t.boden, '0 0 96 40', 'preserveAspectRatio="none"');
+const musterUrl = t => svgUrl(t.muster, '0 0 40 40');
+
+/* Szene oben im Reiter „Reise“: Postkarte mit Gruppenname, Phase und Zahnrad */
+function reiseSzene(r, phText, zahnrad, titel, klein){ const t=thema(r);
+  return `<div class="szene thema-${themaKey(r)}${klein?' klein':''}"><svg class="szenebild" viewBox="0 0 360 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${t.szene()}</svg>
+    <div class="szenetext"><h1>${esc(titel||r.titel||'Reise')}</h1>${phText?`<span class="szenephase">${esc(phText)}</span>`:''}</div>
+    ${zahnrad?`<button class="szenegear" data-act="go" data-v="reiseEinst" aria-label="Reise verwalten" title="Reise verwalten">${ic('gear',19)}</button>`:''}</div>`; }
+/* ===================== Reiter „Reise“: alle Funktionen der Reise als Kacheln =====================
+   „Mein Tag“ zeigt nur, was in der aktuellen Phase zählt (Vorfreude, Unterwegs, Abreisetag).
+   Hier ist dagegen immer alles erreichbar. Neue Funktionen bekommen einfach eine neue Kachel. */
+
+/* ---------- Phase der Reise für mich ---------- */
+function reisePhase(r=cur(), m=myM()){ if(!r || r.status!=='fest') return 'konferenz'; const an=m?.anreise||r.von, ab=m?.abreise||r.bis, t=today();
+  if(an && t<an) return 'vorfreude'; if(ab && t>ab) return 'vorbei'; if(ab && (t===ab || addDays(t,1)===ab)) return 'abreise'; return 'unterwegs'; }
+
+/* ---------- Kacheln: vollflächig bunt, großes Icon, nur Überschrift und eine kleine Zahl ----------
+   Die Kachel, die in der aktuellen Phase zählt, wird groß und rückt nach oben. */
+const HUBIC = {
+  mitglieder:'<circle cx="9" cy="8" r="3.2" class="f"/><path d="M3 19.5c0-3.3 2.7-5.6 6-5.6s6 2.3 6 5.6" class="f"/><circle cx="17.2" cy="9" r="2.6"/><path d="M16.2 13.7c2.9.2 4.8 2.2 4.8 5.2"/>',
+  kasse:'<rect x="3" y="6.5" width="18" height="13" rx="3" class="f"/><path d="M3 10.5h18"/><circle cx="16.5" cy="15" r="1.2" fill="currentColor" stroke="none"/><path d="M6.5 6.5 15 3.6l1.5 2.9"/>',
+  koffer:'<rect x="4" y="7.5" width="16" height="12.5" rx="3" class="f"/><path d="M9 7.5V5.6c0-.9.7-1.6 1.6-1.6h2.8c.9 0 1.6.7 1.6 1.6v1.9"/><path d="M9 11v6M15 11v6"/><path d="M7 20v1.2M17 20v1.2"/>',
+  mitbringen:'<rect x="3.5" y="9.5" width="17" height="10.5" rx="2" class="f"/><path d="M2.5 9.5h19V7.2c0-.6-.5-1-1-1h-17c-.6 0-1 .4-1 1z"/><path d="M12 6.2V20"/><path d="M12 6.2C10.4 2.9 6.8 3.4 7.3 5.4c.4 1.2 4.7.8 4.7.8zM12 6.2c1.6-3.3 5.2-2.8 4.7-.8-.4 1.2-4.7.8-4.7.8z"/>',
+  termine:'<rect x="3.5" y="5" width="17" height="15.5" rx="3" class="f"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="m12 12.4 1.15 2.3 2.5.35-1.8 1.75.42 2.5L12 18.1l-2.27 1.2.43-2.5-1.8-1.75 2.5-.35z" fill="currentColor" stroke="none"/>',
+  herde:'<path d="M12 21.2s-6.6-5.7-6.6-11.2a6.6 6.6 0 0 1 13.2 0c0 5.5-6.6 11.2-6.6 11.2z" class="f"/><circle cx="12" cy="10" r="2.6"/>',
+  heim:'<path d="M3.5 11.2 12 4l8.5 7.2v8.3c0 .8-.7 1.5-1.5 1.5H5c-.8 0-1.5-.7-1.5-1.5z" class="f"/><path d="m8.6 15.2 2.4 2.4 4.6-5"/>',
+  daten:'<path d="M2.5 20.5h19"/><path d="m4 15 3.4 1 4.4-1.3-6.3-4.7 1.9-.6 7.8 3.1 3.9-1.2c1.2-.4 2.5.2 2.7 1.1.2.8-.3 1.6-1.2 1.9L8.6 17.6 4.9 16.8z" class="f"/>',
+  infos:'<path d="M3.5 11.2 12 4l8.5 7.2v8.3c0 .8-.7 1.5-1.5 1.5H5c-.8 0-1.5-.7-1.5-1.5z" class="f"/><path d="M8.6 14.3a4.8 4.8 0 0 1 6.8 0M10.3 16.1a2.4 2.4 0 0 1 3.4 0"/><circle cx="12" cy="18" r=".8" fill="currentColor" stroke="none"/>',
+  notfall:'<circle cx="12" cy="12" r="8.6" class="f"/><path d="M12 7.8v8.4M7.8 12h8.4" stroke-width="2.6"/>',
+  verwalten:'<path d="M4 7h10M18.6 7H20M4 17h3.4M12.6 17H20"/><circle cx="16.3" cy="7" r="2.3" class="f"/><circle cx="10" cy="17" r="2.3" class="f"/>',
+};
+const hubSvg = (k, sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${HUBIC[k]}</svg>`;
+const eurKurz = c => (c>0?'+':c<0?'−':'') + Math.round(Math.abs(c)/100).toLocaleString('de-DE') + ' €';
+function kachel2(o, gross, t){ const [c1,c2]=(t||THEMEN.sonst).farben[o.k]||['#5d5a57','#2e2b29'];
+  return `<button class="hk ${gross?'fokus':''}" style="--hk1:${c1};--hk2:${c2}" data-act="${o.act||'hubGeh'}" ${o.extra||''} aria-label="${esc(o.titel.replace(/&shy;/g,""))}${o.zahl?`, ${esc(o.zahlLang||o.zahl)}`:''}">
+  ${o.zahl?`<span class="hkzahl ${o.warn?'warn':''}">${o.zahl}</span>`:''}<span class="hkic">${o.icHtml||hubSvg(o.ic, 26)}</span><span class="hktitel">${o.titel}</span><span class="hkmuster" aria-hidden="true"></span></button>`; }
+V.reise = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), m=myM(); const ph=reisePhase(r,m);
+  const M=S.rt.mitglied; const dabei=M.filter(x=>x.status==='zugesagt').length;
+  const {s}=planGesamt(S.rt.kasse||[]); const mein=s[S.uid]||0;
+  const {n, ok}=packStand(r.id); const mb=S.rt.mitbringen||[]; const mbOffen=mb.filter(x=>!x.wer).length;
+  const kommend=visibleAkt().filter(x=>x.datum>=today()).length; const herde=herdePlaetze().length; const hc=heimStand(r.id);
+  const anFehlt=!reiseInfoVon(m, ph==='abreise'?'rueck':'an')?.zeit;
+  const K = {
+    mitglieder:{titel:'Mit&shy;glieder', ic:'mitglieder', farbe:'violett', zahl:dabei?String(dabei):'', zahlLang:`${dabei} dabei`, extra:'data-v="mitglieder" data-tab="mit"'},
+    kasse:{titel:'Kassen&shy;buch', ic:'kasse', farbe:'gruen', zahl:mein?eurKurz(mein):'', zahlLang:mein>0?`du bekommst ${eur(mein)}`:`du zahlst ${eur(-mein)}`, warn:mein<0, extra:'data-v="mitglieder" data-tab="kasse"'},
+    packliste: ph==='abreise' ? {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:`${hc.ok}/${hc.n}`, zahlLang:`Heimreise-Check ${hc.ok} von ${hc.n}`, warn:hc.ok<hc.n, extra:'data-v="packliste" data-tab="heim"'}
+      : {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:n?`${ok}/${n}`:'', zahlLang:`${ok} von ${n} eingepackt`, extra:'data-v="packliste" data-tab="mein"'},
+    mitbringen:{titel:'Mit&shy;bringen', ic:'mitbringen', farbe:'pink', zahl:mbOffen?`${mbOffen} offen`:'', warn:mbOffen>0, extra:'data-v="packliste" data-tab="gruppe"'},
+    termine:{titel:'Termine', ic:'termine', farbe:'blau', zahl:kommend?String(kommend):'', zahlLang:`${kommend} kommende`, extra:'data-v="neueAkt"'},
+    herde:{titel:'Herde', ic:'herde', icHtml:art(r).platzIcon!=='pin'?ic(art(r).platzIcon,26):'', farbe:'tuerkis', zahl:herde?String(herde):'', zahlLang:`${herde} teilen heute ihren Platz`, extra:'data-v="herde"'},
+    anreise:{titel:ph==='abreise'?'Rück&shy;reise':'Anreise', ic:'daten', farbe:'nacht', zahl:anFehlt&&['vorfreude','abreise'].includes(ph)?'fehlt':'', warn:true, extra:`data-v="anreise" data-tab="${ph==='abreise'?'rueck':'an'}"`},
+    infos:{titel:'Infos', ic:'infos', farbe:'gelb', zahl:'', extra:'data-v="infos"'},
+    notfall:{titel:'Notfall', ic:'notfall', farbe:'rot', zahl:'', extra:'data-v="notfall"'},
+  };
+  const folge = { vorfreude:['packliste','mitbringen','anreise','infos','mitglieder','termine','kasse','herde','notfall'],
+    unterwegs:['termine','herde','kasse','infos','mitglieder','notfall','anreise','mitbringen','packliste'],
+    abreise:['packliste','anreise','kasse','termine','mitglieder','herde','infos','notfall','mitbringen'],
+    vorbei:['kasse','mitglieder','termine','herde','infos','anreise','packliste','mitbringen','notfall'],
+    konferenz:['mitglieder','kasse','termine','packliste','mitbringen','anreise','infos','herde','notfall'] }[ph];
+  const l=folge.filter(k=>K[k]);
+  const phText={vorfreude:`noch ${daysUntil(m?.anreise||r.von)} ${daysUntil(m?.anreise||r.von)===1?'Tag':'Tage'}`, unterwegs:'unterwegs', abreise:'Heimreise', vorbei:'vorbei', konferenz:''}[ph];
+  const t=thema(r);
+  return `${hdrTrip('Reise')}${geschlossenBanner()}${reiseSzene(r, phText, canMod(r))}
+    <div class="hubgrid thema-${themaKey(r)}" style="--boden:${bodenUrl(t)};--muster:${musterUrl(t)}">${l.map((k,i)=>kachel2({...K[k],k}, i===0, t)).join('')}</div>`; };
+A.hubGeh = el => { const v=el.dataset.v; if(v==='mitglieder') S.ui.mitTab=el.dataset.tab||'mit'; if(v==='packliste') S.ui.packTab=el.dataset.tab||'mein'; if(v==='anreise') S.ui.anTab=el.dataset.tab||'an'; go(v); };
+
+/* ---------- Heimreise-Check ---------- */
+const HEIM_LISTE = [['lade','Ladekabel und Powerbank eingepackt'],['safe','Safe leer'],['ausweis','Ausweise, Tickets und Bordkarte griffbereit'],['zimmer','Schränke, Bad und unter dem Bett kontrolliert'],['bad','Kulturbeutel und Badesachen eingepackt (auch die nassen)'],['schluessel','Schlüssel bzw. Karte abgegeben'],['transfer','Transfer bzw. Abholung geklärt']];
+const heimVon = rid => (S.settings.heim||{})[rid] || {};
+function heimStand(rid){ const h=heimVon(rid); const l=HEIM_LISTE.map(([k])=>k); return {n:l.length, ok:l.filter(k=>h[k]).length}; }
+A.heimTog = el => { const r=cur(); const h={...heimVon(r.id)}; h[el.dataset.k]=!h[el.dataset.k]; saveSettings({heim:{...(S.settings.heim||{}), [r.id]:h}}); };
+function heimKarte(){ const r=cur(); if(reisePhase()!=='abreise') return ''; const {n, ok}=heimStand(r.id); const m=myM(); const ab=m?.abreise||r.bis;
+  return `<button class="card tight packkarte vorfreude" data-act="go" data-v="heimreise"><span class="row" style="gap:10px;width:100%"><span class="admic">${ic('check',20)}</span><span class="grow col" style="gap:2px;min-width:0"><b>Heimreise-Check</b><span class="tiny mut">${ab===today()?'Heute geht es nach Hause.':'Morgen geht es nach Hause.'} ${ok} von ${n} erledigt</span></span>${ic('right',16,'style="color:var(--mut)"')}</span>
+    <span class="packbalken" aria-hidden="true"><span style="width:${Math.round(ok/n*100)}%"></span></span></button>`; }
+V.heimreise = ()=>{ S.ui.packTab='heim'; return V.packliste(); };
+function heimView(r){ const h=heimVon(r.id); const {n, ok}=heimStand(r.id);
+  const {s, plan}=planGesamt(S.rt.kasse||[]); const mein=s[S.uid]||0; const zahle=plan.filter(p=>p.von===S.uid), bekomme=plan.filter(p=>p.an===S.uid);
+  return `<p class="small mut">Damit nichts im Zimmer bleibt. Nur du siehst diese Liste.</p>
+    <div class="card tight"><div class="row between"><b>${ok} von ${n} erledigt</b>${ok===n?'<span class="chip grn">Gute Heimreise! ✈️</span>':''}</div><span class="packbalken"><span style="width:${Math.round(ok/n*100)}%"></span></span></div>
+    <div class="card tight">${HEIM_LISTE.map(([k,t])=>`<div class="packzeile ${h[k]?'ok':''}"><button class="packhaken" data-act="heimTog" data-k="${k}" role="checkbox" aria-checked="${!!h[k]}"><span class="ausbox ${h[k]?'on':''}" aria-hidden="true">${h[k]?ic('check',16):''}</span><span class="grow">${esc(t)}</span></button></div>`).join('')}</div>
+    <button class="card tight" style="text-align:left;color:var(--tx);cursor:pointer" data-act="hubGeh" data-v="mitglieder" data-tab="kasse"><span class="row" style="gap:10px"><span class="admic">${ic('euro',20)}</span><span class="grow col" style="gap:2px"><b>Kassenbuch vor der Abreise klären</b><span class="small ${mein<0?'':'mut'}" style="${mein<0?'color:var(--pinktx)':mein>0?'color:var(--grntx)':''}">${mein<0?`Du zahlst noch ${zahle.map(p=>`${eur(p.betrag)} an ${esc(nameK(p.an))}`).join(', ')}`:mein>0?`Du bekommst noch ${bekomme.map(p=>`${eur(p.betrag)} von ${esc(nameK(p.von))}`).join(', ')}`:'Bei dir ist alles ausgeglichen.'}</span></span>${ic('right',16,'style="color:var(--mut)"')}</span></button>`; };
+/* QR-Code-Erzeuger (für WLAN-Codes). QRCode for JavaScript, Copyright (c) 2009 Kazuhiko Arase, MIT-Lizenz. Gebündelt aus qrcode-terminal/vendor. */
+const QRLib=(function(){const M={};
+(function(){M['QRMode'] = {
+    MODE_NUMBER :       1 << 0,
+    MODE_ALPHA_NUM :    1 << 1,
+    MODE_8BIT_BYTE :    1 << 2,
+    MODE_KANJI :        1 << 3
+};
+
+})();
+(function(){M['QRErrorCorrectLevel'] = {
+	L : 1,
+	M : 0,
+	Q : 3,
+	H : 2
+};
+
+
+})();
+(function(){M['QRMaskPattern'] = {
+	PATTERN000 : 0,
+	PATTERN001 : 1,
+	PATTERN010 : 2,
+	PATTERN011 : 3,
+	PATTERN100 : 4,
+	PATTERN101 : 5,
+	PATTERN110 : 6,
+	PATTERN111 : 7
+};
+
+})();
+(function(){var QRMath = {
+
+	glog : function(n) {
+	
+		if (n < 1) {
+			throw new Error("glog(" + n + ")");
+		}
+		
+		return QRMath.LOG_TABLE[n];
+	},
+	
+	gexp : function(n) {
+	
+		while (n < 0) {
+			n += 255;
+		}
+	
+		while (n >= 256) {
+			n -= 255;
+		}
+	
+		return QRMath.EXP_TABLE[n];
+	},
+	
+	EXP_TABLE : new Array(256),
+	
+	LOG_TABLE : new Array(256)
+
+};
+	
+for (var i = 0; i < 8; i++) {
+	QRMath.EXP_TABLE[i] = 1 << i;
+}
+for (var i = 8; i < 256; i++) {
+	QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4]
+		^ QRMath.EXP_TABLE[i - 5]
+		^ QRMath.EXP_TABLE[i - 6]
+		^ QRMath.EXP_TABLE[i - 8];
+}
+for (var i = 0; i < 255; i++) {
+	QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i;
+}
+
+M['QRMath'] = QRMath;
+
+})();
+(function(){var QRMath = M['QRMath'];
+
+function QRPolynomial(num, shift) {
+	if (num.length === undefined) {
+		throw new Error(num.length + "/" + shift);
+	}
+
+	var offset = 0;
+
+	while (offset < num.length && num[offset] === 0) {
+		offset++;
+	}
+
+	this.num = new Array(num.length - offset + shift);
+	for (var i = 0; i < num.length - offset; i++) {
+		this.num[i] = num[i + offset];
+	}
+}
+
+QRPolynomial.prototype = {
+
+	get : function(index) {
+		return this.num[index];
+	},
+	
+	getLength : function() {
+		return this.num.length;
+	},
+	
+	multiply : function(e) {
+	
+		var num = new Array(this.getLength() + e.getLength() - 1);
+	
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) );
+			}
+		}
+	
+		return new QRPolynomial(num, 0);
+	},
+	
+	mod : function(e) {
+	
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+	
+		var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) );
+	
+		var num = new Array(this.getLength() );
+		
+		for (var i = 0; i < this.getLength(); i++) {
+			num[i] = this.get(i);
+		}
+		
+		for (var x = 0; x < e.getLength(); x++) {
+			num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio);
+		}
+	
+		// recursive call
+		return new QRPolynomial(num, 0).mod(e);
+	}
+};
+
+M['QRPolynomial'] = QRPolynomial;
+
+})();
+(function(){function QRBitBuffer() {
+	this.buffer = [];
+	this.length = 0;
+}
+
+QRBitBuffer.prototype = {
+
+	get : function(index) {
+		var bufIndex = Math.floor(index / 8);
+		return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+	},
+	
+	put : function(num, length) {
+		for (var i = 0; i < length; i++) {
+			this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+		}
+	},
+	
+	getLengthInBits : function() {
+		return this.length;
+	},
+	
+	putBit : function(bit) {
+	
+		var bufIndex = Math.floor(this.length / 8);
+		if (this.buffer.length <= bufIndex) {
+			this.buffer.push(0);
+		}
+	
+		if (bit) {
+			this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) );
+		}
+	
+		this.length++;
+	}
+};
+
+M['QRBitBuffer'] = QRBitBuffer;
+
+})();
+(function(){var QRMode = M['QRMode'];
+
+function QR8bitByte(data) {
+	this.mode = QRMode.MODE_8BIT_BYTE;
+	this.data = data;
+}
+
+QR8bitByte.prototype = {
+
+	getLength : function() {
+		return this.data.length;
+	},
+	
+	write : function(buffer) {
+		for (var i = 0; i < this.data.length; i++) {
+			// not JIS ...
+			buffer.put(this.data.charCodeAt(i), 8);
+		}
+	}
+};
+
+M['QR8bitByte'] = QR8bitByte;
+
+})();
+(function(){var QRErrorCorrectLevel = M['QRErrorCorrectLevel'];
+
+function QRRSBlock(totalCount, dataCount) {
+	this.totalCount = totalCount;
+	this.dataCount  = dataCount;
+}
+
+QRRSBlock.RS_BLOCK_TABLE = [
+
+	// L
+	// M
+	// Q
+	// H
+
+	// 1
+	[1, 26, 19],
+	[1, 26, 16],
+	[1, 26, 13],
+	[1, 26, 9],
+	
+	// 2
+	[1, 44, 34],
+	[1, 44, 28],
+	[1, 44, 22],
+	[1, 44, 16],
+
+	// 3
+	[1, 70, 55],
+	[1, 70, 44],
+	[2, 35, 17],
+	[2, 35, 13],
+
+	// 4		
+	[1, 100, 80],
+	[2, 50, 32],
+	[2, 50, 24],
+	[4, 25, 9],
+	
+	// 5
+	[1, 134, 108],
+	[2, 67, 43],
+	[2, 33, 15, 2, 34, 16],
+	[2, 33, 11, 2, 34, 12],
+	
+	// 6
+	[2, 86, 68],
+	[4, 43, 27],
+	[4, 43, 19],
+	[4, 43, 15],
+	
+	// 7		
+	[2, 98, 78],
+	[4, 49, 31],
+	[2, 32, 14, 4, 33, 15],
+	[4, 39, 13, 1, 40, 14],
+	
+	// 8
+	[2, 121, 97],
+	[2, 60, 38, 2, 61, 39],
+	[4, 40, 18, 2, 41, 19],
+	[4, 40, 14, 2, 41, 15],
+	
+	// 9
+	[2, 146, 116],
+	[3, 58, 36, 2, 59, 37],
+	[4, 36, 16, 4, 37, 17],
+	[4, 36, 12, 4, 37, 13],
+	
+	// 10		
+	[2, 86, 68, 2, 87, 69],
+	[4, 69, 43, 1, 70, 44],
+	[6, 43, 19, 2, 44, 20],
+	[6, 43, 15, 2, 44, 16],
+
+	// 11
+	[4, 101, 81],
+	[1, 80, 50, 4, 81, 51],
+	[4, 50, 22, 4, 51, 23],
+	[3, 36, 12, 8, 37, 13],
+
+	// 12
+	[2, 116, 92, 2, 117, 93],
+	[6, 58, 36, 2, 59, 37],
+	[4, 46, 20, 6, 47, 21],
+	[7, 42, 14, 4, 43, 15],
+
+	// 13
+	[4, 133, 107],
+	[8, 59, 37, 1, 60, 38],
+	[8, 44, 20, 4, 45, 21],
+	[12, 33, 11, 4, 34, 12],
+
+	// 14
+	[3, 145, 115, 1, 146, 116],
+	[4, 64, 40, 5, 65, 41],
+	[11, 36, 16, 5, 37, 17],
+	[11, 36, 12, 5, 37, 13],
+
+	// 15
+	[5, 109, 87, 1, 110, 88],
+	[5, 65, 41, 5, 66, 42],
+	[5, 54, 24, 7, 55, 25],
+	[11, 36, 12],
+
+	// 16
+	[5, 122, 98, 1, 123, 99],
+	[7, 73, 45, 3, 74, 46],
+	[15, 43, 19, 2, 44, 20],
+	[3, 45, 15, 13, 46, 16],
+
+	// 17
+	[1, 135, 107, 5, 136, 108],
+	[10, 74, 46, 1, 75, 47],
+	[1, 50, 22, 15, 51, 23],
+	[2, 42, 14, 17, 43, 15],
+
+	// 18
+	[5, 150, 120, 1, 151, 121],
+	[9, 69, 43, 4, 70, 44],
+	[17, 50, 22, 1, 51, 23],
+	[2, 42, 14, 19, 43, 15],
+
+	// 19
+	[3, 141, 113, 4, 142, 114],
+	[3, 70, 44, 11, 71, 45],
+	[17, 47, 21, 4, 48, 22],
+	[9, 39, 13, 16, 40, 14],
+
+	// 20
+	[3, 135, 107, 5, 136, 108],
+	[3, 67, 41, 13, 68, 42],
+	[15, 54, 24, 5, 55, 25],
+	[15, 43, 15, 10, 44, 16],
+
+	// 21
+	[4, 144, 116, 4, 145, 117],
+	[17, 68, 42],
+	[17, 50, 22, 6, 51, 23],
+	[19, 46, 16, 6, 47, 17],
+
+	// 22
+	[2, 139, 111, 7, 140, 112],
+	[17, 74, 46],
+	[7, 54, 24, 16, 55, 25],
+	[34, 37, 13],
+
+	// 23
+	[4, 151, 121, 5, 152, 122],
+	[4, 75, 47, 14, 76, 48],
+	[11, 54, 24, 14, 55, 25],
+	[16, 45, 15, 14, 46, 16],
+
+	// 24
+	[6, 147, 117, 4, 148, 118],
+	[6, 73, 45, 14, 74, 46],
+	[11, 54, 24, 16, 55, 25],
+	[30, 46, 16, 2, 47, 17],
+
+	// 25
+	[8, 132, 106, 4, 133, 107],
+	[8, 75, 47, 13, 76, 48],
+	[7, 54, 24, 22, 55, 25],
+	[22, 45, 15, 13, 46, 16],
+
+	// 26
+	[10, 142, 114, 2, 143, 115],
+	[19, 74, 46, 4, 75, 47],
+	[28, 50, 22, 6, 51, 23],
+	[33, 46, 16, 4, 47, 17],
+
+	// 27
+	[8, 152, 122, 4, 153, 123],
+	[22, 73, 45, 3, 74, 46],
+	[8, 53, 23, 26, 54, 24],
+	[12, 45, 15, 28, 46, 16],
+
+	// 28
+	[3, 147, 117, 10, 148, 118],
+	[3, 73, 45, 23, 74, 46],
+	[4, 54, 24, 31, 55, 25],
+	[11, 45, 15, 31, 46, 16],
+
+	// 29
+	[7, 146, 116, 7, 147, 117],
+	[21, 73, 45, 7, 74, 46],
+	[1, 53, 23, 37, 54, 24],
+	[19, 45, 15, 26, 46, 16],
+
+	// 30
+	[5, 145, 115, 10, 146, 116],
+	[19, 75, 47, 10, 76, 48],
+	[15, 54, 24, 25, 55, 25],
+	[23, 45, 15, 25, 46, 16],
+
+	// 31
+	[13, 145, 115, 3, 146, 116],
+	[2, 74, 46, 29, 75, 47],
+	[42, 54, 24, 1, 55, 25],
+	[23, 45, 15, 28, 46, 16],
+
+	// 32
+	[17, 145, 115],
+	[10, 74, 46, 23, 75, 47],
+	[10, 54, 24, 35, 55, 25],
+	[19, 45, 15, 35, 46, 16],
+
+	// 33
+	[17, 145, 115, 1, 146, 116],
+	[14, 74, 46, 21, 75, 47],
+	[29, 54, 24, 19, 55, 25],
+	[11, 45, 15, 46, 46, 16],
+
+	// 34
+	[13, 145, 115, 6, 146, 116],
+	[14, 74, 46, 23, 75, 47],
+	[44, 54, 24, 7, 55, 25],
+	[59, 46, 16, 1, 47, 17],
+
+	// 35
+	[12, 151, 121, 7, 152, 122],
+	[12, 75, 47, 26, 76, 48],
+	[39, 54, 24, 14, 55, 25],
+	[22, 45, 15, 41, 46, 16],
+
+	// 36
+	[6, 151, 121, 14, 152, 122],
+	[6, 75, 47, 34, 76, 48],
+	[46, 54, 24, 10, 55, 25],
+	[2, 45, 15, 64, 46, 16],
+
+	// 37
+	[17, 152, 122, 4, 153, 123],
+	[29, 74, 46, 14, 75, 47],
+	[49, 54, 24, 10, 55, 25],
+	[24, 45, 15, 46, 46, 16],
+
+	// 38
+	[4, 152, 122, 18, 153, 123],
+	[13, 74, 46, 32, 75, 47],
+	[48, 54, 24, 14, 55, 25],
+	[42, 45, 15, 32, 46, 16],
+
+	// 39
+	[20, 147, 117, 4, 148, 118],
+	[40, 75, 47, 7, 76, 48],
+	[43, 54, 24, 22, 55, 25],
+	[10, 45, 15, 67, 46, 16],
+
+	// 40
+	[19, 148, 118, 6, 149, 119],
+	[18, 75, 47, 31, 76, 48],
+	[34, 54, 24, 34, 55, 25],
+	[20, 45, 15, 61, 46, 16]
+];
+
+QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) {
+	
+	var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
+	
+	if (rsBlock === undefined) {
+		throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel);
+	}
+
+	var length = rsBlock.length / 3;
+	
+	var list = [];
+	
+	for (var i = 0; i < length; i++) {
+
+		var count = rsBlock[i * 3 + 0];
+		var totalCount = rsBlock[i * 3 + 1];
+		var dataCount  = rsBlock[i * 3 + 2];
+
+		for (var j = 0; j < count; j++) {
+			list.push(new QRRSBlock(totalCount, dataCount) );	
+		}
+	}
+	
+	return list;
+};
+
+QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) {
+
+	switch(errorCorrectLevel) {
+	case QRErrorCorrectLevel.L :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+	case QRErrorCorrectLevel.M :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+	case QRErrorCorrectLevel.Q :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+	case QRErrorCorrectLevel.H :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+	default :
+		return undefined;
+	}
+};
+
+M['QRRSBlock'] = QRRSBlock;
+
+})();
+(function(){var QRMode = M['QRMode'];
+var QRPolynomial = M['QRPolynomial'];
+var QRMath = M['QRMath'];
+var QRMaskPattern = M['QRMaskPattern'];
+
+var QRUtil = {
+
+    PATTERN_POSITION_TABLE : [
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],        
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90],
+        [6, 28, 50, 72, 94],
+        [6, 26, 50, 74, 98],
+        [6, 30, 54, 78, 102],
+        [6, 28, 54, 80, 106],
+        [6, 32, 58, 84, 110],
+        [6, 30, 58, 86, 114],
+        [6, 34, 62, 90, 118],
+        [6, 26, 50, 74, 98, 122],
+        [6, 30, 54, 78, 102, 126],
+        [6, 26, 52, 78, 104, 130],
+        [6, 30, 56, 82, 108, 134],
+        [6, 34, 60, 86, 112, 138],
+        [6, 30, 58, 86, 114, 142],
+        [6, 34, 62, 90, 118, 146],
+        [6, 30, 54, 78, 102, 126, 150],
+        [6, 24, 50, 76, 102, 128, 154],
+        [6, 28, 54, 80, 106, 132, 158],
+        [6, 32, 58, 84, 110, 136, 162],
+        [6, 26, 54, 82, 110, 138, 166],
+        [6, 30, 58, 86, 114, 142, 170]
+    ],
+
+    G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
+    G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0),
+    G15_MASK : (1 << 14) | (1 << 12) | (1 << 10)    | (1 << 4) | (1 << 1),
+
+    getBCHTypeInfo : function(data) {
+        var d = data << 10;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) {
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) );    
+        }
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK;
+    },
+
+    getBCHTypeNumber : function(data) {
+        var d = data << 12;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) {
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) );    
+        }
+        return (data << 12) | d;
+    },
+
+    getBCHDigit : function(data) {
+
+        var digit = 0;
+
+        while (data !== 0) {
+            digit++;
+            data >>>= 1;
+        }
+
+        return digit;
+    },
+
+    getPatternPosition : function(typeNumber) {
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1];
+    },
+
+    getMask : function(maskPattern, i, j) {
+        
+        switch (maskPattern) {
+            
+        case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0;
+        case QRMaskPattern.PATTERN001 : return i % 2 === 0;
+        case QRMaskPattern.PATTERN010 : return j % 3 === 0;
+        case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0;
+        case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0;
+        case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0;
+        case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0;
+        case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0;
+
+        default :
+            throw new Error("bad maskPattern:" + maskPattern);
+        }
+    },
+
+    getErrorCorrectPolynomial : function(errorCorrectLength) {
+
+        var a = new QRPolynomial([1], 0);
+
+        for (var i = 0; i < errorCorrectLength; i++) {
+            a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) );
+        }
+
+        return a;
+    },
+
+    getLengthInBits : function(mode, type) {
+
+        if (1 <= type && type < 10) {
+
+            // 1 - 9
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 10;
+            case QRMode.MODE_ALPHA_NUM  : return 9;
+            case QRMode.MODE_8BIT_BYTE  : return 8;
+            case QRMode.MODE_KANJI      : return 8;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 27) {
+
+            // 10 - 26
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 12;
+            case QRMode.MODE_ALPHA_NUM  : return 11;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 10;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 41) {
+
+            // 27 - 40
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 14;
+            case QRMode.MODE_ALPHA_NUM  : return 13;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 12;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else {
+            throw new Error("type:" + type);
+        }
+    },
+
+    getLostPoint : function(qrCode) {
+        
+        var moduleCount = qrCode.getModuleCount();
+        var lostPoint = 0;
+        var row = 0; 
+        var col = 0;
+
+        
+        // LEVEL1
+        
+        for (row = 0; row < moduleCount; row++) {
+
+            for (col = 0; col < moduleCount; col++) {
+
+                var sameCount = 0;
+                var dark = qrCode.isDark(row, col);
+
+                for (var r = -1; r <= 1; r++) {
+
+                    if (row + r < 0 || moduleCount <= row + r) {
+                        continue;
+                    }
+
+                    for (var c = -1; c <= 1; c++) {
+
+                        if (col + c < 0 || moduleCount <= col + c) {
+                            continue;
+                        }
+
+                        if (r === 0 && c === 0) {
+                            continue;
+                        }
+
+                        if (dark === qrCode.isDark(row + r, col + c) ) {
+                            sameCount++;
+                        }
+                    }
+                }
+
+                if (sameCount > 5) {
+                    lostPoint += (3 + sameCount - 5);
+                }
+            }
+        }
+
+        // LEVEL2
+
+        for (row = 0; row < moduleCount - 1; row++) {
+            for (col = 0; col < moduleCount - 1; col++) {
+                var count = 0;
+                if (qrCode.isDark(row,     col    ) ) count++;
+                if (qrCode.isDark(row + 1, col    ) ) count++;
+                if (qrCode.isDark(row,     col + 1) ) count++;
+                if (qrCode.isDark(row + 1, col + 1) ) count++;
+                if (count === 0 || count === 4) {
+                    lostPoint += 3;
+                }
+            }
+        }
+
+        // LEVEL3
+
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount - 6; col++) {
+                if (qrCode.isDark(row, col) && 
+                        !qrCode.isDark(row, col + 1) && 
+                         qrCode.isDark(row, col + 2) && 
+                         qrCode.isDark(row, col + 3) && 
+                         qrCode.isDark(row, col + 4) && 
+                        !qrCode.isDark(row, col + 5) && 
+                         qrCode.isDark(row, col + 6) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount - 6; row++) {
+                if (qrCode.isDark(row, col) &&
+                        !qrCode.isDark(row + 1, col) &&
+                         qrCode.isDark(row + 2, col) &&
+                         qrCode.isDark(row + 3, col) &&
+                         qrCode.isDark(row + 4, col) &&
+                        !qrCode.isDark(row + 5, col) &&
+                         qrCode.isDark(row + 6, col) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        // LEVEL4
+        
+        var darkCount = 0;
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount; row++) {
+                if (qrCode.isDark(row, col) ) {
+                    darkCount++;
+                }
+            }
+        }
+        
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+
+        return lostPoint;       
+    }
+
+};
+
+M['QRUtil'] = QRUtil;
+
+})();
+(function(){//---------------------------------------------------------------------
+// QRCode for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//   http://www.opensource.org/licenses/mit-license.php
+//
+// The word "QR Code" is registered trademark of 
+// DENSO WAVE INCORPORATED
+//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+// Modified to work in node for this project (and some refactoring)
+//---------------------------------------------------------------------
+
+var QR8bitByte = M['QR8bitByte'];
+var QRUtil = M['QRUtil'];
+var QRPolynomial = M['QRPolynomial'];
+var QRRSBlock = M['QRRSBlock'];
+var QRBitBuffer = M['QRBitBuffer'];
+
+function QRCode(typeNumber, errorCorrectLevel) {
+	this.typeNumber = typeNumber;
+	this.errorCorrectLevel = errorCorrectLevel;
+	this.modules = null;
+	this.moduleCount = 0;
+	this.dataCache = null;
+	this.dataList = [];
+}
+
+QRCode.prototype = {
+	
+	addData : function(data) {
+		var newData = new QR8bitByte(data);
+		this.dataList.push(newData);
+		this.dataCache = null;
+	},
+	
+	isDark : function(row, col) {
+		if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
+			throw new Error(row + "," + col);
+		}
+		return this.modules[row][col];
+	},
+
+	getModuleCount : function() {
+		return this.moduleCount;
+	},
+	
+	make : function() {
+		// Calculate automatically typeNumber if provided is < 1
+		if (this.typeNumber < 1 ){
+			var typeNumber = 1;
+			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+
+				var buffer = new QRBitBuffer();
+				var totalDataCount = 0;
+				for (var i = 0; i < rsBlocks.length; i++) {
+					totalDataCount += rsBlocks[i].dataCount;
+				}
+
+				for (var x = 0; x < this.dataList.length; x++) {
+					var data = this.dataList[x];
+					buffer.put(data.mode, 4);
+					buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+					data.write(buffer);
+				}
+				if (buffer.getLengthInBits() <= totalDataCount * 8)
+					break;
+			}
+			this.typeNumber = typeNumber;
+		}
+		this.makeImpl(false, this.getBestMaskPattern() );
+	},
+	
+	makeImpl : function(test, maskPattern) {
+		
+		this.moduleCount = this.typeNumber * 4 + 17;
+		this.modules = new Array(this.moduleCount);
+		
+		for (var row = 0; row < this.moduleCount; row++) {
+			
+			this.modules[row] = new Array(this.moduleCount);
+			
+			for (var col = 0; col < this.moduleCount; col++) {
+				this.modules[row][col] = null;//(col + row) % 3;
+			}
+		}
+	
+		this.setupPositionProbePattern(0, 0);
+		this.setupPositionProbePattern(this.moduleCount - 7, 0);
+		this.setupPositionProbePattern(0, this.moduleCount - 7);
+		this.setupPositionAdjustPattern();
+		this.setupTimingPattern();
+		this.setupTypeInfo(test, maskPattern);
+		
+		if (this.typeNumber >= 7) {
+			this.setupTypeNumber(test);
+		}
+	
+		if (this.dataCache === null) {
+			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+		}
+	
+		this.mapData(this.dataCache, maskPattern);
+	},
+
+	setupPositionProbePattern : function(row, col)  {
+		
+		for (var r = -1; r <= 7; r++) {
+			
+			if (row + r <= -1 || this.moduleCount <= row + r) continue;
+			
+			for (var c = -1; c <= 7; c++) {
+				
+				if (col + c <= -1 || this.moduleCount <= col + c) continue;
+				
+				if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || 
+                     (0 <= c && c <= 6 && (r === 0 || r === 6) ) || 
+                     (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+					this.modules[row + r][col + c] = true;
+				} else {
+					this.modules[row + r][col + c] = false;
+				}
+			}		
+		}		
+	},
+	
+	getBestMaskPattern : function() {
+	
+		var minLostPoint = 0;
+		var pattern = 0;
+	
+		for (var i = 0; i < 8; i++) {
+			
+			this.makeImpl(true, i);
+	
+			var lostPoint = QRUtil.getLostPoint(this);
+	
+			if (i === 0 || minLostPoint >  lostPoint) {
+				minLostPoint = lostPoint;
+				pattern = i;
+			}
+		}
+	
+		return pattern;
+	},
+	
+	createMovieClip : function(target_mc, instance_name, depth) {
+	
+		var qr_mc = target_mc.createEmptyMovieClip(instance_name, depth);
+		var cs = 1;
+	
+		this.make();
+
+		for (var row = 0; row < this.modules.length; row++) {
+			
+			var y = row * cs;
+			
+			for (var col = 0; col < this.modules[row].length; col++) {
+	
+				var x = col * cs;
+				var dark = this.modules[row][col];
+			
+				if (dark) {
+					qr_mc.beginFill(0, 100);
+					qr_mc.moveTo(x, y);
+					qr_mc.lineTo(x + cs, y);
+					qr_mc.lineTo(x + cs, y + cs);
+					qr_mc.lineTo(x, y + cs);
+					qr_mc.endFill();
+				}
+			}
+		}
+		
+		return qr_mc;
+	},
+
+	setupTimingPattern : function() {
+		
+		for (var r = 8; r < this.moduleCount - 8; r++) {
+			if (this.modules[r][6] !== null) {
+				continue;
+			}
+			this.modules[r][6] = (r % 2 === 0);
+		}
+	
+		for (var c = 8; c < this.moduleCount - 8; c++) {
+			if (this.modules[6][c] !== null) {
+				continue;
+			}
+			this.modules[6][c] = (c % 2 === 0);
+		}
+	},
+	
+	setupPositionAdjustPattern : function() {
+	
+		var pos = QRUtil.getPatternPosition(this.typeNumber);
+		
+		for (var i = 0; i < pos.length; i++) {
+		
+			for (var j = 0; j < pos.length; j++) {
+			
+				var row = pos[i];
+				var col = pos[j];
+				
+				if (this.modules[row][col] !== null) {
+					continue;
+				}
+				
+				for (var r = -2; r <= 2; r++) {
+				
+					for (var c = -2; c <= 2; c++) {
+					
+						if (Math.abs(r) === 2 || 
+                            Math.abs(c) === 2 ||
+                            (r === 0 && c === 0) ) {
+							this.modules[row + r][col + c] = true;
+						} else {
+							this.modules[row + r][col + c] = false;
+						}
+					}
+				}
+			}
+		}
+	},
+	
+	setupTypeNumber : function(test) {
+	
+		var bits = QRUtil.getBCHTypeNumber(this.typeNumber);
+        var mod;
+	
+		for (var i = 0; i < 18; i++) {
+			mod = (!test && ( (bits >> i) & 1) === 1);
+			this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod;
+		}
+	
+		for (var x = 0; x < 18; x++) {
+			mod = (!test && ( (bits >> x) & 1) === 1);
+			this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod;
+		}
+	},
+	
+	setupTypeInfo : function(test, maskPattern) {
+	
+		var data = (this.errorCorrectLevel << 3) | maskPattern;
+		var bits = QRUtil.getBCHTypeInfo(data);
+        var mod;
+	
+		// vertical		
+		for (var v = 0; v < 15; v++) {
+	
+			mod = (!test && ( (bits >> v) & 1) === 1);
+	
+			if (v < 6) {
+				this.modules[v][8] = mod;
+			} else if (v < 8) {
+				this.modules[v + 1][8] = mod;
+			} else {
+				this.modules[this.moduleCount - 15 + v][8] = mod;
+			}
+		}
+	
+		// horizontal
+		for (var h = 0; h < 15; h++) {
+	
+			mod = (!test && ( (bits >> h) & 1) === 1);
+			
+			if (h < 8) {
+				this.modules[8][this.moduleCount - h - 1] = mod;
+			} else if (h < 9) {
+				this.modules[8][15 - h - 1 + 1] = mod;
+			} else {
+				this.modules[8][15 - h - 1] = mod;
+			}
+		}
+	
+		// fixed module
+		this.modules[this.moduleCount - 8][8] = (!test);
+	
+	},
+	
+	mapData : function(data, maskPattern) {
+		
+		var inc = -1;
+		var row = this.moduleCount - 1;
+		var bitIndex = 7;
+		var byteIndex = 0;
+		
+		for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+	
+			if (col === 6) col--;
+	
+			while (true) {
+	
+				for (var c = 0; c < 2; c++) {
+					
+					if (this.modules[row][col - c] === null) {
+						
+						var dark = false;
+	
+						if (byteIndex < data.length) {
+							dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1);
+						}
+	
+						var mask = QRUtil.getMask(maskPattern, row, col - c);
+	
+						if (mask) {
+							dark = !dark;
+						}
+						
+						this.modules[row][col - c] = dark;
+						bitIndex--;
+	
+						if (bitIndex === -1) {
+							byteIndex++;
+							bitIndex = 7;
+						}
+					}
+				}
+								
+				row += inc;
+	
+				if (row < 0 || this.moduleCount <= row) {
+					row -= inc;
+					inc = -inc;
+					break;
+				}
+			}
+		}
+		
+	}
+
+};
+
+QRCode.PAD0 = 0xEC;
+QRCode.PAD1 = 0x11;
+
+QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+	
+	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+	
+	var buffer = new QRBitBuffer();
+	
+	for (var i = 0; i < dataList.length; i++) {
+		var data = dataList[i];
+		buffer.put(data.mode, 4);
+		buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+		data.write(buffer);
+	}
+
+	// calc num max data.
+	var totalDataCount = 0;
+	for (var x = 0; x < rsBlocks.length; x++) {
+		totalDataCount += rsBlocks[x].dataCount;
+	}
+
+	if (buffer.getLengthInBits() > totalDataCount * 8) {
+		throw new Error("code length overflow. (" + 
+            buffer.getLengthInBits() + 
+            ">" +  
+            totalDataCount * 8 + 
+            ")");
+	}
+
+	// end code
+	if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+		buffer.put(0, 4);
+	}
+
+	// padding
+	while (buffer.getLengthInBits() % 8 !== 0) {
+		buffer.putBit(false);
+	}
+
+	// padding
+	while (true) {
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD0, 8);
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD1, 8);
+	}
+
+	return QRCode.createBytes(buffer, rsBlocks);
+};
+
+QRCode.createBytes = function(buffer, rsBlocks) {
+
+	var offset = 0;
+	
+	var maxDcCount = 0;
+	var maxEcCount = 0;
+	
+	var dcdata = new Array(rsBlocks.length);
+	var ecdata = new Array(rsBlocks.length);
+	
+	for (var r = 0; r < rsBlocks.length; r++) {
+
+		var dcCount = rsBlocks[r].dataCount;
+		var ecCount = rsBlocks[r].totalCount - dcCount;
+
+		maxDcCount = Math.max(maxDcCount, dcCount);
+		maxEcCount = Math.max(maxEcCount, ecCount);
+		
+		dcdata[r] = new Array(dcCount);
+		
+		for (var i = 0; i < dcdata[r].length; i++) {
+			dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+		}
+		offset += dcCount;
+		
+		var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+		var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+		var modPoly = rawPoly.mod(rsPoly);
+		ecdata[r] = new Array(rsPoly.getLength() - 1);
+		for (var x = 0; x < ecdata[r].length; x++) {
+            var modIndex = x + modPoly.getLength() - ecdata[r].length;
+			ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+		}
+
+	}
+	
+	var totalCodeCount = 0;
+	for (var y = 0; y < rsBlocks.length; y++) {
+		totalCodeCount += rsBlocks[y].totalCount;
+	}
+
+	var data = new Array(totalCodeCount);
+	var index = 0;
+
+	for (var z = 0; z < maxDcCount; z++) {
+		for (var s = 0; s < rsBlocks.length; s++) {
+			if (z < dcdata[s].length) {
+				data[index++] = dcdata[s][z];
+			}
+		}
+	}
+
+	for (var xx = 0; xx < maxEcCount; xx++) {
+		for (var t = 0; t < rsBlocks.length; t++) {
+			if (xx < ecdata[t].length) {
+				data[index++] = ecdata[t][xx];
+			}
+		}
+	}
+
+	return data;
+
+};
+
+M['index'] = QRCode;
+
+})();
+return {QRCode:M['index'],L:M['QRErrorCorrectLevel']};})();/* ===================== Anreise (Ankunftsboard), Infos & Dokumente, Notfall =====================
+   Anreise: Jeder trägt An- und Rückreise ein (Flug, Bahn, Auto …). Daraus entsteht eine Tafel wie am Flughafen,
+            mit „Ich hole ab“ und dem Hinweis, wer fast gleichzeitig ankommt.
+   Infos:   Unterkunft, WLAN, Check-in usw. für alle. Ob nur der Gruppenadmin oder alle sie ändern dürfen, entscheidet der Admin.
+            Dazu private Dokumente (Foto oder PDF), die nur man selbst sieht.
+   Notfall: Notrufnummern des Urlaubslands, Sperr-Notruf, Krankenhaus in der Nähe, Unterkunftsadresse und ein privater Notfallpass. */
+
+/* ===================== Anreise ===================== */
+const VERKEHR = { flug:['Flug','plane','Flugnummer','Flughafen','z. B. LH 1234','z. B. Palma (PMI)'], bahn:['Bahn','ticket','Zugnummer','Bahnhof','z. B. ICE 578','z. B. Hauptbahnhof'], auto:['Auto','pin','','Treffpunkt','',''], sonst:['Sonstiges','suitcase','Info','Ort','',''] };
+const reiseInfoVon = (m, w) => (w==='rueck' ? m?.rueckInfo : m?.anInfo) || null;
+const anDatum = (m, r) => m?.anreise || r?.von, abDatum = (m, r) => m?.abreise || r?.bis;
+function tafelZeilen(r, w){ const l=zugesagt().map(m=>({m, i:reiseInfoVon(m,w), d:w==='rueck'?abDatum(m,r):anDatum(m,r)})).filter(x=>x.i && x.i.zeit);
+  return l.sort((a,b)=>(a.d+a.i.zeit).localeCompare(b.d+b.i.zeit)); }
+const minuten = t => { const [h,m]=String(t||'').split(':').map(Number); return (h||0)*60+(m||0); };
+/* Wer kommt (bzw. fährt) am selben Ort innerhalb von 45 Minuten? */
+function gemeinsam(zeilen){ const gr=[]; for(const z of zeilen){ const ort=String(z.i.ort||'').trim().toLowerCase(); if(!ort) continue;
+    const g=gr.find(x=>x.d===z.d && x.ort===ort && Math.abs(minuten(x.letzte)-minuten(z.i.zeit))<=45); if(g){ g.l.push(z); g.letzte=z.i.zeit; } else gr.push({d:z.d, ort, letzte:z.i.zeit, l:[z]}); }
+  return gr.filter(g=>g.l.length>1); }
+function tafelHtml(zeilen, w, kompakt=false){ if(!zeilen.length) return '';
+  return `<div class="tafel ${kompakt?'kompakt':''}" role="table" aria-label="${w==='rueck'?'Rückreisen':'Ankünfte'}">${zeilen.map(({m,i,d})=>{ const v=VERKEHR[i.art]||VERKEHR.sonst; const ab=Object.keys(m.abholer||{}).filter(u=>m.abholer[u]); const ich=m.uid===S.uid;
+    return `<div class="tzeile" role="row"><span class="tzeit num" role="cell">${esc(i.zeit)}</span><span class="tic" role="cell">${ic(v[1],16)}</span>
+      <span class="grow col" style="gap:1px;min-width:0" role="cell"><span class="ell"><b>${esc(nm(m.uid))}</b>${i.nr?` <span class="tnr">${esc(i.nr)}</span>`:''}</span><span class="tiny mut ell">${kompakt?'':`${fD(d)} · `}${esc(i.ort||v[0])}${w!=='rueck'&&ab.length?` · abgeholt von ${ab.map(u=>u===S.uid?'dir':esc(nm(u).split(' ')[0])).join(', ')}`:''}</span></span>
+      ${w!=='rueck'&&!ich&&!kompakt?`<button class="btn xs ${ab.includes(S.uid)?'on':'sec'}" data-act="abholen" data-uid="${m.uid}">${ab.includes(S.uid)?ic('check',13)+' Ich hole ab':'Abholen'}</button>`:''}</div>`; }).join('')}</div>`; }
+function gemeinsamHtml(zeilen, w){ const g=gemeinsam(zeilen); if(!g.length) return '';
+  return g.map(x=>`<div class="info small">${ic('mitgl',14)} <b>${x.l.map(z=>esc(nm(z.m.uid).split(' ')[0])).join(', ')}</b> ${w==='rueck'?'fahren':'kommen'} am ${fD(x.d)} fast gleichzeitig ${w==='rueck'?'ab':'an'} (${esc(x.l[0].i.ort)}, ${esc(x.l[0].i.zeit)}–${esc(x.letzte)} Uhr). Zusammen ein Taxi?</div>`).join(''); }
+V.anreise = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), m=myM(); const tab=S.ui.anTab||'an';
+  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='an'}" data-act="ui" data-k="anTab" data-val="an">Ankunft</button><button role="tab" aria-selected="${tab==='rueck'}" data-act="ui" data-k="anTab" data-val="rueck">Rückreise</button></div>`;
+  const z=tafelZeilen(r, tab); const mein=reiseInfoVon(m, tab); const v=VERKEHR[mein?.art]||null; const fehlt=zugesagt().filter(x=>!reiseInfoVon(x,tab)?.zeit).map(x=>x.uid);
+  return `${hdrTrip('Anreise')}${backBtn()}<h1>${tab==='rueck'?'Rückreise':'Anreise'}</h1>${tabs}
+    <div class="card tight"><div class="row between"><b>Meine ${tab==='rueck'?'Rückreise':'Anreise'}</b><span class="tiny mut">${fD(tab==='rueck'?abDatum(m,r):anDatum(m,r))}</span></div>
+      ${mein?.zeit?`<div class="row" style="gap:10px"><span class="tic gross">${ic(v?.[1]||'suitcase',20)}</span><span class="grow col" style="gap:1px"><b>${esc(mein.zeit)} Uhr${mein.nr?` · ${esc(mein.nr)}`:''}</b><span class="small mut">${esc(v?.[0]||'')}${mein.ort?` · ${esc(mein.ort)}`:''}</span></span><button class="btn xs sec" data-act="anAuf" data-w="${tab}">${ic('pencil',13)} Ändern</button></div>`
+        : `<span class="small mut">Trag ein, wie und wann du ${tab==='rueck'?'zurückfährst':'ankommst'}. Dann sehen die anderen, wer wann ${tab==='rueck'?'abreist':'landet'}.</span><button class="btn block" data-act="anAuf" data-w="${tab}">${ic('plus',18)} Eintragen</button>`}
+      <button class="link tiny" style="align-self:flex-start" data-act="reiseDaten">Reisedaten ändern</button></div>
+    ${gemeinsamHtml(z, tab)}
+    <h3 style="margin:6px 0 0">${tab==='rueck'?'Abfahrtstafel':'Ankunftstafel'}</h3>
+    ${tafelHtml(z, tab)||'<div class="empty small">Noch niemand hat etwas eingetragen.</div>'}
+    ${fehlt.length?`<p class="tiny mut">Noch ohne Angabe: ${fehlt.map(u=>esc(nm(u).split(' ')[0])).join(', ')}</p>`:''}`; };
+A.anAuf = el => { const w=el.dataset.w; const i=reiseInfoVon(myM(), w)||{}; Object.assign(S.form,{anArt:i.art||'flug', anNr:i.nr||'', anZeit:i.zeit||'', anOrt:i.ort||''}); openOv('anreiseForm',{w}); };
+OV.anreiseForm = o => { const f=S.form; const v=VERKEHR[f.anArt]||VERKEHR.flug;
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-label="${o.w==='rueck'?'Rückreise':'Anreise'} eintragen"><div class="row between"><h2 style="margin:0">${o.w==='rueck'?'Meine Rückreise':'Meine Anreise'}</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+    <div class="segment">${Object.entries(VERKEHR).map(([k,x])=>`<button data-act="anArt" data-k="${k}" aria-pressed="${f.anArt===k}">${x[0]}</button>`).join('')}</div>
+    ${v[2]?`<label class="f">${v[2]}<input class="in" id="f_anNr" maxlength="20" placeholder="${v[4]}" autocapitalize="characters"></label>`:''}
+    <label class="f">${o.w==='rueck'?'Abfahrt bzw. Abflug (Uhrzeit)':'Ankunft (Uhrzeit)'}<input class="in" id="f_anZeit" maxlength="5" placeholder="z. B. 14:30" data-zeit="1" inputmode="text"></label>
+    <label class="f">${v[3]}<input class="in" id="f_anOrt" maxlength="40" placeholder="${v[5]}"></label>
+    <button class="btn block" data-act="anSpeichern">Speichern</button>${reiseInfoVon(myM(),o.w)?`<button class="btn ghost block" data-act="anLoeschen">Angabe entfernen</button>`:''}</div>`; };
+A.anArt = el => { S.form.anArt=el.dataset.k; renderOv(); };
+A.anSpeichern = async ()=>{ const w=S.ov.w, f=S.form; const zeit=zeitNorm(f.anZeit||''); if(!zeit || !zeitOk(zeit)) return toast('Bitte die Uhrzeit wie 14 oder 14:30 eingeben.');
+  const i={art:f.anArt||'flug', nr:String(f.anNr||'').trim().toUpperCase().slice(0,20), zeit, ort:String(f.anOrt||'').trim().slice(0,40)}; if(!VERKEHR[i.art][2]) i.nr='';
+  await W(()=>mDoc(S.rid,S.uid).update(w==='rueck'?{rueckInfo:i}:{anInfo:i}),'Speichern'); closeOv(); toast('Gespeichert'); };
+A.anLoeschen = async ()=>{ const w=S.ov.w; await W(()=>mDoc(S.rid,S.uid).update(w==='rueck'?{rueckInfo:null}:{anInfo:null}),'Speichern'); closeOv(); };
+A.abholen = async el => { const u=el.dataset.uid; const m=zugesagt().find(x=>x.uid===u); const an=!(m?.abholer||{})[S.uid];
+  await W(()=>mDoc(S.rid,u).update({abholer:{[S.uid]:an}}),'Speichern'); if(an) toast(`Super, du holst ${nm(u).split(' ')[0]} ab.`); };
+/* Karte auf „Mein Tag“: Ankünfte bzw. Abfahrten des gewählten Tages */
+function tafelKarte(day){ const r=cur(); if(!r || r.status!=='fest') return ''; const an=tafelZeilen(r,'an').filter(x=>x.d===day), ab=tafelZeilen(r,'rueck').filter(x=>x.d===day); if(!an.length && !ab.length) return '';
+  return `<button class="card tight tafelkarte" data-act="go" data-v="anreise">${an.length?`<span class="row between"><b class="small">${ic('plane',15)} Ankünfte</b>${ic('right',14,'style="color:var(--mut)"')}</span>${tafelHtml(an,'an',true)}`:''}${ab.length?`<span class="row between"><b class="small">${ic('plane',15)} Abreisen</b>${an.length?'':ic('right',14,'style="color:var(--mut)"')}</span>${tafelHtml(ab,'rueck',true)}`:''}</button>`; }
+
+/* ===================== Infos & Dokumente ===================== */
+const INFOFELDER = [['unterkunft','Unterkunft','z. B. Hotel Sol y Mar'],['adresse','Adresse','Straße, Ort'],['wlanName','WLAN-Name',''],['wlanPw','WLAN-Passwort',''],['checkin','Check-in','z. B. ab 15 Uhr'],['checkout','Check-out','z. B. bis 11 Uhr'],['kontakt','Ansprechpartner vor Ort','Name und Telefon'],['hinweise','Hinweise','z. B. Frühstück 7–10 Uhr, Pool bis 20 Uhr']];
+const infosDarf = (r=cur()) => isAdmin(r) || (!!r?.infosOffen && myM()?.status==='zugesagt');
+const mapsLink = a => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}`;
+V.infos = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const tab=S.ui.infoTab2||'gruppe';
+  const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='gruppe'}" data-act="ui" data-k="infoTab2" data-val="gruppe">Für alle</button><button role="tab" aria-selected="${tab==='doks'}" data-act="ui" data-k="infoTab2" data-val="doks">Meine Dokumente</button></div>`;
+  return `${hdrTrip('Infos')}${backBtn()}<h1>Infos</h1>${tabs}${tab==='doks'?doksView(r):infosView(r)}`; };
+function infosView(r){ const I=r.infos||{}; const da=INFOFELDER.filter(([k])=>String(I[k]||'').trim());
+  const zeile=(k,l)=>{ const v=String(I[k]||''); if(k==='adresse') return `<a class="izeile" href="${mapsLink(v)}" target="_blank" rel="noopener"><span class="tiny mut">${l}</span><span>${esc(v)} ${ic('pin',13)}</span></a>`;
+    if(k==='wlanPw') return `<button class="izeile" data-act="copy" data-text="${esc(v)}"><span class="tiny mut">${l}</span><span class="num">${esc(v)} ${ic('copy',13)}</span></button>`;
+    if(k==='wlanName') return `<div class="izeile"><span class="tiny mut">${l}</span><span class="row between" style="gap:8px"><span>${esc(v)}</span><button class="btn xs sec" data-act="wlanQr">▦ WLAN-Code</button></span></div>`;
+    if(k==='kontakt'){ const tel=(v.match(/\+?[\d\s/()-]{6,}/)||[''])[0].replace(/[^\d+]/g,''); return `<div class="izeile"><span class="tiny mut">${l}</span><span>${esc(v)}${tel?` <a href="tel:${tel}" class="link">${ic('phone',13)} anrufen</a>`:''}</span></div>`; }
+    return `<div class="izeile"><span class="tiny mut">${l}</span><span style="white-space:pre-wrap">${esc(v)}</span></div>`; };
+  return `${da.length?`<div class="card tight infokarte">${da.map(([k,l])=>zeile(k,l)).join('')}</div>`:`<div class="empty small">Noch keine Infos eingetragen.${infosDarf(r)?'':' Der Gruppenadmin kann sie ergänzen.'}</div>`}
+    ${infosDarf(r)?`<button class="btn ${da.length?'sec':''} block" data-act="infosAuf">${ic('pencil',16)} ${da.length?'Infos bearbeiten':'Infos eintragen'}</button>`:''}
+    ${isAdmin(r)?`<label class="toggle small"><input type="checkbox" data-change="infosOffen" ${r.infosOffen?'checked':''}> Alle Mitglieder dürfen die Infos bearbeiten</label>`:''}
+    ${r.infosVon?`<span class="tiny mut">Zuletzt geändert von ${esc(nm(r.infosVon))} · ${fStamp(r.infosAm)}</span>`:''}`; }
+A.infosAuf = ()=>{ const I=cur().infos||{}; INFOFELDER.forEach(([k])=>S.form['inf_'+k]=I[k]||''); openOv('infosForm'); };
+OV.infosForm = () => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Infos bearbeiten"><div class="row between"><h2 style="margin:0">Infos für alle</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  ${INFOFELDER.map(([k,l,ph])=>k==='hinweise'?`<label class="f">${l}<textarea class="in" id="f_inf_${k}" rows="3" maxlength="600" placeholder="${ph}"></textarea></label>`:`<label class="f">${l}<input class="in" id="f_inf_${k}" maxlength="120" placeholder="${ph}"></label>`).join('')}
+  <button class="btn block" data-act="infosSpeichern">Speichern</button></div>`;
+A.infosSpeichern = async ()=>{ const r=cur(); if(!infosDarf(r)) return; const infos=Object.fromEntries(INFOFELDER.map(([k])=>[k, String(S.form['inf_'+k]||'').trim()]));
+  await W(()=>S.db.doc(`reisen/${r.id}`).update({infos, infosVon:S.uid, infosAm:now()}),'Speichern'); closeOv(); toast('Infos gespeichert'); };
+A.infosOffen = async el => { const r=cur(); if(!isAdmin(r)) return; await W(()=>S.db.doc(`reisen/${r.id}`).update({infosOffen:!!el.checked}),'Speichern'); toast(el.checked?'Alle Mitglieder dürfen die Infos jetzt bearbeiten':'Nur du bearbeitest die Infos'); };
+/* WLAN-Knopf auf „Mein Tag“ (unterwegs) */
+function wlanKnopf(){ const r=cur(); const I=r?.infos||{}; if(!I.wlanPw || reisePhase()!=='unterwegs') return '';
+  return `<button class="chip wlanchip" data-act="${I.wlanName?'wlanQr':'copy'}" data-text="${esc(I.wlanPw)}" aria-label="WLAN-Zugang zeigen">📶 WLAN${I.wlanName?` ${esc(I.wlanName)}`:' · kopieren'}</button>`; }
+A.wlanQr = ()=>openOv('wlanQr');
+/* WLAN-Code: QR-Code im Standardformat WIFI:…; Handykamera scannen → Handy verbindet sich automatisch */
+const wlanEsc = t => String(t||'').replace(/([\\;,:"])/g,'\\$1');
+const wlanText = I => `WIFI:T:${I.wlanPw?'WPA':'nopass'};S:${wlanEsc(I.wlanName)};${I.wlanPw?`P:${wlanEsc(I.wlanPw)};`:''};`;
+function qrMatrix(text){ const q=new QRLib.QRCode(-1,QRLib.L.M); q.addData(unescape(encodeURIComponent(text))); q.make(); const n=q.getModuleCount(); return {n, an:(r,c)=>q.isDark(r,c)}; }
+function qrSvg(text){ const {n,an}=qrMatrix(text), R=4, G=n+R*2; let d='';
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(an(r,c)) d+=`M${c+R} ${r+R}h1v1h-1z`;
+  return `<svg class="qrbild" viewBox="0 0 ${G} ${G}" shape-rendering="crispEdges" role="img" aria-label="WLAN-QR-Code"><rect width="${G}" height="${G}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`; }
+OV.wlanQr = () => { const I=cur()?.infos||{}; if(!I.wlanName) return '';
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-label="WLAN-Code"><div class="row between"><h2 style="margin:0">📶 WLAN-Code</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <div class="qrrahmen">${qrSvg(wlanText(I))}</div>
+  <p class="small mut" style="text-align:center;margin:0">Mit der Handykamera scannen, dann verbindet sich das Handy automatisch. Auch praktisch für Gäste: einfach Handy hinhalten.</p>
+  <div class="card tight infokarte"><div class="izeile"><span class="tiny mut">Netzwerk</span><span>${esc(I.wlanName)}</span></div>${I.wlanPw?`<button class="izeile" data-act="copy" data-text="${esc(I.wlanPw)}"><span class="tiny mut">Passwort</span><span class="num">${esc(I.wlanPw)} ${ic('copy',13)}</span></button>`:`<div class="izeile"><span class="tiny mut">Passwort</span><span>offenes Netz</span></div>`}</div>
+  ${S.downloads?`<button class="btn sec block" data-act="wlanQrSpeichern">${ic('dl',16)} Als Bild speichern</button>`:''}</div>`; };
+A.wlanQrSpeichern = async ()=>{ const r=cur(), I=r?.infos||{}; if(!I.wlanName||!S.downloads) return;
+  const {n,an}=qrMatrix(wlanText(I)), px=16, R=4, G=(n+R*2)*px, H=G+110; const c=document.createElement('canvas'); c.width=G; c.height=H; const x=c.getContext('2d');
+  x.fillStyle='#fff'; x.fillRect(0,0,G,H); x.fillStyle='#000'; for(let i=0;i<n;i++) for(let j=0;j<n;j++) if(an(i,j)) x.fillRect((j+R)*px,(i+R)*px,px,px);
+  x.textAlign='center'; x.font='bold 34px system-ui,sans-serif'; x.fillText(`WLAN: ${I.wlanName}`.slice(0,40),G/2,G+20); x.font='26px system-ui,sans-serif'; x.fillStyle='#444'; x.fillText(I.wlanPw?`Passwort: ${I.wlanPw}`.slice(0,48):'offenes Netz',G/2,G+64);
+  const blob=await new Promise(ok=>c.toBlob(ok,'image/png'));
+  try{ await S.downloads.save({filename:`WLAN-${safeName(I.wlanName)}.png`, data:blob}); toast('Gespeichert'); }catch(e){ fail(e,'Speichern'); } };
+/* ---------- Private Dokumente (Foto oder PDF), nur für einen selbst ---------- */
+const doksVon = rid => (S.settings.doks||{})[rid] || {};
+function doksView(r){ const d=Object.entries(doksVon(r.id)).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
+  return `<p class="small mut">Nur du siehst deine Dokumente: Bordkarte, Mietwagenvertrag, Versicherungskarte … Immer griffbereit, ohne Suchen im Mail-Postfach.</p>
+    ${S.assets?`<label class="btn block" style="cursor:pointer">${ic('plus',18)} Dokument hinzufügen <span class="tiny" style="opacity:.8">(Foto oder PDF)</span><input type="file" accept="image/*,application/pdf" hidden data-file="dokDatei"></label>`:''}
+    <div class="list">${d.map(([id,x])=>`<div class="li">${x.mime==='application/pdf'?`<a class="dokvorschau pdf" href="${esc(blob(x.id))}" target="_blank" rel="noopener" aria-label="${esc(x.titel)} öffnen">PDF</a>`:`<button class="dokvorschau" data-act="beweisAuf" data-id="${esc(x.id)}" data-mime="${esc(x.mime||'')}" aria-label="${esc(x.titel)} ansehen"><img src="${esc(blob(x.id))}" alt=""></button>`}<span class="grow col" style="gap:1px;min-width:0"><b class="ell">${esc(x.titel)}</b><span class="tiny mut">${fStamp(x.at)}</span></span><button class="icbtn sm0" data-act="dokWeg" data-id="${id}" aria-label="${esc(x.titel)} löschen">${ic('trash',15)}</button></div>`).join('')||'<div class="empty small">Noch keine Dokumente.</div>'}</div>`; }
+A.dokDatei = async el => { const file=el.files?.[0]; el.value=''; if(!file) return; const pdf=file.type==='application/pdf'; if(!pdf && !file.type.startsWith('image/')) return toast('Bitte ein Foto oder PDF wählen.');
+  if(file.size>15*1024*1024) return toast('Die Datei ist zu groß (höchstens 15 MB).');
+  const titel=(prompt('Wie soll das Dokument heißen?', file.name.replace(/\.[^.]+$/,''))||'').trim()||'Dokument';
+  let up; try{ up = pdf ? await S.assets.upload(file,{type:'application/pdf'}) : await uploadFile(file); }catch(e){ return fail(e,'Hochladen'); } if(!up) return;
+  const r=cur(); const id=Date.now().toString(36); saveSettings({doks:{...(S.settings.doks||{}), [r.id]:{...doksVon(r.id), [id]:{id:up.id, mime:pdf?'application/pdf':(up.mime||file.type), titel:titel.slice(0,60), at:now()}}}}); toast('Dokument gespeichert'); };
+A.dokWeg = el => { const r=cur(); const x=doksVon(r.id)[el.dataset.id]; if(!x) return; openOv('confirm',{title:`„${x.titel}“ löschen?`, text:'Das Dokument wird endgültig entfernt.', ok:'Löschen', fn:async()=>{
+  const d={...doksVon(r.id)}; delete d[el.dataset.id]; await saveSettings({doks:{...(S.settings.doks||{}), [r.id]:d}}); S.assets?.delete(x.id).catch(()=>{}); toast('Gelöscht'); }}); };
+
+/* ===================== Notfall ===================== */
+/* Notrufnummern (ohne Gewähr; vor der Reise beim Auswärtigen Amt prüfen) */
+const NOTRUF = {
+  de:['Deutschland',{Notruf:'112',Polizei:'110'}], at:['Österreich',{Notruf:'112',Rettung:'144',Polizei:'133'}], ch:['Schweiz',{Notruf:'112',Rettung:'144',Polizei:'117'}],
+  es:['Spanien',{Notruf:'112'}], it:['Italien',{Notruf:'112'}], fr:['Frankreich',{Notruf:'112',Rettung:'15',Polizei:'17'}], pt:['Portugal',{Notruf:'112'}], gr:['Griechenland',{Notruf:'112',Polizei:'100',Touristenpolizei:'1571'}],
+  hr:['Kroatien',{Notruf:'112'}], nl:['Niederlande',{Notruf:'112'}], be:['Belgien',{Notruf:'112'}], dk:['Dänemark',{Notruf:'112'}], se:['Schweden',{Notruf:'112'}], no:['Norwegen',{Notruf:'112',Rettung:'113'}],
+  pl:['Polen',{Notruf:'112'}], cz:['Tschechien',{Notruf:'112'}], hu:['Ungarn',{Notruf:'112'}], cy:['Zypern',{Notruf:'112'}], mt:['Malta',{Notruf:'112'}], ie:['Irland',{Notruf:'112'}], gb:['Großbritannien',{Notruf:'999'}],
+  tr:['Türkei',{Notruf:'112'}], eg:['Ägypten',{Polizei:'122',Rettung:'123',Touristenpolizei:'126'}], tn:['Tunesien',{Polizei:'197',Rettung:'190'}], ma:['Marokko',{Polizei:'19',Rettung:'15'}],
+  ae:['Vereinigte Arabische Emirate',{Polizei:'999',Rettung:'998'}], th:['Thailand',{Polizei:'191',Rettung:'1669',Touristenpolizei:'1155'}],
+  us:['USA',{Notruf:'911'}], ca:['Kanada',{Notruf:'911'}], mx:['Mexiko',{Notruf:'911'}], do:['Dominikanische Republik',{Notruf:'911'}],
+};
+const LAND = {};
+function landVon(r){ if(r?.land && NOTRUF[r.land]) return r.land; const q=(r?.wetterOrt?.name||String(r?.ort||'').split(/[,/(]/)[0]).trim(); if(!q) return null;
+  const k=q.toLowerCase(); if(LAND[k]!==undefined) return LAND[k]; LAND[k]=null;
+  holJson(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=de&format=json`).then(j=>{ LAND[k]=(j.results?.[0]?.country_code||'').toLowerCase()||'?'; render(); }).catch(()=>{ LAND[k]='?'; render(); });
+  return null; }
+V.notfall = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const lc=S.ui.notLand||landVon(r); const L=NOTRUF[lc]; const I=r.infos||{}; const pass=S.settings.notfallpass||{};
+  const nummern=L?Object.entries(L[1]):[['Notruf','112']];
+  return `${hdrTrip('Notfall')}${backBtn()}<h1>Notfall</h1>
+    <a class="notruf" href="tel:${esc(nummern[0][1])}"><span class="notrufnr num">${esc(nummern[0][1])}</span><span class="col" style="gap:2px"><b>${esc(nummern[0][0])} anrufen</b><span class="small" style="opacity:.85">${L?esc(L[0]):'In vielen Ländern'}</span></span></a>
+    ${nummern.length>1?`<div class="notrufe">${nummern.slice(1).map(([l,n])=>`<a class="notrufmini" href="tel:${esc(n)}"><b class="num">${esc(n)}</b><span class="tiny">${esc(l)}</span></a>`).join('')}</div>`:''}
+    <label class="f small">Urlaubsland<select class="in" data-change="notLand">${!L?`<option value="">${lc==='?'?'Land nicht erkannt – bitte wählen':'wird erkannt …'}</option>`:''}${Object.entries(NOTRUF).sort((a,b)=>a[1][0].localeCompare(b[1][0])).map(([k,x])=>`<option value="${k}" ${k===lc?'selected':''}>${esc(x[0])}</option>`).join('')}</select></label>
+    <div class="card tight notfallliste">
+      <a class="izeile" href="https://www.google.com/maps/search/Krankenhaus" target="_blank" rel="noopener"><span class="tiny mut">In der Nähe</span><span>🏥 Krankenhaus finden ${ic('right',13)}</span></a>
+      <a class="izeile" href="https://www.google.com/maps/search/Apotheke" target="_blank" rel="noopener"><span class="tiny mut">In der Nähe</span><span>💊 Apotheke finden ${ic('right',13)}</span></a>
+      ${I.adresse?`<a class="izeile" href="${mapsLink(I.adresse)}" target="_blank" rel="noopener"><span class="tiny mut">Eure Unterkunft (für den Notruf)</span><span>${esc(I.unterkunft?I.unterkunft+', ':'')}${esc(I.adresse)}</span></a>`:''}
+      <a class="izeile" href="tel:+49116116"><span class="tiny mut">Karte verloren oder gestohlen</span><span>💳 Sperr-Notruf +49 116 116</span></a>
+      <a class="izeile" href="https://www.auswaertiges-amt.de/de/service/laender" target="_blank" rel="noopener"><span class="tiny mut">Botschaft, Konsulat, Reisehinweise</span><span>🇩🇪 Auswärtiges Amt ${ic('right',13)}</span></a></div>
+    <div class="card tight"><div class="row between"><b>Mein Notfallpass</b><button class="btn xs sec" data-act="passAuf">${ic('pencil',13)} ${Object.values(pass).some(Boolean)?'Bearbeiten':'Anlegen'}</button></div>
+      ${Object.values(pass).some(Boolean)?[['kontakt','Notfallkontakt'],['blut','Blutgruppe'],['allergien','Allergien'],['medis','Medikamente'],['versicherung','Auslandskrankenversicherung']].filter(([k])=>pass[k]).map(([k,l])=>`<div class="izeile"><span class="tiny mut">${l}</span><span>${esc(pass[k])}</span></div>`).join('')
+        :'<span class="small mut">Nur für dich: wichtige Angaben, die du im Notfall dem Arzt oder Helfern zeigen kannst.</span>'}</div>
+    <p class="tiny mut">Angaben ohne Gewähr. Prüfe die Nummern vor der Reise beim Auswärtigen Amt.</p>`; };
+A.notLand = el => { S.ui.notLand=el.value; render(); };
+A.passAuf = ()=>{ const p=S.settings.notfallpass||{}; ['kontakt','blut','allergien','medis','versicherung'].forEach(k=>S.form['np_'+k]=p[k]||''); openOv('passForm'); };
+OV.passForm = () => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Notfallpass"><div class="row between"><h2 style="margin:0">Mein Notfallpass</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+  <p class="small mut">Nur du siehst diese Angaben. Alles ist freiwillig.</p>
+  <label class="f">Notfallkontakt<input class="in" id="f_np_kontakt" maxlength="80" placeholder="Name und Telefon"></label>
+  <label class="f">Blutgruppe<input class="in" id="f_np_blut" maxlength="10" placeholder="z. B. A+"></label>
+  <label class="f">Allergien<input class="in" id="f_np_allergien" maxlength="120"></label>
+  <label class="f">Medikamente<input class="in" id="f_np_medis" maxlength="160"></label>
+  <label class="f">Auslandskrankenversicherung<input class="in" id="f_np_versicherung" maxlength="120" placeholder="Name und Notfallnummer"></label>
+  <button class="btn block" data-act="passSpeichern">Speichern</button></div>`;
+A.passSpeichern = async ()=>{ const p=Object.fromEntries(['kontakt','blut','allergien','medis','versicherung'].map(k=>[k, String(S.form['np_'+k]||'').trim()])); closeOv(); await saveSettings({notfallpass:p}); toast('Notfallpass gespeichert'); };
 boot();
 </script></body></html>

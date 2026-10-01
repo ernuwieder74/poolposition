@@ -46,7 +46,7 @@
 
   /* ---------- Datenbank ----------
      update(): Diese Felder werden zusammengeführt statt ersetzt (z. B. "Bin dabei" mehrerer Personen). */
-  const MERGE = ['dabei', 'likes', 'gesperrt', 'platzDabei', 'getraenke', 'unread', 'getraenkeKat', 'nutzer', 'reakt', 'gastGesperrt', 'gelesen', 'dialog', 'antworten', 'faelle', 'tokens', 'prefs'];
+  const MERGE = ['dabei', 'likes', 'gesperrt', 'platzDabei', 'getraenke', 'unread', 'getraenkeKat', 'nutzer', 'reakt', 'gastGesperrt', 'gelesen', 'dialog', 'antworten', 'faelle', 'tokens', 'prefs', 'abholer'];
   const plain = v => v && typeof v === 'object' && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
   function flatten(obj, path, out) {
     for (const [k, v] of Object.entries(obj)) {
