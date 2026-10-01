@@ -660,7 +660,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.24";
+const APP_VERSION = "Beta 2.25";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -3368,6 +3368,7 @@ V.konferenz = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'
   return `${kopf}
   ${stepper}
   ${adm?`<button class="btn block sec" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',18)} Einladung zur Reise verschicken</button>`:''}
+  ${typeof zKonfKarte==='function'?zKonfKarte(r):''}
   ${offen.length?standKarte(r, mem, abgestimmt):''}${eingeladen?`<span class="tiny mut" style="margin-top:-6px">${eingeladen} eingeladen, noch nicht beigetreten</span>`:''}
   ${offen.length ? offen.map(rd=>rundeKarte(r,rd,adm)).join('')+frageDazuHtml(r,adm) : `<div class="card gold"><div class="ttl">Alle Runden sind entschieden</div><p class="small" style="color:var(--goldtx)">${adm?'Jetzt nur noch die Reise festlegen.':`${esc(nm(r.admin))} legt die Reise gleich fest.`}</p>${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">Reise festlegen</button>`:''}</div>`}
   ${adm?`<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">${ic('gear',14)} Konferenz verwalten</summary>
@@ -6526,7 +6527,10 @@ const zEntry = u => (S.rt.zwahl||[]).find(w=>w.uid===u) || {uid:u};
 const zName = u => zIstGast(u) ? (zEntry(u).name||'Gast') : nm(u);
 const zVor = u => zIstGast(u) ? String(zName(u)).split(' ')[0] : vorname(u);
 const zAv = (u,s=28) => zIstGast(u) ? `<span class="av zgast" style="width:${s}px;height:${s}px;font-size:${Math.round(s*.42)}px" aria-hidden="true">${esc(String(zName(u)).slice(0,1).toUpperCase())}</span>` : av(u,s);
-const zPersonen = () => [...zugesagt().map(m=>m.uid), ...(S.rt.zwahl||[]).filter(w=>w.gast).map(w=>w.uid)];
+/* In der Koffer-Konferenz sind die Mitglieder noch „teilnehmer“, bei einer festen Reise „zugesagt“ */
+const zMitgl = () => cur()?.status==='abstimmung' ? S.rt.mitglied.filter(m=>m.status==='teilnehmer') : zugesagt();
+const zGuard = () => cur()?.status==='abstimmung' ? null : tripGuard();
+const zPersonen = () => [...zMitgl().map(m=>m.uid), ...(S.rt.zwahl||[]).filter(w=>w.gast).map(w=>w.uid)];
 const zBettenText = n => `${n} ${n===1?'Bett':'Betten'}`;
 const zDarfBearbeiten = u => canMod(cur()) || u===S.uid || (zIstGast(u) && zEntry(u).by===S.uid);
 
@@ -6554,7 +6558,7 @@ function zBudgetMein(){ if(S.ui.zbMein===undefined || S.ui.zbMeinRid!==S.rid){ S
 const eurZ = n => `${Math.round(n).toLocaleString('de-DE')} €`;
 
 /* ---------- Hauptansicht ---------- */
-V.zimmer = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); if(!modulAn('zimmer',r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="empty small">Der Bettenmanager ist für diese Reise nicht aktiv. Der Admin kann ihn im Gruppenprofil einschalten.</div>`;
+V.zimmer = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!modulAn('zimmer',r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="empty small">Der Bettenmanager ist für diese Reise nicht aktiv. Der Admin kann ihn im Gruppenprofil einschalten.</div>`;
   zBudgetLaden(r); const p=zPlan(); const admin=canMod(r); const rooms=zRooms(); const betten=rooms.reduce((s,x)=>s+(+x.betten||0),0); const pers=p.personen.length; const ich=zEntry(S.uid);
   const ichText = ich.zimmerId && rooms.some(x=>x.id===ich.zimmerId) ? `${zRoomName(ich.zimmerId)}${ich.einzel?' (für dich allein)':''}` : (ich.einzel?'Einzelzimmer, noch kein Zimmer gewählt':'noch nichts gewählt');
   const nm_ = p.nichtMoeglich.find(x=>x.u===S.uid);
@@ -6682,7 +6686,7 @@ function zAnfrageText(f){ const r=cur(); const b=zBedarf(); const n=b.p.personen
   const s=zBudgetSumme(r); if(f.zbud && s) lines.push('',`Budget: ca. ${eurZ(s.min)} bis ${eurZ(s.max)} pro Person (Durchschnitt ${eurZ(s.avg)}).`);
   if((f.zhinweis||'').trim()) lines.push('','Hinweise:',f.zhinweis.trim());
   lines.push('','Wir freuen uns auf Ihr Angebot.','','Freundliche Grüße',nm(S.uid)); return lines.join('\n'); }
-V.zanfrage = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); if(!canMod(r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="warn">Nur der Admin kann die Anfrage vorbereiten.</div>`; const f=S.form; const s=zBudgetSumme(r); const betreff=`Anfrage Unterkunft ${r.titel}${r.ort?` – ${r.ort}`:''}`;
+V.zanfrage = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!canMod(r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="warn">Nur der Admin kann die Anfrage vorbereiten.</div>`; const f=S.form; const s=zBudgetSumme(r); const betreff=`Anfrage Unterkunft ${r.titel}${r.ort?` – ${r.ort}`:''}`;
   return `${hdrTrip('Zimmer')}${backBtn()}<h1>Anfrage fürs Reisebüro</h1><p class="small mut">Aus euren Zimmern und Wünschen entsteht ein fertiger Text. Du kannst ihn kopieren oder direkt verschicken.</p>
   <label class="f">Ansprechpartner (freiwillig)<input class="in" id="f_zempf" maxlength="40" placeholder="z. B. Frau Meier" data-live="1"></label>
   <label class="toggle"><input type="checkbox" id="f_znamen" data-live="1"> Zimmerverteilung mit Namen anhängen</label>
@@ -6696,10 +6700,26 @@ A.zWhats = ()=>{ window.open(`https://wa.me/?text=${encodeURIComponent(zAnfrageT
 
 /* Auswahlfeld beim Anlegen einer Reise */
 const zimmerWahlFeld = f => `<label class="toggle" style="align-items:flex-start"><input type="checkbox" id="f_zimmerAn" ${f.zimmerAn?'checked':''}><span><b>Bettenmanager aktivieren</b><br><span class="small mut">Die Gruppe verteilt vorab Zimmer und Betten und kann daraus eine Anfrage fürs Reisebüro erstellen. Gilt dann für alle. Später änderbar.</span></span></label>`;
+
+
+/* ---------- Karte in der Koffer-Konferenz: persönliche Wünsche schon vor der Festlegung ---------- */
+function zKonfKarte(r){ if(!modulAn('zimmer',r)) return ''; const p=zPlan(); const pers=p.personen; const ich=zEntry(S.uid);
+  const ez=pers.filter(u=>zEntry(u).einzel); const mit=pers.filter(u=>(zEntry(u).mit||[]).length);
+  const haben=pers.filter(u=>{ const e=zEntry(u); return e.einzel||(e.mit||[]).length||e.zimmerId; }).length;
+  const meins = ich.einzel ? 'Einzelzimmer, allein im Zimmer' : (ich.mit||[]).length ? `Zimmer mit ${ich.mit.map(zName).join(', ')}` : ich.zimmerId ? zRoomName(ich.zimmerId) : 'noch nichts angegeben';
+  return `<div class="card"><div class="row between"><h3 style="margin:0">${hubSvg('bett',18)} Zimmerplanung</h3><span class="tiny mut">${haben} von ${pers.length} haben Wünsche</span></div>
+    <p class="small mut" style="margin:0">Noch ist nicht klar, wohin es geht. Trag trotzdem schon ein, wie du schlafen möchtest und mit wem. So können alle bei der Wahl der Unterkunft darauf achten.</p>
+    <div class="ttl small">Mein Wunsch: ${esc(meins)}</div>
+    ${ez.length?`<span class="small mut">Allein im Zimmer: ${esc(ez.map(zVor).join(', '))}</span>`:''}
+    ${mit.map(u=>`<span class="small mut">${esc(zVor(u))} möchte mit ${esc(zEntry(u).mit.map(zVor).join(', '))}</span>`).join('')}
+    <div class="row" style="gap:8px"><button class="btn sm grow" data-act="zwunschAuf" data-u="${S.uid}">${ic('pencil',14)} Mein Zimmerwunsch</button><button class="btn sm sec grow" data-act="go" data-v="zimmer">Alle Wünsche, Budget</button></div></div>`; }
 /* ===================== Was ist neu? =====================
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 2.25', t:'Zimmerwünsche schon in der Koffer-Konferenz', p:[
+    'Ist der Bettenmanager eingeschaltet, erscheint in der Abstimmung eine Karte „Zimmerplanung“.',
+    'Jeder kann schon vorab eintragen, ob er allein schlafen möchte und mit wem, und optional ein Budget angeben.'] },
   { v:'Beta 2.24', t:'Einladen nach dem Anlegen, Link pro Ort', p:[
     'Nach dem Anlegen einer Reise geht es gleich weiter mit „Leute einladen“: Code und Link mit fertigem Einladungstext, bequem per WhatsApp.',
     'In der Abstimmung gibt es dafür einen eigenen Button.',
