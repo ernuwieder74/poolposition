@@ -22,7 +22,7 @@ async function kennzeichenSetzen(uid) {
   if (team) tkb = IMMER;
   const neu = { ...alt }; if (tkb) neu.tkb = tkb; else delete neu.tkb; if (team) neu.st = true; else delete neu.st;
   if (JSON.stringify(neu) !== JSON.stringify(alt)) await admin.auth().setCustomUserClaims(uid, neu);
-  /* Öffentlich sichtbare Ticketart (nur Art und Ende, für das Profil anderer Mitglieder). Das Team erscheint als Freikarte, wie die Tester, damit eine fehlende Karte nichts verrät. */
+  /* Öffentlich sichtbare Ticketart (nur Art und Ende, für das Profil anderer Mitglieder). Das Team erscheint als Testerkarte, wie die Tester, damit eine fehlende Karte nichts verrät. */
   if (team) await db.doc(`ticketart/${uid}`).set({ art: 'frei', bis: IMMER, at: Date.now() });
   else { const d = t.exists ? t.data() : null; await db.doc(`ticketart/${uid}`).set({ art: d ? d.art : 'tag', bis: d ? Number(d.bis) || 0 : 0, at: Date.now() }); }
   return { tkb, team };

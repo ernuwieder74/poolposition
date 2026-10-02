@@ -1,7 +1,7 @@
 /* Poolposition – Medien: Limits auf dem Server und Umzug des Altbestands
    1) medienZaehlen: läuft bei jedem neuen Original (uploads/{uid}/o/…) und jeder Vorschau (uploads/{uid}/v/…). Zählt je Ticket in kontingent/{uid}
       (foto, video, sprache, vor, tv = Beginn des Tickets) und löscht die Datei sofort, wenn das Limit überschritten wäre. Die App kann das nicht umgehen.
-      Limits: Fotos Pauschal 200, Woche 100, Monat 150, Jahr 300; Videos und Sprachnachrichten je 20; Freikarte und Team ohne Limit; ohne bezahltes Ticket gar nichts.
+      Limits: Fotos Pauschal 200, Woche 100, Monat 150, Jahr 300; Videos und Sprachnachrichten je 20; Testerkarte und Team ohne Limit; ohne bezahltes Ticket gar nichts.
    2) medienUmziehen: nur Oberbademeister. Holt Altbestand (Nachrichten mit Download-Adresse) in das neue Schema (Original unter o/, Vorschau unter v/, Pfad „p:…“ in der Nachricht). */
 const { onObjectFinalized } = require('firebase-functions/v2/storage');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');

@@ -1662,7 +1662,7 @@ async function uploadFile(file, opt={}){ if(!S.assets){ toast('Fotos hochladen g
   const ok=/^(image\/(png|jpeg|gif|webp)|video\/(mp4|webm|quicktime))$/.test(file.type); if(!ok){ toast('Dieses Format geht leider nicht. Möglich sind JPG, PNG, GIF, WebP, MP4, MOV und WebM.'); return null; }
   toast('Wird hochgeladen …');
   try{ const r=await S.assets.upload(await fotoVerkleinern(file), opt.orig?{orig:true}:undefined); return {id:r.id, mime:r.contentType}; }catch(e){ console.error(e); toast(e.code==='quota_or_state'?'Der Speicher für Fotos ist voll.':'Hochladen hat nicht geklappt.'); return null; } }
-/* Vorschaubild (480 px, JPEG) für Tageskarten-Nutzer */
+/* Vorschaubild (480 px, JPEG) für Freikarten-Nutzer */
 async function vorschauBlob(file){ try{ const bmp=await createImageBitmap(file); const f=Math.min(1, 480/Math.max(bmp.width,bmp.height)); const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(bmp.width*f)); c.height=Math.max(1,Math.round(bmp.height*f)); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(bmp,0,0,c.width,c.height); bmp.close&&bmp.close(); return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.7)); }catch(e){ return null; } }
 /* Foto oder Video für Chat und Album: Recht, Planungsphase und Limit prüfen, Vorschau erzeugen, Original ablegen, Zähler erhöhen */
 async function uploadMedium(file){ const vid=/^video\//.test(file.type); const art=vid?'video':'foto';
@@ -4769,13 +4769,13 @@ A.rdAdminSpeichern = async el => { const o=S.ov; const x=(S.ui.ninfo?.reisen||[]
 P.star='<path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9-4.3-4.1 5.9-.8z"/>';
 /* ===================== Tickets: Mitgliedschaft und Gültigkeit des Accounts =====================
    tickets/{uid} = { art:'tag'|'woche'|'monat'|'jahr', von, bis, by, at, auto? }
-   Neue Nutzer und alle Bestandsnutzer bekommen beim ersten Start automatisch eine Tageskarte (24 Stunden, Demo-Account).
+   Neue Nutzer und alle Bestandsnutzer bekommen beim ersten Start automatisch eine Freikarte (24 Stunden, Demo-Account).
    Nur der Oberbademeister (Admin) weist höhere Tickets zu. Läuft das Ticket ab, bleibt der Account gültig, der Nutzer kann aber nur noch ansehen.
    Die Sperre gilt doppelt: im Client („Wächter“ um die Datenbank, nur in der echten App) und in den Firestore-Regeln (ticketOk(): Schreiben nur mit gültigem Ticket, Oberbademeister und Badeaufsicht ausgenommen). Erlaubt bleiben Profil, Ticket, Konto, Push, Einstellungen, Meldungen und Feedback. Die genauen Regeln folgen später.
    Oberbademeister und Badeaufsicht (mit Dienstrang) sind ausgenommen. */
-const TICKETS = [['tag','Tageskarte','gratis'],['pauschal','Pauschalreise','Von Kauf bis 30 Tage nach der Reise'],['woche','Wochenkarte','7 Tage ab Aktivierung'],['monat','Monatskarte','1 Monat ab Aktivierung'],['jahr','Jahreskarte','1 Jahr ab Aktivierung'],['frei','Freikarte','Tester, ohne Limits']];
-/* Beta 3.1: Rechte je Ticket. Die Tageskarte ist gratis und läuft nie ab, sie kann ansehen, lesen, chatten, abstimmen und planen. Bezahlte Tickets (und die Freikarte) dürfen zusätzlich Fotos, Videos, Sprachnachrichten und Reisen anlegen.
-   Läuft ein bezahltes Ticket ab, gilt wieder die Tageskarte. */
+const TICKETS = [['tag','Freikarte','gratis'],['pauschal','Pauschalreise','Von Kauf bis 30 Tage nach der Reise'],['woche','Wochenkarte','7 Tage ab Aktivierung'],['monat','Monatskarte','1 Monat ab Aktivierung'],['jahr','Jahreskarte','1 Jahr ab Aktivierung'],['frei','Testerkarte','Tester, ohne Limits']];
+/* Beta 3.1: Rechte je Ticket. Die Freikarte ist gratis und läuft nie ab, sie kann ansehen, lesen, chatten, abstimmen und planen. Bezahlte Tickets (und die Testerkarte) dürfen zusätzlich Fotos, Videos, Sprachnachrichten und Reisen anlegen.
+   Läuft ein bezahltes Ticket ab, gilt wieder die Freikarte. */
 const TK_BEZAHLT = ['pauschal','woche','monat','jahr','frei'];
 const TK_PLUS = ['foto_hoch','foto_gross','foto_laden','video','sprache','reise_anlegen','umfrage','admin'];
 const TK_LIMIT = { pauschal:{foto:200}, woche:{foto:100}, monat:{foto:150}, jahr:{foto:300}, frei:{} };
@@ -4785,7 +4785,7 @@ function ticketBis(art, von=now()){ const d=new Date(von); if(art==='tag') retur
 S.ticket = null; S.ticketDa = false;
 const ticketFrei = () => !!S.isOwner || !!S.rang; /* Support-Ansicht: gilt das Ticket des angesehenen Mitglieds */
 const ticketAbgelaufen = t => !!t && now() >= (t.bis||0);
-/* Wirksame Ticketart: Oberbademeister/Badeaufsicht = frei, abgelaufenes bezahltes Ticket = Tageskarte */
+/* Wirksame Ticketart: Oberbademeister/Badeaufsicht = frei, abgelaufenes bezahltes Ticket = Freikarte */
 function ticketArt(){ try{ if(ticketFrei()) return 'frei'; if(!S.ticketDa) return 'frei'; const t=S.ticket; if(!t) return 'tag'; if(t.art==='tag') return 'tag'; return ticketAbgelaufen(t)?'tag':t.art; }catch(e){ return 'frei'; } }
 const tkBezahlt = () => TK_BEZAHLT.includes(ticketArt());
 const tkDarf = r => { try{ if(!TK_PLUS.includes(r)) return true; return tkBezahlt(); }catch(e){ return true; } };
@@ -4817,7 +4817,7 @@ function ticketAbo(){ if(!S.db || !S.uid) return;
   /* Support-Ansicht: ist das Ticket nicht lesbar, gilt der Stand aus der Mitgliederverwaltung */
   if(S.supportVon) setTimeout(()=>{ if(!S.ticketDa) ticketErsatz(); }, 2500); }
 function ticketErsatz(){ try{ const x=KONTO.tick?.[S.uid]; if(x && !S.ticketDa){ S.ticketDa=true; S.ticket=x; render(); } }catch(e){} }
-/* Wächter um die Datenbank: blockiert nur noch, was die Tageskarte nicht darf (Reise anlegen, Reise verwalten). Alles andere bleibt offen, Medien prüfen die Upload-Stellen selbst. */
+/* Wächter um die Datenbank: blockiert nur noch, was die Freikarte nicht darf (Reise anlegen, Reise verwalten). Alles andere bleibt offen, Medien prüfen die Upload-Stellen selbst. */
 function ticketWaechter(db){ if(!db) return db;
   const pruef = (p,op) => { p=String(p||''); const t=p.split('/'); if(t[0]!=='reisen' || tkDarf('reise_anlegen')) return null;
     if(t.length<=2 && (op==='add' || op==='set' && !(S.reisen||{})[t[1]])) return 'reise_anlegen';
@@ -4844,7 +4844,7 @@ function ticketKopf(){ try{ if(ticketFrei()) return `<div class="tkkopf2" role="
   return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen ${tkEnde(t.bis).replace(' Uhr','')}`:`Gültig bis ${tkEnde(t.bis).replace(' Uhr','')}`})}</div>`; }catch(e){ return ''; } }
 /* Karte „Kiosk“ unter dem Kopf */
 function ticketKarte(){ try{ const t=S.ticket; let info='Tickets ansehen';
-    if(S.ticketDa && t){ info = ticketFrei() ? 'Als Oberbademeister bist du von Tickets ausgenommen.' : t.art==='tag' ? 'Tageskarte: gratis. Ansehen, chatten und abstimmen. Fotos, Videos und eigene Reisen gibt es mit einem Ticket.' : ticketAbgelaufen(t) ? `Deine ${ticketName(t.art)} ist abgelaufen. Es gilt wieder die Tageskarte.` : `${ticketName(t.art)}: ${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}`; }
+    if(S.ticketDa && t){ info = ticketFrei() ? 'Als Oberbademeister bist du von Tickets ausgenommen.' : t.art==='tag' ? 'Freikarte: gratis. Ansehen, chatten und abstimmen. Fotos, Videos und eigene Reisen gibt es mit einem Ticket.' : ticketAbgelaufen(t) ? `Deine ${ticketName(t.art)} ist abgelaufen. Es gilt wieder die Freikarte.` : `${ticketName(t.art)}: ${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}`; }
     const ab = S.ticketDa && t && !ticketFrei() && t.art!=='tag' && ticketAbgelaufen(t);
     return `<button class="tkbtn" data-act="go" data-v="kiosk" aria-label="Zum Kiosk"><div class="card tight"><div class="row between"><b>${ic('star',14)} Kiosk</b><span class="tiny mut">Zum Kiosk ${ic('right',14)}</span></div><span class="tiny ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${esc(info)}</span></div></button>`; }catch(e){ return ''; } }
 
@@ -4867,7 +4867,7 @@ A.ticketSpeichern = async el => { if(!istSuper()) return; const art=S.form.tkArt
       try{ await supportSend(u, `Dein Ticket wurde geändert: ${ticketName(art)}, gültig bis ${fStampJ(bis)}. Viel Spaß mit Poolposition!`); }catch(e){} }
     closeOv(); toast(us.length===1?'Ticket zugewiesen':`${us.length} Tickets zugewiesen`); render(); }catch(e){ el.disabled=false; fail(e,'Zuweisen'); } };
 
-/* Ticketart eines anderen Mitglieds, neben dem Namen: für alle sichtbar (nur die Art, ohne Datum). Der Server schreibt sie nach ticketart/{uid}, Das Team erscheint dort als Freikarte, wie die Tester, damit eine fehlende Karte nichts verrät.
+/* Ticketart eines anderen Mitglieds, neben dem Namen: für alle sichtbar (nur die Art, ohne Datum). Der Server schreibt sie nach ticketart/{uid}, Das Team erscheint dort als Testerkarte, wie die Tester, damit eine fehlende Karte nichts verrät.
    Das Team mit dem Recht „Nutzer“ sieht zusätzlich Ablaufdatum aus der Mitgliederverwaltung. */
 S.tkArt = {};
 const tkTeamNutzer = () => { try{ return !!S.rechte?.nutzer; }catch(e){ return false; } };
@@ -4881,7 +4881,7 @@ function ticketNeben(u, breit){ try{ if(!u || u===S.uid || S.supportVon) return 
     const g = t && art!=='tag' ? `Gültig bis ${tkEnde(x.bis).replace(' Uhr','')}` : art==='tag' ? 'Gratis, ohne Ablauf' : undefined;
     return `<div class="tkkopf2${breit?' breit':''}" aria-label="Ticket: ${esc(ticketName(art))}">${ticketBild(art,{nr:tkNr(u), ...(g?{gueltig:g}:{})})}</div>`; }catch(e){ return ''; } }
 /* ===================== Kiosk: Tickets ansehen =====================
-   Noch ohne Funktion (Beta). Später kaufen Nutzer hier ihre Mitgliedschaft. Tageskarten sind nicht kaufbar, sie gibt es nur als Demo-Zugang.
+   Noch ohne Funktion (Beta). Später kaufen Nutzer hier ihre Mitgliedschaft. Freikarten sind nicht kaufbar, sie gibt es nur als Demo-Zugang.
    Die Preise sind absichtlich unkenntlich, sie werden später festgelegt. */
 const TK_INFO = {
   tag:   {n:'TAGESKARTE',  dauer:'Gratis, ohne Ablauf', sub:'Schnuppern im Becken', sym:'☀️'},
@@ -4905,17 +4905,17 @@ function ticketBild(art, opt={}){ const i=TK_INFO[art]||TK_INFO.tag; const nr=op
     <div class="tkstub"><span class="tksym">${i.sym}</span><span class="tknr">Nr.<br><b>${nr}</b></span><span class="tkein">EINTRITT</span></div></div>`; }
 const TK_LEIST = { pauschal:'Von Kauf bis 30 Tage nach der Reise', woche:'7 Tage ab Aktivierung', monat:'1 Monat ab Aktivierung', jahr:'1 Jahr ab Aktivierung' };
 V.kiosk = ()=>{ const t=ticketFrei()?{art:'frei',bis:4102444800000}:S.ticket; const ab=t && t.art!=='tag' && !ticketFrei() && ticketAbgelaufen(t);
-  const mein = t && (S.ticketDa||ticketFrei()) ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen am ${tkEnde(t.bis)}`:`Gültig bis ${tkEnde(t.bis)}`})}<span class="small ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${ticketFrei()?'Als Team bist du von Tickets ausgenommen.':t.art==='tag'?'Die Tageskarte ist gratis und läuft nie ab.':ab?`Abgelaufen am ${tkEnde(t.bis)}. Es gilt wieder die Tageskarte.`:`${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}.`}</span></div>` : '';
+  const mein = t && (S.ticketDa||ticketFrei()) ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen am ${tkEnde(t.bis)}`:`Gültig bis ${tkEnde(t.bis)}`})}<span class="small ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${ticketFrei()?'Als Team bist du von Tickets ausgenommen.':t.art==='tag'?'Die Freikarte ist gratis und läuft nie ab.':ab?`Abgelaufen am ${tkEnde(t.bis)}. Es gilt wieder die Freikarte.`:`${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}.`}</span></div>` : '';
   return `${hdrPlain('Kiosk')}${backBtn()}
   <div class="kioskdach" aria-hidden="true"></div>
   <div class="col" style="gap:2px"><h1>Der Kiosk</h1><span class="mut">Hier gibt es bald deine Mitgliedschaft. Wähle dein Ticket für Poolposition.</span></div>
   <div class="info small">${ic('clock',16)} <b>Beta-Phase:</b> Kaufen geht noch nicht. Tickets vergibt vorerst die Badeaufsicht.</div>
   ${mein}
-  <div class="card"><b>${ic('star',16)} Mit der Tageskarte (gratis)</b><span class="small">Alles ansehen und lesen, Einladungen folgen, chatten, abstimmen, planen, Packliste und Aufgaben, Buchungsunterlagen. Im Album siehst du kleine Vorschaubilder.</span>
+  <div class="card"><b>${ic('star',16)} Mit der Freikarte (gratis)</b><span class="small">Alles ansehen und lesen, Einladungen folgen, chatten, abstimmen, planen, Packliste und Aufgaben, Buchungsunterlagen. Im Album siehst du kleine Vorschaubilder.</span>
     <b class="small" style="margin-top:6px">Mit einem Ticket zusätzlich</b><span class="small">Eigene Reisen und Koffer-Konferenzen anlegen, Fotos und Videos teilen, Fotos vergrößern und herunterladen, Sprachnachrichten senden.</span></div>
   <div class="col" style="gap:14px"><h3 style="margin:0">Das gibt es bald</h3>
     ${['pauschal','woche','monat','jahr'].map(a=>`<div class="col${a==='pauschal'?' tkempf':''}" style="gap:8px">${a==='pauschal'?'<span class="tkband">⭐ Unsere Empfehlung</span>':''}${ticketBild(a,{nr:'000'+({pauschal:'001',woche:'007',monat:'030',jahr:'365'})[a], preis:true, gueltig:TK_LEIST[a].split(' · ')[0]})}${a==='pauschal'?`<span class="small"><b>Perfekt für Reiseleitungen, die eine Reise planen.</b> Von der Planung bis zur Nachbereitung ist alles abgedeckt.</span><span class="tiny mut">Gültig von Kauf bis 30 Tage nach der Reise</span>`:`<span class="tiny mut">${esc(TK_LEIST[a])}</span>`}<button class="btn sec block" disabled aria-disabled="true">Bald erhältlich</button></div>`).join('')}</div>
-  <span class="tiny mut">Ein Ticket schaltet die Funktionen für dich frei. Läuft es ab, gilt wieder die Tageskarte, und du kannst weiter alles ansehen und chatten.</span>`; };
+  <span class="tiny mut">Ein Ticket schaltet die Funktionen für dich frei. Läuft es ab, gilt wieder die Freikarte, und du kannst weiter alles ansehen und chatten.</span>`; };
 /* ===================== Mitgliederverwaltung (nur Oberbademeister) =====================
    Eigener Bereich im Adminbereich: Übersicht mit Zahlen, Mitgliederliste mit Labels/Notizen, Ticketprotokoll.
    Daten: tickets/{uid} (aktuelles Ticket), ticketlog (jede Zuweisung), mverw/{uid} (Labels + private Notiz). */
@@ -4966,7 +4966,7 @@ function mvUeb(D){ const P=Object.keys(S.profile); const h=heuteStart();
   const mitReise=RX.d?new Set(Object.values(RX.d.mit).flat().filter(m=>m.status==='zugesagt').map(m=>m.uid)).size:null;
   const lab=mvAlleLabels().map(l=>[l,P.filter(u=>mvLabelsVon(u).includes(l)).length]).filter(x=>x[1]);
   const link=(f,txt)=>`<button class="mvlink" data-act="mvFilter" data-k="${f}">${txt}</button>`;
-  const TK=[['tag','Tageskarte (gratis)'],['pauschal','Pauschalreise'],['woche','Wochenkarte'],['monat','Monatskarte'],['jahr','Jahreskarte'],['frei','Freikarte (Tester)']];
+  const TK=[['tag','Freikarte (gratis)'],['pauschal','Pauschalreise'],['woche','Wochenkarte'],['monat','Monatskarte'],['jahr','Jahreskarte'],['frei','Testerkarte (Tester)']];
   return `<div class="mvgrid">${mvZ(P.length,'Mitglieder')}${mvZ(akt(h),'heute aktiv')}${mvZ(akt(mvTage(7)),'aktiv in 7 Tagen')}${mvZ(akt(mvTage(30)),'aktiv in 30 Tagen')}${mvZ(neu(h),'neu heute')}${mvZ(neu(mvTage(7)),'neu in 7 Tagen')}${mvZ(neu(mvTage(30)),'neu in 30 Tagen')}${mvZ(mitReise??'…','auf Reisen dabei')}</div>
   <div class="card"><b>${ic('mitgl',16)} Neue Mitglieder pro Woche</b><div class="mvkurve" role="img" aria-label="Neue Mitglieder pro Woche, letzte 12 Wochen">${wo.map(x=>`<span class="mvsp" title="${fD(isoDay(new Date(x.von)))}: ${x.n}"><i style="height:${Math.max(x.n?6:2,Math.round(x.n/wmax*100))}%"></i><em>${x.n}</em></span>`).join('')}</div><span class="tiny mut">Die letzten 12 Wochen, älteste links.</span></div>
   <div class="card"><b>${ic('star',16)} Tickets (${ohneTeam} Mitglieder ohne Team)</b>
@@ -4976,8 +4976,8 @@ function mvUeb(D){ const P=Object.keys(S.profile); const h=heuteStart();
     <span class="tiny mut">Team (Bademeister) ist von Tickets ausgenommen: ${z('team')}</span></div>
   <div class="card"><b>${ic('baro',16)} Vergebene Tickets (Protokoll)</b>
     <div class="mvgrid2">${TK.map(([k,n])=>`<div class="mvz"><b class="num">${log.filter(x=>x.art===k).length}</b><span>${n}<br><span class="tiny mut">${l30.filter(x=>x.art===k).length} in 30 Tagen</span></span></div>`).join('')}</div>
-    <span class="tiny">${hoch} Mitglieder haben aktuell ein höheres Ticket · ${konv} % haben schon einmal mehr als eine Tageskarte bekommen.</span>
-    <span class="tiny mut">Verkauf gibt es noch nicht, hier zählen alle Zuweisungen durch dich. Die automatische Tageskarte beim Start ist nicht enthalten. Ab dieser Version wird jede Zuweisung protokolliert.</span></div>
+    <span class="tiny">${hoch} Mitglieder haben aktuell ein höheres Ticket · ${konv} % haben schon einmal mehr als eine Freikarte bekommen.</span>
+    <span class="tiny mut">Verkauf gibt es noch nicht, hier zählen alle Zuweisungen durch dich. Die automatische Freikarte beim Start ist nicht enthalten. Ab dieser Version wird jede Zuweisung protokolliert.</span></div>
   ${FB&&istSuper()?`<div class="card"><b>${ic('album',16)} Fotos aus der Zeit vor Beta 3.1</b><span class="small">Zieht alte Fotos, Videos und Sprachnachrichten in das neue geschützte Schema um und erzeugt Vorschaubilder. Kann mehrfach gestartet werden, bis nichts mehr offen ist.</span>${MV.umzug?`<span class="tiny">${esc(MV.umzug)}</span>`:''}<button class="btn sm sec" data-act="medienUmzug" ${MV.umzugLaeuft?'disabled':''}>${MV.umzugLaeuft?'Läuft …':'Umzug starten'}</button></div>`:''}
   <div class="card ${b24.length?'hinweis':''}"><b>${ic('clock',16)} Läuft bald ab</b>
     <span class="small">${b24.length} in den nächsten 24 Stunden · ${b7.length} in 7 Tagen</span>
@@ -5007,7 +5007,7 @@ function mvListe(D){ const f=S.ui.mvF||'alle'; const fn=mvFilterFn(D); const P=O
   const chip=(k,t)=>`<button class="fchip ${f===k?'an':''}" data-act="mvFilterSet" data-k="${k}" aria-pressed="${f===k}">${t} <span class="mut">${P.filter(fn[k]).length}</span></button>`;
   const lc=mvAlleLabels().filter(x=>P.some(u=>mvLabelsVon(u).includes(x)));
   return `<input class="in" id="f_mvSuche" placeholder="Name oder Label suchen" data-live="1" autocomplete="off">
-  <div class="fchips">${chip('alle','Alle')}${chip('tag','Gratis')}${chip('pauschal','Pauschal')}${chip('woche','Woche')}${chip('monat','Monat')}${chip('jahr','Jahr')}${chip('frei','Freikarte')}${chip('bald','Läuft bald ab')}${chip('abg','Abgelaufen')}${chip('kein','Ohne Ticket')}${chip('neu','Neu (7 T.)')}${chip('still','Inaktiv 30 T.')}${chip('gesperrt','Gesperrt')}${chip('team','Team')}
+  <div class="fchips">${chip('alle','Alle')}${chip('tag','Gratis')}${chip('pauschal','Pauschal')}${chip('woche','Woche')}${chip('monat','Monat')}${chip('jahr','Jahr')}${chip('frei','Testerkarte')}${chip('bald','Läuft bald ab')}${chip('abg','Abgelaufen')}${chip('kein','Ohne Ticket')}${chip('neu','Neu (7 T.)')}${chip('still','Inaktiv 30 T.')}${chip('gesperrt','Gesperrt')}${chip('team','Team')}
     ${lc.map(x=>`<button class="fchip ${f==='l:'+x?'an':''}" data-act="mvFilterSet" data-k="l:${esc(x)}" aria-pressed="${f==='l:'+x}">${ic('tag',12)} ${esc(x)} <span class="mut">${P.filter(u=>mvLabelsVon(u).includes(x)).length}</span></button>`).join('')}</div>
   <div class="row wrap" style="gap:8px"><button class="btn sm sec" data-act="mvTicketAlle" ${l.filter(u=>u!==S.uid).length?'':'disabled'}>${ic('star',14)} Ticket für Auswahl (${l.filter(u=>u!==S.uid).length})</button><button class="btn sm sec" data-act="mvLabelAlle" ${l.length?'':'disabled'}>${ic('tag',14)} Label für Auswahl</button><button class="btn sm sec" data-act="mvCsv" ${l.length?'':'disabled'}>${ic('post',14)} CSV</button></div>
   <span class="tiny mut">${l.length} ${l.length===1?'Mitglied':'Mitglieder'}, sortiert nach letzter Aktivität. Antippen für Profil, Labels und Notiz.</span>
@@ -5026,7 +5026,7 @@ const AKT = { zugewiesen:'zugewiesen', verlaengert:'verlängert' };
 function mvLog(D){ const l=MV.log||[]; const f=S.ui.mvLogF||'alle';
   const show=l.filter(x=>f==='alle'||x.art===f).slice(0,150);
   return `<div class="fchips">${[['alle','Alle'],['pauschal','Pauschal'],['woche','Woche'],['monat','Monat'],['jahr','Jahr'],['frei','Frei']].map(([k,n])=>`<button class="fchip ${f===k?'an':''}" data-act="mvLogF" data-k="${k}" aria-pressed="${f===k}">${n}</button>`).join('')}</div>
-  <span class="tiny mut">${l.length} Einträge. Jede Zuweisung und Verlängerung wird hier festgehalten (die automatische Tageskarte nicht).</span>
+  <span class="tiny mut">${l.length} Einträge. Jede Zuweisung und Verlängerung wird hier festgehalten (die automatische Freikarte nicht).</span>
   <div class="list">${show.map(x=>`<div class="li"><span class="grow col" style="gap:2px;min-width:0"><span class="small"><b>${esc(nm(x.uid))}</b> · ${esc(ticketName(x.art))} ${AKT[x.aktion]||''}</span><span class="tiny mut">gültig bis ${fStamp(x.bis)} · ${fStamp(x.at)} von ${esc(nm(x.by))}</span></span></div>`).join('')||'<div class="empty small">Noch keine Einträge. Sobald du ein Ticket vergibst, erscheint es hier.</div>'}</div>`; }
 A.mvLogF = el => { S.ui.mvLogF=el.dataset.k; render(); };
 
@@ -5089,7 +5089,7 @@ function mvNutz(D){ if(!MV.nz && !MV.nzLaedt) nzLaden(); if(!MV.nz) return '<p c
   const hs=Array.from({length:24},(_,i)=>A.h['h'+pad(i)]||0); const hmax=Math.max(1,...hs);
   const mitT=Object.values(A.pro).reduce((x,p)=>x+p.tage,0)||1;
   const ticketGr={}; users.forEach(u=>{ const k=mvStatus(D,u); (ticketGr[k]=ticketGr[k]||{n:0,sek:0}); ticketGr[k].n++; ticketGr[k].sek+=A.pro[u].sek; });
-  const TN={tag:'Tageskarte',pauschal:'Pauschalreise',woche:'Wochenkarte',monat:'Monatskarte',jahr:'Jahreskarte',frei:'Freikarte',abg:'Abgelaufen',kein:'Ohne Ticket',team:'Team'};
+  const TN={tag:'Freikarte',pauschal:'Pauschalreise',woche:'Wochenkarte',monat:'Monatskarte',jahr:'Jahreskarte',frei:'Testerkarte',abg:'Abgelaufen',kein:'Ohne Ticket',team:'Team'};
   const rk=users.map(u=>[u,A.pro[u]]).sort((a,b)=>b[1].sek-a[1].sek).slice(0,25);
   const sum=Object.keys(MV.nzSum||{}).length;
   return `<div class="fchips">${[7,30,90].map(n=>`<button class="fchip ${tage===n?'an':''}" data-act="nzTage" data-k="${n}" aria-pressed="${tage===n}">${n} Tage</button>`).join('')}</div>
@@ -5163,20 +5163,21 @@ A.nzSchalter = ()=>{ saveSettings({nutzungAus:!S.settings?.nutzungAus}); render(
 const ADMLOG = [
   { v:'Beta 3.2', t:'Ticketsystem aktiviert, Kiosk-Preise', d:[
     'Kiosk: Beispielpreise sichtbar (19,99 / 4,99 / 9,99 / 29,99 €), Pauschalreise als Empfehlung hervorgehoben, einheitliche Laufzeit-Texte, Fotolimits aus den Erklärungstexten entfernt. Kaufen bleibt „Bald erhältlich“.',
-    'Freikarte des Teams wird anderen wie jede Freikarte angezeigt, Ticketnachrichten nennen Tag, Monat und Jahr.',
+    'Testerkarte des Teams wird anderen wie jede Testerkarte angezeigt, Ticketnachrichten nennen Tag, Monat und Jahr.',
     'Gratis-Nutzer: keine Großansicht von Fotos (Hinweis statt Bild), Langdruck auf Vorschaubildern abgeschaltet. Umfragen im Chat erstellen ist ein Ticketrecht (umfrage, auch in den Firestore-Regeln als Nachrichtentyp), Abstimmen bleibt für alle.',
-    'Tester-Tickets müssen manuell auf Freikarte gesetzt werden (Mitgliederverwaltung, Ticket für Auswahl).',
+    'Umbenennung (nur Wording): Tageskarte heißt jetzt Freikarte (art tag), die bisherige Freikarte (art frei, unlimitiert für Tester und Team) heißt Testerkarte. Funktion unverändert.',
+    'Tester-Tickets müssen manuell auf Testerkarte gesetzt werden (Mitgliederverwaltung, Ticket für Auswahl).',
   ] },
-  { v:'Beta 3.1', t:'Ticketmodell: Rechte, Freikarte, Pauschalreise, Medien-Sperre', d:[
-    'Tickets: neue Arten Pauschalreise (pauschal, Ende frei wählbar, Vorschlag Reiseende plus 30 Tage) und Freikarte (frei, für Tester, alle Rechte, ohne Limits, Ende frei wählbar). Zuweisung im Dialog mit Datumsfeld für diese beiden Arten. Die Tageskarte läuft nie ab (Anzeige „gratis“). Abgelaufene bezahlte Tickets gelten wie die Tageskarte.',
+  { v:'Beta 3.1', t:'Ticketmodell: Rechte, Testerkarte, Pauschalreise, Medien-Sperre', d:[
+    'Tickets: neue Arten Pauschalreise (pauschal, Ende frei wählbar, Vorschlag Reiseende plus 30 Tage) und Testerkarte (frei, für Tester, alle Rechte, ohne Limits, Ende frei wählbar). Zuweisung im Dialog mit Datumsfeld für diese beiden Arten. Die Freikarte läuft nie ab (Anzeige „gratis“). Abgelaufene bezahlte Tickets gelten wie die Freikarte.',
     'Rechte (ticket.js): tkDarf(recht) mit foto_hoch, foto_gross, foto_laden, video, sprache, reise_anlegen, admin für bezahlt (pauschal, woche, monat, jahr, frei) und Team. Der Wächter blockiert nur noch Reise anlegen und Verwalten durch die Reiseleitung ohne Ticket. Der Hinweis „Nur ansehen“ entfällt.',
-    'Medien: neue Fotos und Videos im Chat und Album liegen als Original unter uploads/{uid}/o/ (in der Nachricht steht nur der Pfad „p:…“, die Adresse holt die App beim Anzeigen), dazu ein Vorschaubild (480 px) unter uploads/{uid}/v/ im Feld vor. Altbestand hat keine Vorschau und erscheint der Tageskarte gesperrt. Gäste einer Tagesaktivität laden weiter über den Altpfad hoch.',
+    'Medien: neue Fotos und Videos im Chat und Album liegen als Original unter uploads/{uid}/o/ (in der Nachricht steht nur der Pfad „p:…“, die Adresse holt die App beim Anzeigen), dazu ein Vorschaubild (480 px) unter uploads/{uid}/v/ im Feld vor. Altbestand hat keine Vorschau und erscheint der Freikarte gesperrt. Gäste einer Tagesaktivität laden weiter über den Altpfad hoch.',
     'Speicherregeln: Originale nur mit Kennzeichen tkb (Ende des bezahlten Tickets) oder st (Team). Die Funktion claimsSelf (und die Trigger ticketKennzeichen, rollenKennzeichen in functions/claims.js) schreibt die Kennzeichen, die App ruft claimsSelf beim Start und bei Ticketänderung auf und erneuert das Token. Neu: functions/admins.json (aus konfig.py, nicht im Repo).',
     'Datenbankregeln: ticketOk() ist nur noch „angemeldet“. Neu bezahlt(): Reise anlegen, Reiseleitung ändern und Foto-, Audio-Nachrichten verlangen ein bezahltes Ticket. Neu: kontingent/{uid} (Zähler foto, video, sprache je Ticket, tv = Beginn).',
-    'Limits (Server): Funktion medienZaehlen (functions/medien.js) zählt jedes neue Original und jede Vorschau in kontingent/{uid} (nur der Server schreibt) und löscht Überschreitungen sofort. Fotos je Ticket Pauschal 200, Woche 100, Monat 150, Jahr 300; Videos und Sprachnachrichten je 20; Freikarte und Team ohne Limit. Die App liest nur und zeigt den Hinweis erst bei 19 von 20 (Fotos: bei noch 10). Vor Reisebeginn keine Fotos und Videos (Prüfung nur in der App; Ausnahme Reiseinfos und Belege).',
+    'Limits (Server): Funktion medienZaehlen (functions/medien.js) zählt jedes neue Original und jede Vorschau in kontingent/{uid} (nur der Server schreibt) und löscht Überschreitungen sofort. Fotos je Ticket Pauschal 200, Woche 100, Monat 150, Jahr 300; Videos und Sprachnachrichten je 20; Testerkarte und Team ohne Limit. Die App liest nur und zeigt den Hinweis erst bei 19 von 20 (Fotos: bei noch 10). Vor Reisebeginn keine Fotos und Videos (Prüfung nur in der App; Ausnahme Reiseinfos und Belege).',
     'Altbestand: Mitgliederverwaltung, Übersicht, Karte „Fotos aus der Zeit vor Beta 3.1“ startet die Funktion medienUmziehen (nur Oberbademeister). Sie kopiert Originale nach o/, erzeugt Vorschauen (sharp, 480 px) unter v/, setzt „p:Pfad“ und vor in der Nachricht und löscht die alte Datei. Mehrfach startbar. Profilbilder und Belege bleiben im Altpfad.',
     'Kaufangebot: Karte „Meine Reisen“ ab 7 Tage vor Reisebeginn bis Reiseende ohne bezahltes Ticket; Push eine Woche vorher (tagesErinnerung, Marker kaufAngebot). Empfehlung bis 7 Reisetage Wochenkarte, sonst Pauschalreise.',
-    'Offen: Nach dem ersten Veröffentlichen den Umzug des Altbestands starten und zwei Konten testen (Tageskarte, Freikarte). Kaufabwicklung folgt später. Die Funktion medienZaehlen nutzt die Region der Datenbank, sie muss zur Speicher-Region passen.' ] },
+    'Offen: Nach dem ersten Veröffentlichen den Umzug des Altbestands starten und zwei Konten testen (Freikarte, Testerkarte). Kaufabwicklung folgt später. Die Funktion medienZaehlen nutzt die Region der Datenbank, sie muss zur Speicher-Region passen.' ] },
   { v:'Beta 2.33', t:'Begriffe: Reiseleitung und Herde', d:[
     'Wer eine Reise organisiert, heißt überall „Reiseleitung“ (bisher Admin, Gruppenadmin, Reise-Admin), auch in der Reisenliste und Mitgliederansicht der Badeaufsicht. „Admin“ steht nur noch für das Team von Poolposition.',
     'Abgelaufenes Ticket: Der Hinweis verweist auf die Badeaufsicht statt auf den Admin.' ] },
@@ -5195,7 +5196,7 @@ const ADMLOG = [
     'Server-Regeln (ticketOk): Schreiben nur mit gültigem Ticket. Oberbademeister und Bademeister mit Dienstrang sind ausgenommen. Ausnahmen für Profil, Tickets, Konten, Push, Einstellungen, Meldungen, Feedback.',
     'Mitgliederliste: Filter „Ticket abgelaufen“ und „Ohne Ticket“, Ticket für alle in der Auswahl.' ] },
   { v:'Beta 2.28', t:'Tickets, Statusmeldung, Zimmerplan', d:[
-    'Ticketsystem: Tageskarte (automatisch beim ersten Start), Wochen-, Monats-, Jahreskarte nur durch den Oberbademeister. Zuweisung einzeln oder für eine Auswahl.',
+    'Ticketsystem: Freikarte (automatisch beim ersten Start), Wochen-, Monats-, Jahreskarte nur durch den Oberbademeister. Zuweisung einzeln oder für eine Auswahl.',
     'Reise-Admins bekommen eine Meldung, wenn jemand nach der Gruppenabstimmung seine Angaben ändert (Sammlung aenderungen, Push-Funktion).',
     'Zimmerplan mit automatischem Bedarf und Ampel, Entscheidung durch den Reise-Admin. „Begleitperson ohne App“ entfernt.' ] },
 ];
@@ -8483,25 +8484,25 @@ A.createReise = async el => { const f=S.form; if(f.modus!=='abst') return altCre
 A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='zeit'&&v.id!==r.zeitId).map(v=>({von:v.von,bis:v.bis}));
   go('neu',{form:{modus:'abst', ws:1, art:r.reiseart, titel:`${r.titel} – Plan B`, zjn:z.length?'nein':'', zmode:'zeit', zlist:z, invite:S.rt.mitglied.filter(m=>m.status==='abgesagt'&&m.uid!==S.uid).map(m=>m.uid)}}); };
 
-/* Beta 3.1: Reisen und Koffer-Konferenzen anlegen gibt es mit einem Ticket. Die Tageskarte sieht stattdessen einen Hinweis. */
+/* Beta 3.1: Reisen und Koffer-Konferenzen anlegen gibt es mit einem Ticket. Die Freikarte sieht stattdessen einen Hinweis. */
 A.neuAnlegen = ()=>{ if(!tkDarf('reise_anlegen')) return go('neuTicket'); go('neu'); };
-V.neuTicket = ()=>`${hdrPlain('Urlaub anlegen')}${backBtn()}<div class="empty">${ic('lock',30)}<span><b>Eigene Reisen gibt es mit einem Ticket.</b><br>Mit der Tageskarte kannst du Einladungen folgen, Reisen ansehen, chatten, abstimmen und planen. Wer selbst eine Reise oder Koffer-Konferenz anlegt, braucht ein Ticket.</span></div><button class="btn block" data-act="go" data-v="kiosk">Tickets ansehen</button>`;
+V.neuTicket = ()=>`${hdrPlain('Urlaub anlegen')}${backBtn()}<div class="empty">${ic('lock',30)}<span><b>Eigene Reisen gibt es mit einem Ticket.</b><br>Mit der Freikarte kannst du Einladungen folgen, Reisen ansehen, chatten, abstimmen und planen. Wer selbst eine Reise oder Koffer-Konferenz anlegt, braucht ein Ticket.</span></div><button class="btn block" data-act="go" data-v="kiosk">Tickets ansehen</button>`;
 const altNeuV = V.neu; V.neu = ()=> tkDarf('reise_anlegen') ? altNeuV() : V.neuTicket();
 /* ===================== Was ist neu? =====================
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
   { v:'Beta 3.2', t:'Ticketsystem aktiviert', p:[
-    'Das Ticketsystem ist jetzt aktiv. Die Tageskarte bleibt gratis, mit einem Ticket (Pauschalreise, Wochenkarte, Monatskarte, Jahreskarte) legst du Reisen an und nutzt Fotos, Videos und Sprachnachrichten.',
+    'Das Ticketsystem ist jetzt aktiv. Die Freikarte bleibt gratis, mit einem Ticket (Pauschalreise, Wochenkarte, Monatskarte, Jahreskarte) legst du Reisen an und nutzt Fotos, Videos und Sprachnachrichten.',
     'Im Kiosk siehst du alle Tickets mit Laufzeit und Preis. Die Pauschalreise ist unsere Empfehlung: alles für eine Reise, von der Planung bis zur Nachbereitung. Kaufen kannst du noch nicht, das Ticket ist „bald erhältlich“.',
-    'Hinweis für Beta-Tester: Eure Tickets wurden in Freikarten umgewandelt. Das bedeutet unlimitierte Nutzung des Systems.',
+    'Hinweis für Beta-Tester: Eure Tickets wurden in Testerkarten umgewandelt. Das bedeutet unlimitierte Nutzung des Systems.',
   ] },
   { v:'Beta 3.1', t:'Neue Tickets: Gratis, Pauschalreise und mehr', p:[
-    'Die Tageskarte ist jetzt gratis und läuft nicht mehr ab. Du kannst weiter alles ansehen, Einladungen folgen, chatten, abstimmen, planen sowie Packliste und Aufgaben nutzen.',
+    'Die Freikarte ist jetzt gratis und läuft nicht mehr ab. Du kannst weiter alles ansehen, Einladungen folgen, chatten, abstimmen, planen sowie Packliste und Aufgaben nutzen.',
     'Mit einem Ticket (Pauschalreise, Wochenkarte, Monatskarte, Jahreskarte) legst du eigene Reisen an, teilst Fotos und Videos, vergrößerst und speicherst Fotos und sendest Sprachnachrichten.',
-    'Mit der Tageskarte siehst du Fotos als kleine Vorschau. Buchungsunterlagen wie Angebote sind für alle in voller Größe sichtbar.',
+    'Mit der Freikarte siehst du Fotos als kleine Vorschau. Buchungsunterlagen wie Angebote sind für alle in voller Größe sichtbar.',
     'Die Pauschalreise gilt für genau eine Reise. Fotos und Videos gibt es ab Reisebeginn, Angebote und Unterlagen kannst du schon vorher hochladen.',
-    'Eine Woche vor Reisebeginn zeigt dir die App, welches Ticket passt. Tester bekommen eine Freikarte.',
+    'Eine Woche vor Reisebeginn zeigt dir die App, welches Ticket passt. Tester bekommen eine Testerkarte.',
   ] },
   { v:'Beta 2.33', t:'Neue Begriffe: Reiseleitung und Herde', p:[
     'Wer die Reise organisiert, heißt jetzt überall „Reiseleitung“.',
@@ -8533,7 +8534,7 @@ const NEUES = [
   { v:'Beta 2.28', t:'Tickets, Kiosk, Statusseite und Zimmerplan', p:[
     'Neue Statusseite: Haben alle abgestimmt, siehst du nur den Gesamtstand der Gruppe, z. B. „beim Reisebüro angefragt“. Unten kannst du deine Angaben ändern, nach deutlicher Warnung und Rückfrage. Die Reiseleitung bekommt dann eine Meldung.',
     'Neuer Zimmerplan: Die App berechnet den Zimmerbedarf aus den Wünschen, zum Beispiel „1 Doppelzimmer, 1 Einzelzimmer“, mit Ampel. Wer keinen Partner hat, wird von der Reiseleitung eingeordnet. Virtuelle Begleitpersonen gibt es nicht mehr.',
-    'Tickets: Tageskarte, Wochenkarte, Monatskarte, Jahreskarte bestimmen, wie lange ein Account bearbeiten darf. Neue Nutzer starten mit einer Tageskarte, danach kann man nur noch ansehen.',
+    'Tickets: Freikarte, Wochenkarte, Monatskarte, Jahreskarte bestimmen, wie lange ein Account bearbeiten darf. Neue Nutzer starten mit einer Freikarte, danach kann man nur noch ansehen.',
     'Neuer Kiosk: Hier siehst du Wochen-, Monats- und Jahreskarte als Schwimmbad-Tickets. Kaufen geht in der Beta noch nicht, die Preise folgen. Dein eigenes Ticket mit Restlaufzeit steht in deinem Profil.',
   ] },
   { v:'Beta 2.27', t:'Koffer-Konferenz Schritt für Schritt', p:[

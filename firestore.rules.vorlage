@@ -11,8 +11,8 @@ service cloud.firestore {
     // Bademeister: Rechte vergibt der Oberbademeister (Superadmin) einzeln, gespeichert unter rollen/{uid}.rechte
     function rollenDoc(u) { return /databases/$(database)/documents/rollen/$(u); }
     function recht(r) { return signedIn() && exists(rollenDoc(me())) && get(rollenDoc(me())).data.get('rechte', {}).get(r, false) == true; }
-    // Tickets (Beta 3.1): Die Tageskarte ist gratis und läuft nie ab, sie darf ansehen, lesen, chatten, abstimmen und planen (ticketOk = angemeldet).
-    // Bezahlte Tickets (Pauschalreise, Woche, Monat, Jahr) und die Freikarte dürfen zusätzlich Reisen anlegen und verwalten sowie Fotos, Videos und Sprachnachrichten senden (bezahlt()).
+    // Tickets (Beta 3.1): Die Freikarte ist gratis und läuft nie ab, sie darf ansehen, lesen, chatten, abstimmen und planen (ticketOk = angemeldet).
+    // Bezahlte Tickets (Pauschalreise, Woche, Monat, Jahr) und die Testerkarte dürfen zusätzlich Reisen anlegen und verwalten sowie Fotos, Videos und Sprachnachrichten senden (bezahlt()).
     // Oberbademeister und Badeaufsicht sind ausgenommen.
     function ticketDoc(u) { return /databases/$(database)/documents/tickets/$(u); }
     function ticketOk() { return signedIn(); }
@@ -44,7 +44,7 @@ service cloud.firestore {
       allow update: if recht('ausblenden') && onlyChanges(['foto', 'fotoOrig', 'fotoEntfernt']);
     }
 
-    // Tickets (Mitgliedschaft): jeder liest sein eigenes, die Tageskarte legt der Nutzer beim ersten Start selbst an, alles andere nur der Oberbademeister
+    // Tickets (Mitgliedschaft): jeder liest sein eigenes, die Freikarte legt der Nutzer beim ersten Start selbst an, alles andere nur der Oberbademeister
     match /tickets/{uid} {
       allow read: if signedIn() && (me() == uid || isSuper() || recht('nutzer'));
       allow create: if signedIn() && me() == uid && request.resource.data.art == 'tag' && request.resource.data.by == me()
