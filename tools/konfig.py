@@ -26,6 +26,8 @@ open('.bucket', 'w').write(cfg.get('storageBucket', ''))
 try: loc = subprocess.check_output(['gcloud', 'firestore', 'databases', 'describe', '--database=(default)', '--project', P, '--format=value(locationId)'], text=True).strip()
 except Exception: loc = ''
 reg = {'nam5': 'us-central1', 'eur3': 'europe-west1', '': 'us-central1'}.get(loc, loc)
+try: bl = subprocess.check_output(['gcloud', 'storage', 'buckets', 'describe', 'gs://' + cfg.get('storageBucket', ''), '--project', P, '--format=value(location)'], text=True).strip().lower()
+except Exception: bl = ''
 open('functions/admins.json', 'w').write(json.dumps({'admins': admins}))
-open('functions/region.json', 'w').write(json.dumps({'region': reg}))
+open('functions/region.json', 'w').write(json.dumps({'region': reg, 'bucketRegion': bl or reg}))
 print(f'Konfiguration erzeugt: Admins {len(admins)}, Web-Push {"ja" if vapid else "nein"}, Datenbank {loc or "?"} → Funktionen-Region {reg}, Speicher {cfg.get("storageBucket")}')

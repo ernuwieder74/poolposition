@@ -10,6 +10,7 @@ const admin = require('firebase-admin');
 const crypto = require('crypto');
 const db = admin.firestore();
 let REGION = 'us-central1'; try { REGION = require('./region.json').region || REGION; } catch (e) {}
+let BUCKET_REGION = REGION; try { BUCKET_REGION = require('./region.json').bucketRegion || REGION; } catch (e) {}
 let ADMINS = []; try { ADMINS = (require('./admins.json').admins || []).map(a => String(a).toLowerCase()); } catch (e) {}
 const BEZAHLT = ['pauschal', 'woche', 'monat', 'jahr', 'frei'];
 const FOTO = { pauschal: 200, woche: 100, monat: 150, jahr: 300 };
@@ -17,7 +18,7 @@ const VOR_MAX = 1000;
 const artVon = ct => /^image\//.test(ct) ? 'foto' : /^video\//.test(ct) ? 'video' : /^audio\//.test(ct) ? 'sprache' : null;
 const urlVon = (bucket, path, token) => `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media&token=${token}`;
 
-exports.medienZaehlen = onObjectFinalized({ region: REGION, maxInstances: 5 }, async ev => {
+exports.medienZaehlen = onObjectFinalized({ region: BUCKET_REGION, maxInstances: 5 }, async ev => {
   const o = ev.data; if (o.metadata && o.metadata.migriert) return; const m = /^uploads\/([^/]+)\/(o|v)\/[^/]+$/.exec(o.name || ''); if (!m) return;
   const [, uid, teil] = m; const bucket = admin.storage().bucket(o.bucket); const weg = async grund => { logger.warn('Medium gelöscht', uid, o.name, grund); await bucket.file(o.name).delete().catch(() => {}); };
   const art = teil === 'v' ? 'vor' : artVon(o.contentType); if (!art) return weg('Typ');
