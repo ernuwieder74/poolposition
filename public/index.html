@@ -4884,12 +4884,12 @@ function ticketNeben(u, breit){ try{ if(!u || u===S.uid || S.supportVon) return 
    Noch ohne Funktion (Beta). Später kaufen Nutzer hier ihre Mitgliedschaft. Freikarten sind nicht kaufbar, sie gibt es nur als Demo-Zugang.
    Die Preise sind absichtlich unkenntlich, sie werden später festgelegt. */
 const TK_INFO = {
-  tag:   {n:'TAGESKARTE',  dauer:'Gratis, ohne Ablauf', sub:'Schnuppern im Becken', sym:'☀️'},
+  tag:   {n:'FREIKARTE',    dauer:'Gratis, ohne Ablauf', sub:'Schnuppern im Becken', sym:'☀️'},
   pauschal:{n:'PAUSCHALREISE', dauer:'Von Kauf bis 30 Tage nach der Reise', sub:'Alles für <b class="eine">EINE</b> Reise', sym:'🧳'},
   woche: {n:'WOCHENKARTE', dauer:'7 Tage ab Aktivierung',     sub:'Für den Kurztrip',      sym:'🏊'},
   monat: {n:'MONATSKARTE', dauer:'1 Monat ab Aktivierung',    sub:'Für Dauerplaner',       sym:'🛟'},
   jahr:  {n:'JAHRESKARTE', dauer:'1 Jahr ab Aktivierung',     sub:'Für Stammgäste',        sym:'🏆'},
-  frei:  {n:'FREIKARTE',   dauer:'Für Tester', sub:'Freier Eintritt',     sym:'🎟️'} };
+  frei:  {n:'TESTERKARTE',  dauer:'Für Tester', sub:'Freier Eintritt',     sym:'🎟️'} };
 /* Enddatum mit Uhrzeit; ab einem halben Jahr Restlaufzeit mit Jahreszahl */
 const tkEnde = ms => { const d=new Date(ms); const jahr=(ms-now())>180*864e5 || d.getFullYear()!==new Date().getFullYear(); return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${jahr?d.getFullYear():''} ${fTime(ms)} Uhr`; };
 const tkNr = u => { let h=7; for(const c of String(u||'x')) h=(h*31+c.charCodeAt(0))%1000000; return String(h).padStart(6,'0'); };
