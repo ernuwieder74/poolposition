@@ -14,7 +14,7 @@ function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter
   const tagSumme = (m, t) => Object.values(m.getraenke||{}).reduce((s,g)=>s+(+g?.tage?.[t]||0),0);
   const ms=mitglied.filter(m=>['zugesagt','entfernt','ausgetreten'].includes(m.status));
   const aktiv=mitglied.filter(m=>m.status==='zugesagt');
-  const z=[`☀️ Guten Morgen liebe ${String(r.gruppenName||'').trim()||'Reisegruppe'}!`];
+  const z=[`☀️ Guten Morgen, liebe ${String(r.gruppenName||'').trim()||'Herde'}!`];
   const summe=ms.reduce((s,m)=>s+tagSumme(m,gestern),0);
   if(summe>0){
     const proG={}; ms.forEach(m=>Object.entries(m.getraenke||{}).forEach(([k,g])=>{ const n=+g?.tage?.[gestern]||0; if(n){ const nn=trinkName(k); proG[nn]=(proG[nn]||0)+n; } }));

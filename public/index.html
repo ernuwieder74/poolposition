@@ -774,7 +774,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.32";
+const APP_VERSION = "Beta 2.33";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -1229,7 +1229,7 @@ V.home = ()=>{
 };
 function emptyHome(){ return `<div class="card"><h2>Deine erste Reise</h2>
   <div class="col small"><div class="row"><span class="pos p1">1</span><span>Leg einen Urlaub an. Steht er schon fest, trägst du Ort und Datum ein. Sonst startest du eine Koffer-Konferenz.</span></div>
-  <div class="row"><span class="pos">2</span><span>Schick den 6-stelligen Code per WhatsApp an deine Leute.</span></div>
+  <div class="row"><span class="pos">2</span><span>Schick den 6-stelligen Code per WhatsApp an deine Herde.</span></div>
   <div class="row"><span class="pos">3</span><span>Abstimmen, zusagen, und im Urlaub: Mein Tag, Chat, Album, Barometer und Herzen.</span></div></div>
   <button class="btn block" data-act="go" data-v="neu">Urlaub anlegen</button></div>`; }
 function tripCard(r,m){ const st=reiseStatus(r,m); const a=art(r); const md=meineDaten(r,m); const eigen=r.von && (md.von!==r.von||md.bis!==r.bis);
@@ -1262,8 +1262,8 @@ A.meineDatenAuf = el => { const rid=el.dataset.rid; if(rid!==S.rid) setTrip(rid)
 function pastCard(r,m){ const a=art(r); return `<div class="card tight"><div class="row"><span style="color:var(--mut)">${ic(a.icon,24)}</span><button style="all:unset;cursor:pointer" class="grow" data-act="openTrip" data-rid="${r.id}"><div class="ttl">${esc(r.titel)}</div><div class="small mut">${fRange(r.von,r.bis)}${r.ort?` · ${esc(r.ort)}`:''}</div></button><button class="btn xs sec" data-act="nochmal" data-rid="${r.id}">Nochmal zusammen?</button></div>${canMod(r)?`<div class="kachelakt" style="grid-template-columns:1fr 1fr"><button class="ka" data-act="reiseBearbeiten" data-rid="${r.id}">${ic('pencil',18)}<span>Bearbeiten</span></button><button class="ka gef" data-act="reiseLoeschen" data-rid="${r.id}">${ic('trash',18)}<span>Löschen</span></button></div>`:''}</div>`; }
 function inviteText(r,code){ const abst=r.status==='abstimmung'; const link = FB ? `${APP_LINK}/?code=${code}` : APP_LINK;
   return [
-    abst ? 'Hey Leute, ich habe angefangen, unsere Reise zu planen. Jetzt müsst ihr sagen, wie es weiter geht. Eure Stimme ist erforderlich! 🗳️'
-         : `Hey Leute, unsere Reise${r.ort?` nach ${r.ort}`:''} nimmt Gestalt an${r.von?` (${fD(r.von)} bis ${fDY(r.bis)})`:''}. Seid dabei, eure Stimme und eure Ideen zählen! 🌴`,
+    abst ? 'Hey Herde, ich habe angefangen, unsere Reise zu planen. Jetzt müsst ihr sagen, wie es weiter geht. Eure Stimme ist erforderlich! 🗳️'
+         : `Hey Herde, unsere Reise${r.ort?` nach ${r.ort}`:''} nimmt Gestalt an${r.von?` (${fD(r.von)} bis ${fDY(r.bis)})`:''}. Seid dabei, eure Stimme und eure Ideen zählen! 🌴`,
     '',
     `👉 Klickt den Link an: ${link}`,
     '',
@@ -1368,8 +1368,8 @@ V.konferenz = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'
   <div class="card"><h3>Wann</h3>${Z.slice(0,3).map((z,i)=>`<div class="row"><span class="pos ${i?'':'p1'}">P${i+1}</span><span class="grow num">${fRange(z.von,z.bis)}</span><span class="small mut num">${z.can} können${z.ne.length?`, ${z.ne.length} nicht`:''}</span></div>`).join('')||'<span class="small mut">Noch keine Stimmen.</span>'}
   <h3 style="margin-top:6px">Wohin</h3>${O.slice(0,3).map((o,i)=>`<div class="row"><span class="pos ${i?'':'p1'}">P${i+1}</span><span class="grow">${esc(o.name)}</span><span class="small mut num">${o.pts} Pkt.</span></div>`).join('')||'<span class="small mut">Noch keine Stimmen.</span>'}</div>
   <h2 style="margin-top:6px">Dabei in der Konferenz <span class="mut" style="font-weight:600">(${mem.length})</span></h2>
-  <div class="list">${mem.map(m=>`<div class="li">${av(m.uid,34)}<span class="grow">${esc(nm(m.uid))}${m.uid===r.admin?' <span class="tiny mut">· organisiert</span>':''}</span>${m.status==='eingeladen'?'<span class="chip">eingeladen</span>':voted.has(m.uid)?`<span class="chip grn">${ic('check',14)} abgestimmt</span>`:'<span class="chip">wartet noch</span>'}</div>`).join('')}</div>
-  ${adm?`<div class="card gold"><div class="ttl">Du organisierst diese Konferenz</div><p class="small">Wenn alle abgestimmt haben, gibst du das Ergebnis frei. Daraus wird eure Reise.</p>
+  <div class="list">${mem.map(m=>`<div class="li">${av(m.uid,34)}<span class="grow">${esc(nm(m.uid))}${m.uid===r.admin?' <span class="tiny mut">· Reiseleitung</span>':''}</span>${m.status==='eingeladen'?'<span class="chip">eingeladen</span>':voted.has(m.uid)?`<span class="chip grn">${ic('check',14)} abgestimmt</span>`:'<span class="chip">wartet noch</span>'}</div>`).join('')}</div>
+  ${adm?`<div class="card gold"><div class="ttl">Du bist die Reiseleitung dieser Konferenz</div><p class="small">Wenn alle abgestimmt haben, gibst du das Ergebnis frei. Daraus wird eure Reise.</p>
     <label class="toggle small"><input type="checkbox" data-act="toggleOffen" ${r.vorschlaegeOffen?'checked':''}> Andere dürfen Vorschläge ergänzen</label>
     <button class="btn block yel" data-act="go" data-v="freigabe" ${Z.length&&O.length?'':'disabled'}>Startfreigabe geben</button>${Z.length&&O.length?'':'<span class="tiny mut">Dafür braucht es mindestens einen Zeitraum und einen Ort.</span>'}</div>`:''}
   <button class="link" style="align-self:center;color:var(--mut)" data-act="leaveKonf">Konferenz verlassen</button>`; };
@@ -1383,7 +1383,7 @@ A.vo = el => { if(!S.myVote) S.myVote={zeiten:{},orte:{}}; const id=el.dataset.i
   if(d>0 && myPts()>=3) return toast('Du hast alle 3 Punkte vergeben. Nimm erst woanders einen weg.'); const n=Math.max(0,c+d); if(n) S.myVote.orte[id]=n; else delete S.myVote.orte[id]; queueVote(); };
 A.toggleOffen = async el => { await W(()=>S.db.doc(`reisen/${S.rid}`).update({vorschlaegeOffen:!cur().vorschlaegeOffen}),'Speichern'); };
 A.delVorschlag = async el => { await W(()=>S.db.doc(`vorschlaege/${el.dataset.id}`).delete(),'Entfernen'); toast('Vorschlag entfernt'); };
-A.leaveKonf = async ()=>{ const r=cur(); if(isAdmin(r)) return toast('Du organisierst diese Konferenz. Übertrage die Rolle erst unter Mitglieder oder gib das Ergebnis frei.'); await W(()=>mDoc(S.rid,S.uid).update({status:'ausgetreten'}),'Verlassen'); A.home(); };
+A.leaveKonf = async ()=>{ const r=cur(); if(isAdmin(r)) return toast('Du bist die Reiseleitung dieser Konferenz. Übertrage die Reiseleitung erst unter Mitglieder oder gib das Ergebnis frei.'); await W(()=>mDoc(S.rid,S.uid).update({status:'ausgetreten'}),'Verlassen'); A.home(); };
 V.vorschlag = ()=>{ const t=S.route.typ; return `${hdrPlain('Vorschlag')}${backBtn()}<h1>${t==='zeit'?'Zeitraum vorschlagen':'Ort vorschlagen'}</h1>
   ${t==='zeit'?`<div class="grid2"><label class="f">Von<input class="in" type="date" id="f_von" min="${today()}"></label><label class="f">Bis<input class="in" type="date" id="f_bis" min="${today()}"></label></div>`
   :`<label class="f">Ort<input class="in" id="f_name" maxlength="50" placeholder="z. B. Kreta"></label><label class="f">Link oder Notiz (freiwillig)<input class="in" id="f_link" maxlength="300" placeholder="Hotel-Link, Preis, Idee …"></label>`}
@@ -1749,7 +1749,7 @@ A.upAlbum = async el => { const files=[...(el.files||[])]; el.value=''; let n=0;
   for(const f of files){ const up=await uploadFile(f); if(!up) continue; try{ await S.db.collection('nachrichten').add({rid:S.rid, typ:'bild', bild:up.id, mime:up.mime, aufnahme:f.lastModified||now(), createdAt:now(), by:S.uid, nurAlbum:true}); n++; }catch(e){ fail(e,'Speichern'); } }
   if(n) toast(`${n} ${n===1?'Datei':'Dateien'} hinzugefügt`); };
 V.papierkorb = ()=>{ const g=tripGuard(); if(g) return g; const items=S.rt.msgs.filter(x=>x.geloescht && x.bild && !x.geloescht.endgueltig).sort((a,b)=>b.geloescht.at-a.geloescht.at);
-  return `${hdrTrip('Papierkorb')}${backBtn()}<h1>Papierkorb</h1><p class="small mut">Nur du als Admin siehst den Papierkorb. Bilder, die du selbst gelöscht hast, kannst du wiederherstellen. Von Mitgliedern selbst gelöschte Bilder kannst du nur endgültig löschen. Nach 30 Tagen gilt ein Bild als abgelaufen.</p>
+  return `${hdrTrip('Papierkorb')}${backBtn()}<h1>Papierkorb</h1><p class="small mut">Nur du als Reiseleitung siehst den Papierkorb. Bilder, die du selbst gelöscht hast, kannst du wiederherstellen. Von Mitgliedern selbst gelöschte Bilder kannst du nur endgültig löschen. Nach 30 Tagen gilt ein Bild als abgelaufen.</p>
   ${items.length?items.map(x=>{ const age=Math.floor((now()-x.geloescht.at)/864e5); const mayRestore=x.geloescht.by===S.uid; return `<div class="card tight" style="flex-direction:row;align-items:center"><img src="${esc(blob(x.bild))}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0"><div class="grow small"><div>von ${esc(nm(x.by))}</div><div class="mut">gelöscht von ${esc(x.geloescht.by==='system'?'Badeaufsicht':nm(x.geloescht.by))} · ${fStamp(x.geloescht.at)}</div>${age>=30?'<div style="color:var(--pinktx)">abgelaufen</div>':`<div class="mut">noch ${30-age} Tage</div>`}</div><div class="col" style="gap:6px">${mayRestore&&age<30?`<button class="btn xs sec" data-act="restore" data-id="${x.id}">Wiederherstellen</button>`:''}<button class="btn xs ghost" data-act="purge" data-id="${x.id}">Endgültig löschen</button></div></div>`; }).join(''):'<div class="empty">Der Papierkorb ist leer.</div>'}`; };
 A.restore = async el => { await W(()=>S.db.doc(`nachrichten/${el.dataset.id}`).update({geloescht:null}),'Wiederherstellen'); toast('Wiederhergestellt'); };
 A.purge = el => openOv('confirm',{title:'Endgültig löschen?', text:'Das Bild ist danach für immer weg.', ok:'Endgültig löschen', fn: async ()=>{ const x=S.rt.msgs.find(m=>m.id===el.dataset.id); if(!x) return;
@@ -1814,7 +1814,7 @@ V.mitglieder = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const a
   const weg=all.filter(m=>['entfernt','ausgetreten'].includes(m.status)); const offen=all.filter(m=>['teilnehmer','eingeladen'].includes(m.status));
   const row=(m,kind)=>{ const dd=daysUntil(m.abreise||r.bis); const st = kind==='weg' ? `<span class="row" style="gap:4px;color:var(--pinktx)">${m.status==='entfernt'?AW.rote(14)+' Entfernt':'Ausgetreten'}</span>` : kind==='aus' ? `Ausgecheckt · ${fD(m.abreise||r.bis)}` : dd===0?'reist heute ab':dd===1?'morgen':`in ${dd} Tagen`;
     return `<button class="mrow ${kind!=='da'?'faded':''}" data-act="go" data-v="mitglied" data-p='{"uid":"${m.uid}"}'><span class="avwrap">${avAw(m.uid,40,kind==='weg'?'gray':'')}${kind==='aus'?`<span class="bdg" style="color:var(--yelt)">${ic('plane',13)}</span>`:kind==='weg'&&m.status==='entfernt'?`<span class="bdg">${AW.rote(13)}</span>`:''}</span>
-    <span class="row" style="gap:6px;min-width:0"><span class="ell" style="font-size:16px;font-weight:600">${esc(nm(m.uid))}</span>${awards(m.uid)}${m.uid===r.admin?'<span class="tiny mut">Admin</span>':''}</span><span class="small num" style="color:var(--tx2);text-align:right">${st}</span><span class="hpill num" aria-label="${+m.herzen||0} Herzen">${I.s(P.heart,13,'fill="#e8353b" stroke="none"')}${+m.herzen||0}</span></button>`; };
+    <span class="row" style="gap:6px;min-width:0"><span class="ell" style="font-size:16px;font-weight:600">${esc(nm(m.uid))}</span>${awards(m.uid)}${m.uid===r.admin?'<span class="tiny mut">Reiseleitung</span>':''}</span><span class="small num" style="color:var(--tx2);text-align:right">${st}</span><span class="hpill num" aria-label="${+m.herzen||0} Herzen">${I.s(P.heart,13,'fill="#e8353b" stroke="none"')}${+m.herzen||0}</span></button>`; };
   return `${hdrTrip('Mitglieder')}${S.hist.length?backBtn('Reise'):''}${geschlossenBanner()}${mitgliederTabs('mit')}
   <div class="row between"><h2>${act.length} ${act.length===1?'Mitglied':'Mitglieder'}</h2>${isAdmin()?`<button class="btn xs sec" data-act="go" data-v="reiseEinst">${ic('gear',14)} Reise verwalten</button>`:''}</div>
   <div class="list">${da.map(m=>row(m,'da')).join('')}${aus.map(m=>row(m,'aus')).join('')}${!act.length?'<div class="empty small">Noch niemand.</div>':''}</div>
@@ -1826,7 +1826,7 @@ V.mitglieder = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const a
 V.mitglied = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const uid=S.route.uid; const m=rtM(uid)||{}; const p=pr(uid); const z=zodiac(p.geb); const self=uid===S.uid;
   const tel = (p.telSichtbar||self) && p.tel; const a=art(r);
   return `${hdrTrip('Mitglied')}${backBtn('Mitglieder')}
-  <div class="row" style="gap:16px">${pbAuf(uid, avAw(uid,84,m.status==='entfernt'?'gray':''))}<div class="grow col" style="gap:4px"><div class="row" style="gap:8px"><h1 class="ell">${esc(nm(uid))}</h1>${awards(uid,24)}</div>${vollName(p)&&vollName(p)!==nm(uid)?`<div class="mut">${esc(vollName(p))}</div>`:''}${m.status==='entfernt'?`<span class="chip" style="align-self:flex-start;color:var(--pinktx)">${AW.rote(14)} Entfernt</span>`:''}${uid===r.admin?'<span class="chip yel" style="align-self:flex-start">Admin der Reise</span>':''}</div></div>
+  <div class="row" style="gap:16px">${pbAuf(uid, avAw(uid,84,m.status==='entfernt'?'gray':''))}<div class="grow col" style="gap:4px"><div class="row" style="gap:8px"><h1 class="ell">${esc(nm(uid))}</h1>${awards(uid,24)}</div>${vollName(p)&&vollName(p)!==nm(uid)?`<div class="mut">${esc(vollName(p))}</div>`:''}${m.status==='entfernt'?`<span class="chip" style="align-self:flex-start;color:var(--pinktx)">${AW.rote(14)} Entfernt</span>`:''}${uid===r.admin?'<span class="chip yel" style="align-self:flex-start">Reiseleitung</span>':''}</div></div>
   <div class="card"><h3>Profil</h3>
   ${p.geb?`<div class="row between"><span class="mut">Geburtstag</span><b>${esc(p.geb)}${p.jahr?esc(p.jahr):''} ${z?`<span style="color:var(--yelt)">${z.sym} ${esc(z.name)}</span>`:''}</b></div>`:''}
   ${p.wohnort?`<div class="row between"><span class="mut">Wohnort</span><b>${esc(p.wohnort)}</b></div>`:''}
@@ -1838,12 +1838,12 @@ V.mitglied = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const uid
   ${m.kommentar?`<div class="row between"><span class="mut">Heute</span><b>${esc(m.kommentar)}</b></div>`:''}</div>
   <div class="grid2"><div class="card tight" style="align-items:center"><span style="font-size:26px;font-weight:800" class="num">${+m.herzen||0}</span><span class="small mut">Herzen</span></div><div class="card tight" style="align-items:center"><span style="font-size:26px;font-weight:800" class="num">${drinkTotal(m)}</span><span class="small mut">Getränke</span></div></div>
   ${self?`<button class="btn sec block" data-act="go" data-v="profil">Mein Profil</button>`:`<div class="row"><button class="btn grow" data-act="startPair" data-uid="${uid}" data-h="${esc(r.titel)}">${ic('chat',18)} Flüstern</button><button class="btn sec" data-act="melden" data-gegen="${uid}">${ic('flag',18)} Melden</button></div>${pr(uid).foto?`<button class="link tiny" style="align-self:center;color:var(--mut)" data-act="meldenProfilbild" data-gegen="${uid}">Profilbild melden</button>`:''}`}
-  ${!self && canMod() && m.status==='zugesagt' ? `<div class="card"><h3>${isAdmin()?'Admin':'System-Admin'}</h3><button class="btn ghost block" data-act="transferAdmin" data-uid="${uid}">Admin-Rolle an ${esc(nm(uid))} übertragen</button><button class="btn block" style="background:#7a1d20" data-act="kick" data-uid="${uid}">${AW.rote(16)} Aus der Reise ausschließen</button><p class="tiny mut">Die Person kann danach auch mit einer neuen Einladung nicht mehr beitreten. Nachrichten, Bilder und Statistik der Person bleiben erhalten.</p></div>`:''}`; };
+  ${!self && canMod() && m.status==='zugesagt' ? `<div class="card"><h3>${isAdmin()?'Reiseleitung':'System-Admin'}</h3><button class="btn ghost block" data-act="transferAdmin" data-uid="${uid}">Reiseleitung an ${esc(nm(uid))} übertragen</button><button class="btn block" style="background:#7a1d20" data-act="kick" data-uid="${uid}">${AW.rote(16)} Aus der Reise ausschließen</button><p class="tiny mut">Die Person kann danach auch mit einer neuen Einladung nicht mehr beitreten. Nachrichten, Bilder und Statistik der Person bleiben erhalten.</p></div>`:''}`; };
 A.kick = el => { const u=el.dataset.uid; openOv('confirm',{title:`${nm(u)} ausschließen?`, text:'Die Person verliert sofort den Zugriff auf diese Reise und kann auch mit einer Einladung nicht erneut beitreten.', ok:'Ausschließen', fn: ()=>kickUser(S.rid,u) }); };
 async function kickUser(rid,u,bademeister=false){ try{ await mDoc(rid,u).update({status:'entfernt', entferntAm:now()}); await S.db.doc(`reisen/${rid}`).update({gesperrt:{[u]:true}});
   await S.db.collection('nachrichten').add({rid, typ:'system', text:`${nm(u)} wurde aus der Reise entfernt.`, by:bademeister?'support':S.uid, createdAt:now()});
   openOv('confirm',{title:'Ausgeschlossen', text:`${nm(u)} hat keinen Zugriff mehr auf die Reise und kann auch mit einem Einladungscode nicht wieder beitreten.`, ok:'Verstanden', noCancel:true, fn:()=>{}}); }catch(e){ fail(e,'Ausschließen'); } }
-A.transferAdmin = el => { const u=el.dataset.uid; openOv('confirm',{title:'Admin-Rolle übertragen?', text:`${nm(u)} verwaltet danach die Reise. Du bist dann normales Mitglied.`, ok:'Übertragen', fn: async ()=>{ await W(()=>S.db.doc(`reisen/${S.rid}`).update({admin:u}),'Übertragen'); toast(`${nm(u)} ist jetzt Admin`); } }); };
+A.transferAdmin = el => { const u=el.dataset.uid; openOv('confirm',{title:'Reiseleitung übertragen?', text:`${nm(u)} verwaltet danach die Reise. Du bist dann normales Mitglied.`, ok:'Übertragen', fn: async ()=>{ await W(()=>S.db.doc(`reisen/${S.rid}`).update({admin:u}),'Übertragen'); toast(`${nm(u)} hat jetzt die Reiseleitung`); } }); };
 
 /* ---------- Barometer ---------- */
 const dayFull = d => { const l=dayLabel(d); return ['Heute','Gestern','Morgen'].includes(l) ? `${l}, ${fD(d)}` : l; };
@@ -1946,7 +1946,7 @@ function datumWort(d){ const n=daysUntil(d); const kurz=`${WD[parseDay(d).getDay
 function reiseDatenInfo(alt, neu, name){ const t=[]; const tage=(a,b)=>Math.round((parseDay(b)-parseDay(a))/864e5); const T=n=>`${n} ${n===1?'Tag':'Tage'}`;
   if(alt.abreise && neu.abreise && neu.abreise!==alt.abreise){ const n=tage(alt.abreise, neu.abreise);
     t.push(n>0 ? `Juchuuuu! 🎉 ${name} hat um ${T(n)} verlängert und reist jetzt erst ${datumWort(neu.abreise)} ab.`
-               : `Leute, schlechte Nachrichten! 😢 ${name} hat den Urlaub verkürzt und reist schon ${datumWort(neu.abreise)} ab.`); }
+               : `Liebe Herde, schlechte Nachrichten! 😢 ${name} hat den Urlaub verkürzt und reist schon ${datumWort(neu.abreise)} ab.`); }
   if(alt.anreise && neu.anreise && neu.anreise!==alt.anreise){ const n=tage(neu.anreise, alt.anreise);
     t.push(n>0 ? `Juchuuuu! 🎉 ${name} kommt ${T(n)} früher und ist schon ${datumWort(neu.anreise)} dabei.`
                : `Schade! ${name} kommt ${T(-n)} später und ist erst ${datumWort(neu.anreise)} dabei.`); }
@@ -1961,7 +1961,7 @@ A.saveReiseDaten = async ()=>{ const f=S.form; if(f.anreise&&f.abreise&&f.abreis
   toast('Gespeichert'); back(); };
 A.leaveTrip = ()=>{ const r=cur(); if(isAdmin(r)){ const others=zugesagt().filter(m=>m.uid!==S.uid); if(!others.length) return toast('Du bist allein in dieser Reise. Lade erst jemanden ein oder lass sie einfach bestehen.'); openOv('nachfolge'); return; }
   openOv('confirm',{title:'Reise verlassen?', text:'Du siehst die Reise danach nicht mehr. Deine Nachrichten und Bilder bleiben für die anderen erhalten.', ok:'Verlassen', fn: async ()=>{ await W(()=>mDoc(S.rid,S.uid).update({status:'ausgetreten'}),'Verlassen'); await S.db.collection('nachrichten').add({rid:S.rid, typ:'system', text:`${nm(S.uid)} hat die Reise verlassen.`, by:S.uid, createdAt:now()}).catch(()=>{}); setTrip(null); A.home(); }}); };
-A.nachfolgeWahl = async el => { const u=el.dataset.uid; closeOv(); try{ await S.db.doc(`reisen/${S.rid}`).update({admin:u}); await mDoc(S.rid,S.uid).update({status:'ausgetreten'}); await S.db.collection('nachrichten').add({rid:S.rid, typ:'system', text:`${nm(S.uid)} hat die Reise verlassen. ${nm(u)} ist jetzt Admin.`, by:S.uid, createdAt:now()}); setTrip(null); A.home(); toast('Reise verlassen'); }catch(e){ fail(e,'Verlassen'); } };
+A.nachfolgeWahl = async el => { const u=el.dataset.uid; closeOv(); try{ await S.db.doc(`reisen/${S.rid}`).update({admin:u}); await mDoc(S.rid,S.uid).update({status:'ausgetreten'}); await S.db.collection('nachrichten').add({rid:S.rid, typ:'system', text:`${nm(S.uid)} hat die Reise verlassen. ${nm(u)} hat jetzt die Reiseleitung.`, by:S.uid, createdAt:now()}); setTrip(null); A.home(); toast('Reise verlassen'); }catch(e){ fail(e,'Verlassen'); } };
 
 /* ---------- Urlaubsherzen (privat) ---------- */
 function herzDocRef(){ return S.db.doc(`data/users/${S.uid}/herzen_${S.rid}`); }
@@ -2039,7 +2039,7 @@ V.einstellungen = ()=>{ const bl=Object.keys(S.settings.blockiert||{}); if(bl.so
 
 /* ---------- Reise verwalten (Admin) ---------- */
 A.reiseEinstInit = ()=>{};
-V.reiseEinst = ()=>{ const r=cur(); if(!r) return splash('…'); if(!canMod(r)) return `${hdrPlain()}${backBtn()}<div class="warn">Nur der Admin kann die Reise verwalten.</div>`;
+V.reiseEinst = ()=>{ const r=cur(); if(!r) return splash('…'); if(!canMod(r)) return `${hdrPlain()}${backBtn()}<div class="warn">Nur die Reiseleitung kann die Reise verwalten.</div>`;
   const f=S.form; if(!f._init){ Object.assign(f,{_init:1, anreise:r.anreiseArt||'', grenze:String(grenzeH(r)), morgen:!r.morgenAus, titel:r.titel, art:r.reiseart, ort:r.ort||'', von:r.von||'', bis:r.bis||'', deadline:r.deadline||''}); (r.stationen||[]).forEach((s,i)=>{ f['sd'+i]=s.datum; f['so'+i]=s.ort; f['sb'+i]=s.bord||''; }); f.sc=Math.max(1,(r.stationen||[]).length); f.gruppenName=r.gruppenName||''; }
   const a=ARTEN[f.art]||ARTEN.sonst; const sc=+f.sc||1;
   return `${hdrPlain('Reise verwalten')}${backBtn()}<h1>Reise verwalten</h1>
@@ -2160,20 +2160,20 @@ function einlStatus(e){ if(e.widerrufen) return {k:'aus', t:'zurückgezogen'}; i
 
 /* Kurzfassung in Karten (Meine Reisen, Mitglieder, Konferenz, Reise verwalten) */
 function codeRow(r){
-  if(r.admin!==S.uid) return `<p class="small mut">${ic('ticket',16,'style="vertical-align:-3px"')} Neue Leute einladen kann nur ${esc(nm(r.admin))} als Admin der ${r.status==='abstimmung'?'Koffer-Konferenz':'Reise'}.</p>`;
-  return `<button class="btn sm" style="align-self:flex-start" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',16)} Leute einladen</button>`; }
+  if(r.admin!==S.uid) return `<p class="small mut">${ic('ticket',16,'style="vertical-align:-3px"')} Neue Mitglieder einladen kann nur ${esc(nm(r.admin))} als Reiseleitung der ${r.status==='abstimmung'?'Koffer-Konferenz':'Reise'}.</p>`;
+  return `<button class="btn sm" style="align-self:flex-start" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',16)} Herde einladen</button>`; }
 /* Nach dem Anlegen: Schritt „Leute einladen“, dann erst in die Reise */
 function einlNachAnlegen(rid){ setTrip(rid); S.ui.einl=null; S.ui.einlListe=null; S.ui.einlStart=rid; go('einladen',{form:{einlAnz:8}}); }
 A.einlFertig = el => { const rid=S.ui.einlStart||S.rid; const spaeter=el.dataset.spaeter==='1'; S.ui.einlStart=null; S.ui.einl=null; toast(spaeter?'Du kannst jederzeit später einladen.':'Einladungen verschickt'); openTrip(rid); };
 A.einladenOeffnen = el => { const rid=el.dataset.rid; if(rid && rid!==S.rid) setTrip(rid); S.ui.einl=null; S.ui.einlListe=null; S.ui.einlStart=null; go('einladen'); };
 
 /* Seite „Leute einladen“ */
-V.einladen = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(r.admin!==S.uid && !istGlobal()) return `${hdrPlain('Einladen')}${backBtn()}<div class="warn">Nur der Admin kann Leute einladen.</div>`;
+V.einladen = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(r.admin!==S.uid && !istGlobal()) return `${hdrPlain('Einladen')}${backBtn()}<div class="warn">Nur die Reiseleitung kann Mitglieder einladen.</div>`;
   if(S.ui.einlListe===null || S.ui.einlListe===undefined || S.ui.einlRid!==r.id) ladeEinladungen(r.id);
   const e=S.ui.einl; const anz=+S.form.einlAnz||1;
   const liste=(S.ui.einlListe||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   const st0=S.ui.einlStart===r.id;
-  return `${hdrPlain('Einladen')}${st0?'':backBtn()}${st0?'<span class="tag"><span class="dot"></span>NÄCHSTER SCHRITT</span>':''}<h1>Leute zur Reise einladen</h1><p class="small mut">Für „${esc(r.titel)}“. Jede Einladung bekommt einen eigenen Code. Er gilt ${EINL_TAGE} Tage und nur für so viele Personen, wie du auswählst. Weitergeleitete Codes funktionieren danach nicht mehr.</p>
+  return `${hdrPlain('Einladen')}${st0?'':backBtn()}${st0?'<span class="tag"><span class="dot"></span>NÄCHSTER SCHRITT</span>':''}<h1>Deine Herde zur Reise einladen</h1><p class="small mut">Für „${esc(r.titel)}“. Jede Einladung bekommt einen eigenen Code. Er gilt ${EINL_TAGE} Tage und nur für so viele Personen, wie du auswählst. Weitergeleitete Codes funktionieren danach nicht mehr.</p>
   ${e?`<div class="card hot"><div class="row between"><span class="tag"><span class="dot"></span>NEUE EINLADUNG</span><span class="small" style="color:var(--redtx)">für ${e.max} ${e.max===1?'Person':'Personen'}</span></div>
       <div class="code">${e.code.split('').map(c=>`<span>${esc(c)}</span>`).join('')}</div>
       <div class="row"><button class="btn sm sec grow" data-act="einlKopieren">${ic('copy',16)} Kopieren</button><a class="btn sm wa grow" href="https://wa.me/?text=${encodeURIComponent(inviteText(r,e.code))}" target="_blank" rel="noopener" data-act-link="einlVerschickt">Per WhatsApp</a></div>
@@ -2181,7 +2181,7 @@ V.einladen = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …')
       <span class="tiny" style="color:var(--redtx)">Gültig bis ${fStamp(e.bis)}.${e.verschickt?' Verschickt.':''}</span>
       ${e.verschickt?`<button class="btn block yel" data-act="einlNeu">Nächste Einladung erstellen</button>`:''}</div>`
    :`<div class="card"><label class="f">Für wie viele Personen?<select class="in" id="f_einlAnz">${[1,2,3,4,5,6,8,10].map(n=>`<option value="${n}" ${n===anz?'selected':''}>${n} ${n===1?'Person':'Personen'}${n===1?' (empfohlen)':''}</option>`).join('')}</select></label>
-      <span class="tiny mut">Für eine WhatsApp-Gruppe wählst du die Zahl der Leute darin. Sobald so viele beigetreten sind, ist der Code verbraucht.</span>
+      <span class="tiny mut">Für eine WhatsApp-Gruppe wählst du die Zahl der Personen darin. Sobald so viele beigetreten sind, ist der Code verbraucht.</span>
       <button class="btn block" data-act="einlErstellen">${ic('plus',18)} Einladung erstellen</button></div>`}
   ${st0?`<div class="col" style="gap:8px"><button class="btn block yel" data-act="einlFertig">Einladungen verschickt</button><button class="btn block sec" data-act="einlFertig" data-spaeter="1">Einladungen später verschicken</button></div>`:''}
   <h2>Einladungen</h2>
@@ -2315,7 +2315,7 @@ OV.kat = ()=>{ const k=S.ui.katEdit||{}; const nutz={}; S.rt.mitglied.forEach(m=
 A.katSave = async ()=>{ const upd={}; document.querySelectorAll('input[data-kat]').forEach(i=>{ const id=i.dataset.kat, n=i.value.trim().replace(/\s+/g,' '); if(n && n!==drinkName(id)) upd[id]={name:n, by:S.uid, at:now()}; });
   closeOv(); if(!Object.keys(upd).length) return; await W(()=>S.db.doc(`reisen/${S.rid}`).update({getraenkeKat:upd}),'Speichern'); toast('Namen korrigiert'); };
 OV.herzBild = o => `<button class="icbtn" style="align-self:flex-end" data-act="closeOv" aria-label="Schließen">${ic('x',20)}</button><img src="${esc(blob(o.p.foto))}" alt="Foto von ${esc(o.p.name)}"><div class="small" style="text-align:center">${esc(o.p.name)}${o.p.woher?' · '+esc(o.p.woher):''}</div>`;
-OV.nachfolge = ()=>`<div class="sheet" role="dialog" aria-modal="true"><h2>Wer übernimmt?</h2><p class="small mut">Als Admin bestimmst du vor dem Verlassen eine Nachfolge.</p><div class="list">${zugesagt().filter(m=>m.uid!==S.uid).map(m=>`<button class="li" style="color:var(--tx)" data-act="nachfolgeWahl" data-uid="${m.uid}">${av(m.uid,34)}<span class="grow">${esc(nm(m.uid))}</span>${ic('right',18)}</button>`).join('')}</div><button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`;
+OV.nachfolge = ()=>`<div class="sheet" role="dialog" aria-modal="true"><h2>Wer übernimmt?</h2><p class="small mut">Als Reiseleitung bestimmst du vor dem Verlassen eine Nachfolge.</p><div class="list">${zugesagt().filter(m=>m.uid!==S.uid).map(m=>`<button class="li" style="color:var(--tx)" data-act="nachfolgeWahl" data-uid="${m.uid}">${av(m.uid,34)}<span class="grow">${esc(nm(m.uid))}</span>${ic('right',18)}</button>`).join('')}</div><button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`;
 
 /* ===================== Bademeister-Zentrale (Admin) ===================== */
 /* Oberbademeister = Superadmin (E-Mail aus der Einrichtung). Alle anderen bekommen einzelne Rechte und einen Dienstrang. */
@@ -2326,7 +2326,7 @@ const RECHTE = [
   ['ausschliessen','Aus Reisen ausschließen','Personen aus einer Reise entfernen'],
   ['sperren','Konten sperren','7 Tage oder dauerhaft sperren und entsperren'],
   ['nutzer','Nutzer anschreiben','Liste aller Nutzer sehen und als Poolposition Bademeister schreiben'],
-  ['reisen','Reisen verwalten','Reisen schließen oder öffnen, Reise-Admin ändern'],
+  ['reisen','Reisen verwalten','Reisen schließen oder öffnen, Reiseleitung ändern'],
   ['feedback','Beta-Feedback lesen','Feedback der Tester sehen und erledigen'],
   ['loeschen','Fälle endgültig löschen','Archivierte Meldungen dauerhaft entfernen'],
   ['support','Als Mitglied ansehen','Support-Ansicht: die App mit den Augen eines Mitglieds sehen (nur lesen, wird protokolliert)'],
@@ -2350,7 +2350,7 @@ V.sysadmin = ()=>{ if(!istMod()) return `${hdrPlain()}${backBtn()}<div class="wa
   let body = '<p class="mut">Wird geladen …</p>';
   if(D){ if(tab==='info') body = infoTab(); if(tab==='fb') body = fbListe(D);
     if(tab==='meld') body = meldTab(D);
-    if(tab==='reisen') body = D.reisen.length?`<div class="list">${D.reisen.map(r=>`<div class="li"><span style="color:var(--yelt)">${ic(art(r).icon,22)}</span><span class="grow col" style="gap:2px"><b>${esc(r.titel)}</b><span class="tiny mut">Admin: ${esc(nm(r.admin))} · ${esc(reiseStatus(r).text)}${r.geschlossen?' · geschlossen':''}</span></span><div class="col" style="gap:4px"><button class="btn xs sec" data-act="sysClose" data-rid="${r.id}">${r.geschlossen?'Öffnen':'Schließen'}</button><button class="btn xs ghost" data-act="sysAdminPick" data-rid="${r.id}">Admin ändern</button></div></div>`).join('')}</div>`:'<div class="empty">Keine Reisen.</div>';
+    if(tab==='reisen') body = D.reisen.length?`<div class="list">${D.reisen.map(r=>`<div class="li"><span style="color:var(--yelt)">${ic(art(r).icon,22)}</span><span class="grow col" style="gap:2px"><b>${esc(r.titel)}</b><span class="tiny mut">Reiseleitung: ${esc(nm(r.admin))} · ${esc(reiseStatus(r).text)}${r.geschlossen?' · geschlossen':''}</span></span><div class="col" style="gap:4px"><button class="btn xs sec" data-act="sysClose" data-rid="${r.id}">${r.geschlossen?'Öffnen':'Schließen'}</button><button class="btn xs ghost" data-act="sysAdminPick" data-rid="${r.id}">Reiseleitung ändern</button></div></div>`).join('')}</div>`:'<div class="empty">Keine Reisen.</div>';
     if(tab==='nutzer') body = nutzerTab(D);
     if(tab==='rank') body = rankingTab(D);
     if(tab==='admins') body = adminsTab(D); }
@@ -2405,8 +2405,8 @@ async function meldLog(mk, text){ if(!mk || !S.ui.sys) return; const [by,id]=mk.
   try{ await S.db.doc(`meldungen/${by}/eintraege/${id}`).update({aktionen:a}); m.aktionen=a; render(); }catch(e){ console.warn('Meldung', e); } }
 A.sysClose = async el => { const r=S.ui.sys.reisen.find(x=>x.id===el.dataset.rid); await W(()=>S.db.doc(`reisen/${r.id}`).update({geschlossen:!r.geschlossen}),'Speichern'); r.geschlossen=!r.geschlossen; toast(r.geschlossen?'Reise geschlossen':'Reise wieder geöffnet'); render(); };
 A.sysAdminPick = async el => { const rid=el.dataset.rid; try{ const s=await S.db.collection('mitglied').where('rid','==',rid).get(); const ms=snapDocs(s).filter(m=>['zugesagt','teilnehmer'].includes(m.status)); S.ui.extraIds=[...new Set([...(S.ui.extraIds||[]),...ms.map(m=>m.uid)])]; await refreshProfiles(); openOv('sysAdmin',{rid, ms}); }catch(e){ fail(e,'Laden'); } };
-OV.sysAdmin = o => `<div class="sheet" role="dialog" aria-modal="true"><h2>Neuen Admin bestimmen</h2><div class="list">${o.ms.map(m=>`<button class="li" style="color:var(--tx)" data-act="sysAdminSet" data-uid="${m.uid}">${av(m.uid,34)}<span class="grow">${esc(nm(m.uid))}</span></button>`).join('')||'<div class="empty small">Keine Mitglieder.</div>'}</div><button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`;
-A.sysAdminSet = async el => { const rid=S.ov.rid; closeOv(); await W(()=>S.db.doc(`reisen/${rid}`).update({admin:el.dataset.uid}),'Speichern'); const r=S.ui.sys.reisen.find(x=>x.id===rid); if(r) r.admin=el.dataset.uid; toast('Admin geändert'); render(); };
+OV.sysAdmin = o => `<div class="sheet" role="dialog" aria-modal="true"><h2>Neue Reiseleitung bestimmen</h2><div class="list">${o.ms.map(m=>`<button class="li" style="color:var(--tx)" data-act="sysAdminSet" data-uid="${m.uid}">${av(m.uid,34)}<span class="grow">${esc(nm(m.uid))}</span></button>`).join('')||'<div class="empty small">Keine Mitglieder.</div>'}</div><button class="btn ghost block" data-act="closeOv">Abbrechen</button></div>`;
+A.sysAdminSet = async el => { const rid=S.ov.rid; closeOv(); await W(()=>S.db.doc(`reisen/${rid}`).update({admin:el.dataset.uid}),'Speichern'); const r=S.ui.sys.reisen.find(x=>x.id===rid); if(r) r.admin=el.dataset.uid; toast('Reiseleitung geändert'); render(); };
 
 
 /* ===================== Profilbild ===================== */
@@ -3093,7 +3093,7 @@ function berichtText(d){ const {r, mitglied, akt, profil, gestern, heute, wetter
   const tagSumme = (m, t) => Object.values(m.getraenke||{}).reduce((s,g)=>s+(+g?.tage?.[t]||0),0);
   const ms=mitglied.filter(m=>['zugesagt','entfernt','ausgetreten'].includes(m.status));
   const aktiv=mitglied.filter(m=>m.status==='zugesagt');
-  const z=[`☀️ Guten Morgen liebe ${String(r.gruppenName||'').trim()||'Reisegruppe'}!`];
+  const z=[`☀️ Guten Morgen, liebe ${String(r.gruppenName||'').trim()||'Herde'}!`];
   const summe=ms.reduce((s,m)=>s+tagSumme(m,gestern),0);
   if(summe>0){
     const proG={}; ms.forEach(m=>Object.entries(m.getraenke||{}).forEach(([k,g])=>{ const n=+g?.tage?.[gestern]||0; if(n){ const nn=trinkName(k); proG[nn]=(proG[nn]||0)+n; } }));
@@ -3183,7 +3183,7 @@ function gastKarte(a){ const liste=S.gast.liste[a.id]; if(liste===undefined && a
   const f=aktFenster(a); const vorbei=f && now()>gastEnde(a)+NACH_FOTOS_H*3600e3;
   const code=a.gastCode; const link=code?aktLink(code):'';
   return `<div class="card" id="gastkarte"><div class="row between"><h3>Externe Gäste</h3><button class="icbtn sm0" data-act="gastZu" aria-label="Gäste-Fenster schließen">${ic('x',18)}</button></div>
-  <p class="small mut">Leute, die nicht zur Reisegruppe gehören, zum Beispiel neue Bekannte vom Strand. Gäste sehen nur diese Aktivität: Infos, Teilnehmer und den Chat mit Bildern aus dem Lesezeitraum. Standard ist ab der Einladung bis zum Ende des Termins. Der Rest der Reise bleibt verborgen.</p>
+  <p class="small mut">Leute, die nicht zu eurer Herde gehören, zum Beispiel neue Bekannte vom Strand. Gäste sehen nur diese Aktivität: Infos, Teilnehmer und den Chat mit Bildern aus dem Lesezeitraum. Standard ist ab der Einladung bis zum Ende des Termins. Der Rest der Reise bleibt verborgen.</p>
   ${!kannGaeste(a)?'':!a.bis?`<div class="info small">Leg zuerst fest, bis wann die Aktivität geht. Nur in diesem Zeitraum haben Gäste Zugriff.</div><div class="row"><input class="in grow" type="text" inputmode="decimal" maxlength="5" placeholder="z. B. 14:00" data-zeit="1" id="f_aktBis" aria-label="Ende"><button class="btn sm" data-act="aktEndeSetzen" data-id="${a.id}">Ende speichern</button></div>`
    :vorbei?'<p class="small mut">Die Aktivität ist vorbei. Neue Gäste können nicht mehr beitreten.</p>'
    :code?`<div class="qrwrap"><div id="qrbox" data-code="${esc(link)}"></div></div>
@@ -3450,7 +3450,7 @@ V.kasseNeu = ()=>{ const aid=S.route.aktId||''; const gm=kasseGastModus(aid); if
   <label class="f">Bezahlt von<select class="in" id="f_kzahler">${leute.map(u=>`<option value="${u}" ${u===f.kzahler?'selected':''}>${esc(u===S.uid?`${nm(u)} (ich)`:nm(u)+(aid&&gastIn(aid,u)?' (Gast)':''))}</option>`).join('')}</select></label>
   <div class="col" style="gap:6px"><div class="row between"><span class="f" style="font-size:13px;font-weight:600;color:var(--mut)">Für wen?</span><span class="row" style="gap:10px"><button class="link tiny" data-act="kasseFuerAlle" data-val="1">Alle</button><button class="link tiny" data-act="kasseFuerAlle" data-val="0">Keiner</button></span></div>
     <div class="row wrap" style="gap:6px">${leute.map(u=>`<button class="chip ${fuer[u]?'yel':''}" style="border:0;cursor:pointer;height:34px" data-act="kasseFuer" data-uid="${u}" aria-pressed="${!!fuer[u]}">${fuer[u]?ic('check',14):''} ${esc(aid?(u===S.uid?'ich':nm(u)+(gastIn(aid,u)?' (Gast)':'')):kasseName(u))}</button>`).join('')}</div>
-    ${leute.length<2&&!aid?'<span class="tiny" style="color:var(--yelt)">Hier erscheinen alle, die der Reise beigetreten sind. Lade weitere Leute ein, um Ausgaben mit ihnen zu teilen.</span>':''}
+    ${leute.length<2&&!aid?'<span class="tiny" style="color:var(--yelt)">Hier erscheinen alle, die der Reise beigetreten sind. Lade weitere Mitglieder ein, um Ausgaben mit ihnen zu teilen.</span>':''}
     ${n&&c?`<div class="kanteile"><span class="tiny mut">So wird aufgeteilt (${n} ${n===1?'Person':'Personen'}):</span>${Object.entries(anteile({betrag:c, fuer:Object.keys(fuer).filter(u=>fuer[u])})).map(([u,v])=>`<span class="row between small"><span>${esc(u===S.uid?'ich':nm(u))}</span><b class="num">${eur(v)}</b></span>`).join('')}</div>`:'<span class="tiny mut">Der Betrag wird gleichmäßig aufgeteilt.</span>'}</div>
   <label class="f">Datum<input class="in" type="date" id="f_kdatum"></label>
   ${kasseBelegFeld()}
@@ -3850,7 +3850,7 @@ function standBild(art, p){ const q=Math.max(0,Math.min(1,p)); const voll=q>=1;
     <path d="M0 62 q7 -4 14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 V80 H0 Z" fill="#2c7fb8"/><path d="M0 70 q7 -3 14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 V80 H0 Z" fill="#1f6697"/></svg>`; }
 const WARTE_ART = { strand:n=>`Die Sonne wartet nur noch auf ${n}. ☀️`, ski:n=>`Nur noch ${n} fehlt, dann ist der Gipfel schneeweiß. 🏔️`, kreuzfahrt:n=>`Das Schiff legt erst ab, wenn ${n} an Bord ist. 🚢`, land:n=>`Der Ballon hebt ab, sobald ${n} abgestimmt hat. 🎈`, sonst:n=>`Der Koffer ist fast voll, nur ${n} fehlt noch. 🧳` };
 function standKarte(r, mem, fertig){ const n=mem.length, d=mem.filter(m=>fertig.has(m.uid)).length; const offen=mem.filter(m=>!fertig.has(m.uid)); const p=n?d/n:0; const art=r.reiseart||'strand';
-  const txt = !n ? 'Noch niemand dabei. Lade Leute ein!' : !offen.length ? 'Alle haben abgestimmt! 🎉' : offen.length===1 ? (offen[0].uid===S.uid ? 'Nur noch deine Stimme fehlt. Alle warten auf dich! 👀' : WARTE_TEXT(r, art, nm(offen[0].uid).split(' ')[0])) : `Noch ${offen.length} Stimmen offen.`;
+  const txt = !n ? 'Noch niemand dabei. Lade deine Herde ein!' : !offen.length ? 'Alle haben abgestimmt! 🎉' : offen.length===1 ? (offen[0].uid===S.uid ? 'Nur noch deine Stimme fehlt. Alle warten auf dich! 👀' : WARTE_TEXT(r, art, nm(offen[0].uid).split(' ')[0])) : `Noch ${offen.length} Stimmen offen.`;
   const adm=isAdmin(r); const erinnern=offen.filter(m=>m.uid!==S.uid);
   return `<div class="card stand" role="group" aria-label="Abstimmungsstand"><div class="row" style="gap:14px;align-items:center">${standBild(art,p)}
     <div class="grow col" style="gap:4px;min-width:0"><div class="standzahl"><b class="num">${d}</b><span>/${n}</span></div><span class="small">haben abgestimmt</span></div></div>
@@ -4084,7 +4084,7 @@ OV.kasseDetail = o => { const e=alleKasse().find(x=>x.id===o.id); if(!e) return 
       <div><span class="tiny mut">Bezahlt von</span><b>${esc(nameK(e.zahler))}</b><span class="small mut">${fD(e.datum)}${e.aktId?` · Event: ${esc(aktTitel(e.aktId))}`:''}</span></div>
       <div><span class="tiny mut">Aufgeteilt auf ${(e.fuer||[]).length} ${(e.fuer||[]).length===1?'Person':'Personen'}</span>${Object.entries(a).map(([u,v])=>`<div class="kdzeile"><span>${esc(nameK(u))}</span><b class="num">${eur(v)}</b></div>`).join('')}</div></div>
     ${e.beleg?`<div class="col" style="gap:6px"><span class="tiny mut">Beleg</span>${belegVorschau(e.beleg, true)}</div>`:''}
-    <span class="tiny mut">Ändern kann nur, wer die Ausgabe eingetragen hat, oder der Gruppenadmin.</span></div>`; };
+    <span class="tiny mut">Ändern kann nur, wer die Ausgabe eingetragen hat, oder die Reiseleitung.</span></div>`; };
 
 /* ---------- Export: Tabelle (CSV für Excel/Numbers) und Text zum Teilen ---------- */
 A.kasseExport = ()=>openOv('kasseExport');
@@ -4583,10 +4583,10 @@ function sichtBeobachten(){ if(!('IntersectionObserver' in window)){ document.qu
    Jede Änderung erscheint sofort als Info im Gruppenchat. */
 const gruppenName = (r=cur()) => String(r?.gruppenName||'').trim();
 function gruppenNameFeld(r){ const admin=isAdmin(r);
-  return `<label class="f">Name der Reisegruppe (freiwillig)<input class="in" id="f_gruppenName" maxlength="30" placeholder="z. B. Putenschnitzel" ${admin?'':'disabled'}></label>
-  <span class="tiny mut" style="margin-top:-6px">${admin?'Wird nur im Morgenbericht genutzt: „Guten Morgen liebe …“. Ohne Namen heißt es „liebe Reisegruppe“. Alle sehen die Änderung als Info im Gruppenchat.':'Den Gruppennamen kann nur der Gruppenadmin ändern.'}</span>`; }
+  return `<label class="f">Name eurer Herde (freiwillig)<input class="in" id="f_gruppenName" maxlength="30" placeholder="z. B. Putenschnitzel" ${admin?'':'disabled'}></label>
+  <span class="tiny mut" style="margin-top:-6px">${admin?'Wird nur im Morgenbericht genutzt: „Guten Morgen, liebe …“. Ohne Namen heißt es „liebe Herde“. Alle sehen die Änderung als Info im Gruppenchat.':'Den Gruppennamen kann nur die Reiseleitung ändern.'}</span>`; }
 async function gruppenNameInfo(r, neu){ const wer=nm(S.uid).split(' ')[0];
-  const text = neu ? `${wer} (Gruppenadmin) hat den Gruppennamen in „${neu}“ geändert.` : `${wer} (Gruppenadmin) hat den Gruppennamen entfernt. Ihr seid jetzt wieder die Reisegruppe.`;
+  const text = neu ? `${wer} (Reiseleitung) hat den Gruppennamen in „${neu}“ geändert.` : `${wer} (Reiseleitung) hat den Gruppennamen entfernt. Ihr seid jetzt wieder die Herde.`;
   await S.db.collection('nachrichten').add({rid:r.id, typ:'system', gname:true, text, by:S.uid, createdAt:now()}).catch(e=>console.warn('Gruppenname-Info', e)); }
 /* ===================== Badeaufsicht: Mitglieder-Infos und Support-Ansicht =====================
    - Jeder Besuch der App wird knapp festgehalten (konten/{uid}: erster und letzter Besuch, App-Version).
@@ -4682,7 +4682,7 @@ OV.nutzerInfo = o => { const u=o.uid, I=S.ui.ninfo?.uid===u?S.ui.ninfo:{}; const
       ${gesp?zeile('Sperre', `<span style="color:var(--pinktx)">${sp.typ==='konto'?'dauerhaft gesperrt':'gesperrt bis '+fStamp(sp.bis)}</span>`):''}
       ${!FB?'<span class="tiny mut">„Beigetreten“ und „Zuletzt aktiv“ werden ab dieser Version erfasst.</span>':''}</div>
     <div class="card tight"><b class="small">Reisen und Gruppen (${(I.reisen||[]).length})</b>
-      ${(I.reisen||[]).map(({m,r})=>`<div class="row" style="gap:8px;align-items:flex-start"><span style="color:var(--yelt);display:flex">${ic(art(r).icon,18)}</span><span class="grow col" style="gap:1px;min-width:0"><span class="small ell"><b>${esc(r.titel||'Reise')}</b>${r.admin===u?' <span class="chip yel" style="height:20px;font-size:11px">Admin</span>':''}</span><span class="tiny mut">${esc(MSTAT[m.status]||m.status||'')} · ${r.status==='fest'&&r.von?fRange(r.von,r.bis):r.status==='abstimmung'?'Koffer-Konferenz':esc(r.status||'')}${r.geschlossen?' · geschlossen':''}</span>${r.status==='fest'&&m.status==='zugesagt'?`<span class="tiny">Eigene Reisedaten: <b>${fRange(m.anreise||r.von, m.abreise||r.bis)}</b></span>`:''}</span>${r.status==='fest'&&m.status==='zugesagt'&&darf('reisedaten')&&!S.supportVon?`<button class="btn xs sec" data-act="rdAdminAuf" data-mid="${esc(m.id)}">${ic('pencil',13)} Reisedaten</button>`:''}</div>`).join('')||(I.laedt?'':'<span class="small mut">Keine Reisen.</span>')}</div>
+      ${(I.reisen||[]).map(({m,r})=>`<div class="row" style="gap:8px;align-items:flex-start"><span style="color:var(--yelt);display:flex">${ic(art(r).icon,18)}</span><span class="grow col" style="gap:1px;min-width:0"><span class="small ell"><b>${esc(r.titel||'Reise')}</b>${r.admin===u?' <span class="chip yel" style="height:20px;font-size:11px">Reiseleitung</span>':''}</span><span class="tiny mut">${esc(MSTAT[m.status]||m.status||'')} · ${r.status==='fest'&&r.von?fRange(r.von,r.bis):r.status==='abstimmung'?'Koffer-Konferenz':esc(r.status||'')}${r.geschlossen?' · geschlossen':''}</span>${r.status==='fest'&&m.status==='zugesagt'?`<span class="tiny">Eigene Reisedaten: <b>${fRange(m.anreise||r.von, m.abreise||r.bis)}</b></span>`:''}</span>${r.status==='fest'&&m.status==='zugesagt'&&darf('reisedaten')&&!S.supportVon?`<button class="btn xs sec" data-act="rdAdminAuf" data-mid="${esc(m.id)}">${ic('pencil',13)} Reisedaten</button>`:''}</div>`).join('')||(I.laedt?'':'<span class="small mut">Keine Reisen.</span>')}</div>
     ${darf('support')&&(I.log||[]).length?`<div class="card tight"><b class="small">Support-Ansicht (Protokoll)</b>${I.log.map(x=>`<span class="tiny">${x.art==='ende'?'beendet':'gestartet'} von <b>${esc(nm(x.von))}</b> · ${fStamp(x.at)}${x.grund?` · „${esc(x.grund)}“`:''}</span>`).join('')}</div>`:''}
     <div class="col" style="gap:8px">${istSuper()&&u!==S.uid?`<button class="btn block" data-act="ticketAuf" data-uid="${u}">${ic('star',18)} Ticket zuweisen</button>`:''}${darf('nutzer')?`<button class="btn sec block" data-act="sysMsg" data-uid="${u}">${ic('chat',18)} Schreiben</button>`:''}
       ${alsErlaubt(u)?`<button class="btn block alsbtn" data-act="alsAuf" data-uid="${u}">${ic('shield',18)} Als ${esc(nm(u).split(' ')[0])} ansehen (Support)</button>`:''}</div></div>`; };
@@ -4759,7 +4759,7 @@ function ticketWaechter(db){ if(!db) return db;
 let ticketHinweisT=0;
 function ticketHinweis(){ if(Date.now()-nutzerAktion>1500) return; if(Date.now()-ticketHinweisT>4000){ ticketHinweisT=Date.now(); toast('Dein Ticket ist abgelaufen. Du kannst alles ansehen, aber nichts ändern.'); } }
 function ticketBanner(){ try{ if(!nurAnsehen()) return ''; }catch(e){ return ''; }
-  return `<div class="supportbanner" role="status"><span class="grow small">${ic('lock',16)} <b>Nur ansehen</b><br><span style="opacity:.85">Deine ${esc(ticketName(S.ticket.art))} ist am ${fStamp(S.ticket.bis)} abgelaufen. Dein Account bleibt bestehen. Für ein neues Ticket melde dich beim Admin.</span></span></div>`; }
+  return `<div class="supportbanner" role="status"><span class="grow small">${ic('lock',16)} <b>Nur ansehen</b><br><span style="opacity:.85">Deine ${esc(ticketName(S.ticket.art))} ist am ${fStamp(S.ticket.bis)} abgelaufen. Dein Account bleibt bestehen. Für ein neues Ticket melde dich bei der Badeaufsicht.</span></span></div>`; }
 /* Ticket neben dem Profilbild (antippen = Kiosk) */
 function ticketKopf(){ try{ if(!S.ticketDa || !S.ticket) return ''; const t=S.ticket; const ab=!ticketFrei() && ticketAbgelaufen(t);
   return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), preis:true, gueltig:ticketFrei()?'Dauerhaft gültig':ab?`Abgelaufen ${tkEnde(t.bis).replace(' Uhr','')}`:`Gültig bis ${tkEnde(t.bis).replace(' Uhr','')}`})}</div>`; }catch(e){ return ''; } }
@@ -5052,6 +5052,9 @@ A.nzSchalter = ()=>{ saveSettings({nutzungAus:!S.settings?.nutzungAus}); render(
    NUR für den Oberbademeister (istSuper) im Admin-Dashboard. Änderungen am Adminsystem dürfen nie in „Was ist neu?“ (neues.js) oder
    in Nutzer-Texten auftauchen. Neue Einträge hier oben anfügen; je Version: kurz (t) und im Detail (d). */
 const ADMLOG = [
+  { v:'Beta 2.33', t:'Begriffe: Reiseleitung und Herde', d:[
+    'Wer eine Reise organisiert, heißt überall „Reiseleitung“ (bisher Admin, Gruppenadmin, Reise-Admin), auch in der Reisenliste und Mitgliederansicht der Badeaufsicht. „Admin“ steht nur noch für das Team von Poolposition.',
+    'Abgelaufenes Ticket: Der Hinweis verweist auf die Badeaufsicht statt auf den Admin.' ] },
   { v:'Beta 2.31', t:'Buchungsseite und Angebote', d:[
     'Buchungsseite des Admins: „Dein nächster Schritt“ (Angaben, Anfrage vorbereiten, Angebot hochladen, Buchen und Reise starten), eine Fortschrittsliste, Rest eingeklappt. Einladen, Ort/Zeit ändern und Löschen liegen unter „Verwalten“.',
     'Angebot trotzdem vormerken: Der Admin darf ein Angebot auch bei Ablehnung oder fehlenden Stimmen vormerken (Rückfrage, Info im Chat, Feld vormerkAdmin an der Reise). Fällt zurück, wenn das Angebot verworfen wird.',
@@ -5180,13 +5183,13 @@ function reisenTab(D){ if(!RX.d){ reiseDatenLaden(); } if(S.ui.sysReise){ const 
   const l=D.reisen.filter(filt[f]||filt.alle).filter(r=>!q || String(r.titel||'').toLowerCase().includes(q) || String(r.ort||'').toLowerCase().includes(q) || nm(r.admin).toLowerCase().includes(q))
     .sort((a,b)=>ord[reiseKat(a)]-ord[reiseKat(b)] || String(a.von||'').localeCompare(String(b.von||'')));
   const chip=(k,t)=>`<button class="fchip ${f===k?'an':''}" data-act="ui" data-k="rFilter" data-val="${k}" aria-pressed="${f===k}">${t} <span class="mut">${D.reisen.filter(filt[k]).length}</span></button>`;
-  return `<input class="in" id="f_rSuche" placeholder="Reise, Ort oder Admin suchen" data-live="1" autocomplete="off">
+  return `<input class="in" id="f_rSuche" placeholder="Reise, Ort oder Reiseleitung suchen" data-live="1" autocomplete="off">
     <div class="fchips">${chip('alle','Alle')}${chip('laeuft','Läuft')}${chip('geplant','Geplant')}${chip('konferenz','Konferenz')}${chip('vorbei','Vorbei')}${chip('meld','Mit Meldungen')}</div>
     ${!RX.d?'<p class="small mut">Kennzahlen werden geladen …</p>':''}
     <div class="col" style="gap:10px">${l.map(r=>reiseKarte(r,D)).join('')||'<div class="empty small">Keine Reisen in dieser Auswahl.</div>'}</div>`; }
 function reiseKarte(r, D){ const k=reiseKat(r); const [kt,kc]=RKAT[k]; const z=reiseZahlen(r,D);
   return `<button class="card reisekarte ${z.meldOffen?'mitmeld':''}" data-act="reiseAuf" data-rid="${r.id}">
-    <span class="row" style="gap:10px;width:100%;align-items:flex-start"><span class="admic">${ic(art(r).icon,20)}</span><span class="grow col" style="gap:2px;min-width:0"><b>${esc(r.titel||'Reise')}</b><span class="tiny mut">${r.status==='fest'&&r.von?fRange(r.von,r.bis):'Termin wird abgestimmt'}${r.ort?` · ${esc(r.ort)}`:''} · Admin ${esc(nm(r.admin))}</span></span>${ic('right',16,'style="color:var(--mut);flex-shrink:0;margin-top:4px"')}</span>
+    <span class="row" style="gap:10px;width:100%;align-items:flex-start"><span class="admic">${ic(art(r).icon,20)}</span><span class="grow col" style="gap:2px;min-width:0"><b>${esc(r.titel||'Reise')}</b><span class="tiny mut">${r.status==='fest'&&r.von?fRange(r.von,r.bis):'Termin wird abgestimmt'}${r.ort?` · ${esc(r.ort)}`:''} · Reiseleitung ${esc(nm(r.admin))}</span></span>${ic('right',16,'style="color:var(--mut);flex-shrink:0;margin-top:4px"')}</span>
     <span class="pillen"><span class="pille status ${kc}">${kt}</span>${RX.d?`${pille('mitgl', `${z.dabei+z.teilnehmer} ${r.status==='abstimmung'?'Teilnehmer':'dabei'}${z.eingeladen?` · ${z.eingeladen} eingeladen`:''}`)}${z.meldOffen?pille('flag', `${z.meldOffen} ${z.meldOffen===1?'Meldung':'Meldungen'} offen`, 'rot'):z.meld?pille('flag', `${z.meld} erledigt`):''}${pille('chat', `${z.n24} heute`, z.n24?'':'still')}${z.f24?pille('cam', `${z.f24} Fotos`):''}${z.raus?pille('lock', `${z.raus} raus`, 'orange'):''}${z.gaeste.length?pille('mitgl', `${z.gaeste.length} ${z.gaeste.length===1?'Gast':'Gäste'}`):''}${z.kasseN?pille('euro', `${z.kasseN} ${z.kasseN===1?'Zahlung':'Zahlungen'} offen`):''}`:''}</span>
     ${RX.d?`<span class="tiny mut">${z.letzte?`Zuletzt geschrieben ${vorWann(z.letzte)}`:'Seit über 7 Tagen keine Nachricht'}${z.termine.length?` · nächster Termin ${fD(z.termine[0].datum)} „${esc(z.termine[0].titel||'')}“`:''}${r.geschlossen?' · <b>geschlossen</b>':''}</span>`:''}</button>`; }
 A.reiseAuf = el => { S.ui.sysReise=el.dataset.rid; render(); window.scrollTo(0,0); };
@@ -5197,13 +5200,13 @@ function reiseDetail(r, D){ const k=reiseKat(r); const [kt,kc]=RKAT[k]; const z=
   const gruppen=['zugesagt','teilnehmer','eingeladen','abgesagt','entfernt','ausgetreten'].map(s=>[s, z.mit.filter(m=>m.status===s)]).filter(([s,l])=>l.length);
   return `<button class="admzurueck" style="margin-bottom:6px" data-act="reiseZu">${ic('back',18)} Alle Reisen</button>
     <div class="card"><div class="row" style="gap:10px"><span class="admic">${ic(art(r).icon,24)}</span><span class="grow col" style="gap:2px;min-width:0"><h2 style="margin:0">${esc(r.titel||'Reise')}</h2><span class="small mut">${r.status==='fest'&&r.von?fRange(r.von,r.bis):'Termin wird abgestimmt'}${r.ort?` · ${esc(r.ort)}`:''}</span></span><span class="chip ${kc}">${kt}</span></div>
-      <span class="small">Gruppenadmin: <b>${esc(nm(r.admin))}</b>${r.gruppenName?` · Gruppenname „${esc(r.gruppenName)}“`:''}${r.geschlossen?' · <b style="color:var(--pinktx)">geschlossen</b>':''}</span>
-      <div class="row wrap" style="gap:6px"><button class="btn xs sec" data-act="sysClose" data-rid="${r.id}">${r.geschlossen?'Reise öffnen':'Reise schließen'}</button><button class="btn xs sec" data-act="sysAdminPick" data-rid="${r.id}">Admin ändern</button></div></div>
+      <span class="small">Reiseleitung: <b>${esc(nm(r.admin))}</b>${r.gruppenName?` · Gruppenname „${esc(r.gruppenName)}“`:''}${r.geschlossen?' · <b style="color:var(--pinktx)">geschlossen</b>':''}</span>
+      <div class="row wrap" style="gap:6px"><button class="btn xs sec" data-act="sysClose" data-rid="${r.id}">${r.geschlossen?'Reise öffnen':'Reise schließen'}</button><button class="btn xs sec" data-act="sysAdminPick" data-rid="${r.id}">Reiseleitung ändern</button></div></div>
     ${RX.d?`<div class="rwerte">${wert('mitgl', z.dabei+z.teilnehmer, r.status==='abstimmung'?'Teilnehmer':'dabei')}${wert('flag', z.meldOffen, `offene Meldungen${z.meld>z.meldOffen?` (${z.meld} insg.)`:''}`, z.meldOffen?'rot':'')}${wert('chat', z.n24, 'Nachrichten heute')}${wert('cam', z.f24, 'Fotos heute')}${wert('mitgl', z.gaeste.length, 'Event-Gäste')}${wert('lock', z.raus, 'ausgeschlossen/ausgetreten', z.raus?'orange':'')}${wert('ticket', z.einladungen, 'offene Einladungen')}${wert('euro', z.kasseN, z.kasseN?`offene Zahlungen · ${eur(z.kasseSumme)}`:'offene Zahlungen')}</div>
     <span class="tiny mut">${z.letzte?`Zuletzt geschrieben ${vorWann(z.letzte)} (${fStamp(z.letzte)}).`:'Seit über 7 Tagen keine Nachricht im Gruppenchat.'}</span>`:'<p class="small mut">Kennzahlen werden geladen …</p>'}
     ${meld.length?`<div class="card tight"><b class="small">Meldungen aus dieser Reise</b>${meld.map(m=>`<button class="li" style="color:var(--tx);padding:6px 0" data-act="admGeh" data-val="meld"><span class="chip ${m.status==='offen'?(m.gelesenAm?'orange':'red'):m.status==='archiviert'?'':'grn'}" style="flex-shrink:0">${m.status==='offen'?(m.gelesenAm?'in Bearbeitung':'neu'):m.status}</span><span class="grow small ell">${esc(KATEGORIE[m.kategorie]||'Meldung')} · gegen ${esc(nm(m.gegen))}</span><span class="tiny mut">${fD(isoDay(new Date(m.createdAt)))}</span></button>`).join('')}</div>`:''}
     ${z.termine.length?`<div class="card tight"><b class="small">Kommende Termine (${z.termine.length})</b>${z.termine.slice(0,6).map(a=>`<span class="small">${ic('tag',13)} ${fD(a.datum)}${a.zeit?` ${esc(a.zeit)}`:''} · ${esc(a.titel||'')}</span>`).join('')}</div>`:''}
-    <div class="card tight"><b class="small">Mitglieder (${z.mit.length})</b>${gruppen.map(([s,l])=>`<span class="tiny mut" style="margin-top:6px;font-weight:700">${MSTATN[s]||s} (${l.length})</span>${l.map(m=>`<button class="li" style="color:var(--tx);padding:5px 0" data-act="nutzerAuf" data-uid="${m.uid}">${av(m.uid,30)}<span class="grow small ell">${esc(nm(m.uid))}${m.uid===r.admin?' <span class="chip yel" style="height:20px;font-size:11px">Admin</span>':''}</span>${s==='zugesagt'&&(m.anreise||m.abreise)&&(m.anreise!==r.von||m.abreise!==r.bis)?`<span class="tiny mut">${fRange(m.anreise||r.von, m.abreise||r.bis)}</span>`:''}${ic('right',14,'style="color:var(--mut)"')}</button>`).join('')}`).join('')||'<span class="small mut">Noch keine Mitglieder.</span>'}</div>
+    <div class="card tight"><b class="small">Mitglieder (${z.mit.length})</b>${gruppen.map(([s,l])=>`<span class="tiny mut" style="margin-top:6px;font-weight:700">${MSTATN[s]||s} (${l.length})</span>${l.map(m=>`<button class="li" style="color:var(--tx);padding:5px 0" data-act="nutzerAuf" data-uid="${m.uid}">${av(m.uid,30)}<span class="grow small ell">${esc(nm(m.uid))}${m.uid===r.admin?' <span class="chip yel" style="height:20px;font-size:11px">Reiseleitung</span>':''}</span>${s==='zugesagt'&&(m.anreise||m.abreise)&&(m.anreise!==r.von||m.abreise!==r.bis)?`<span class="tiny mut">${fRange(m.anreise||r.von, m.abreise||r.bis)}</span>`:''}${ic('right',14,'style="color:var(--mut)"')}</button>`).join('')}`).join('')||'<span class="small mut">Noch keine Mitglieder.</span>'}</div>
     ${z.gaeste.length?`<div class="card tight"><b class="small">Event-Gäste (${z.gaeste.length})</b>${z.gaeste.map(u=>`<button class="li" style="color:var(--tx);padding:5px 0" data-act="nutzerAuf" data-uid="${u}">${av(u,30)}<span class="grow small ell">${esc(nm(u))}</span>${ic('right',14,'style="color:var(--mut)"')}</button>`).join('')}</div>`:''}`; }
 
 /* ===================== Bademeister-Verwaltung ===================== */
@@ -5247,8 +5250,8 @@ const PUSHKAT = [
   ['fluester','Flüstern und Bademeister','Private Nachrichten und Nachrichten von Poolposition Bademeister'],
   ['termine','Termine','Neue Termine und eine Erinnerung 30 Minuten vor Beginn'],
   ['morgen','Morgenbericht','Die Zusammenfassung am Morgen'],
-  ['rund','Ansagen des Admins','Wichtige Nachrichten an die ganze Gruppe'],
-  ['aend','Änderungen von Mitgliedern','Nur für Admins: wenn jemand seine Angaben ändert'],
+  ['rund','Ansagen der Reiseleitung','Wichtige Nachrichten an die ganze Gruppe'],
+  ['aend','Änderungen von Mitgliedern','Nur für die Reiseleitung: wenn jemand seine Angaben ändert'],
   ['aufgaben','Erinnerungen','Der Tag vor der Abreise und fällige To-dos'],
   ['admin','Badeaufsicht','Neue Meldungen (nur für Bademeister)']];
 const PUSH = { geprueft:false, geht:false, prefs:null, an:false };
@@ -6896,7 +6899,7 @@ function infosView(r){ const I=r.infos||{}; const da=INFOFELDER.filter(([k])=>St
     if(k==='wlanName') return `<div class="izeile"><span class="tiny mut">${l}</span><span class="row between" style="gap:8px"><span>${esc(v)}</span><button class="btn xs sec" data-act="wlanQr">▦ WLAN-Code</button></span></div>`;
     if(k==='kontakt'){ const tel=(v.match(/\+?[\d\s/()-]{6,}/)||[''])[0].replace(/[^\d+]/g,''); return `<div class="izeile"><span class="tiny mut">${l}</span><span>${esc(v)}${tel?` <a href="tel:${tel}" class="link">${ic('phone',13)} anrufen</a>`:''}</span></div>`; }
     return `<div class="izeile"><span class="tiny mut">${l}</span><span style="white-space:pre-wrap">${esc(v)}</span></div>`; };
-  return `${da.length?`<div class="card tight infokarte">${da.map(([k,l])=>zeile(k,l)).join('')}</div>`:`<div class="empty small">Noch keine Infos eingetragen.${infosDarf(r)?'':' Der Gruppenadmin kann sie ergänzen.'}</div>`}
+  return `${da.length?`<div class="card tight infokarte">${da.map(([k,l])=>zeile(k,l)).join('')}</div>`:`<div class="empty small">Noch keine Infos eingetragen.${infosDarf(r)?'':' Die Reiseleitung kann sie ergänzen.'}</div>`}
     ${infosDarf(r)?`<button class="btn ${da.length?'sec':''} block" data-act="infosAuf">${ic('pencil',16)} ${da.length?'Infos bearbeiten':'Infos eintragen'}</button>`:''}
     ${isAdmin(r)?`<label class="toggle small"><input type="checkbox" data-change="infosOffen" ${r.infosOffen?'checked':''}> Alle Mitglieder dürfen die Infos bearbeiten</label>`:''}
     ${r.infosVon?`<span class="tiny mut">Zuletzt geändert von ${esc(nm(r.infosVon))} · ${fStamp(r.infosAm)}</span>`:''}`; }
@@ -6983,7 +6986,7 @@ A.notLand = el => { S.ui.notLand=el.value; render(); };
    Neue Mitglieder (profile/{uid}.neu): ohne Einladung → Willkommen mit Wahl „Schritt für Schritt“ oder „direkt starten“,
    mit Einladung → kurze Einführung. */
 
-const PF_GRUPPEN = [['freunde','Freunde','Ihr kennt euch und reist zusammen'],['paare','Paare und Paargruppen','Mehrere Paare oder ein Paar mit Freunden'],['familie','Familie','Nur Erwachsene aus der Familie'],['kinder','Familie mit Kindern','Kinder unter 18 sind dabei'],['team','Verein, Team oder Firma','Eine organisierte Gruppe'],['sonst','Etwas anderes','Zum Beispiel eine bunt gemischte Truppe']];
+const PF_GRUPPEN = [['freunde','Freunde','Ihr kennt euch und reist zusammen'],['paare','Paare und Paargruppen','Mehrere Paare oder ein Paar mit Freunden'],['familie','Familie','Nur Erwachsene aus der Familie'],['kinder','Familie mit Kindern','Kinder unter 18 sind dabei'],['team','Verein, Team oder Firma','Eine organisierte Gruppe'],['sonst','Etwas anderes','Zum Beispiel eine bunt gemischte Herde']];
 const PF_ALTER = [['u26','bis 25'],['a26','26 bis 40'],['a41','41 bis 60'],['a60','über 60'],['kind','Kinder unter 18']];
 const PF_ZIELE = [['erholung','Erholung und Ruhe'],['aktiv','Aktiv und Sport'],['kultur','Kultur und Entdecken'],['party','Party und Feiern'],['familie','Zeit als Familie'],['flirten','Kennenlernen und Flirten']];
 const PF_MODULE = [['herzen','Urlaubsherzen','Urlaubsbekanntschaften festhalten und das gelbe Trikot'],['barometer','Barometer','Getränke zählen, Auszeichnungen und Sektflasche'],['herde','Herde','Zeigen, wo ihr heute seid'],['zimmer','Bettenmanager','Zimmer und Betten vorab verteilen, mit Anfrage fürs Reisebüro']];
@@ -7012,7 +7015,7 @@ function pfGruppeWahl(f){ return `<div class="col" style="gap:8px">${PF_GRUPPEN.
 const pfChips = (liste, pre, f) => `<div class="row wrap" style="gap:8px">${liste.map(([k,l])=>`<button type="button" class="chip ${f[pre+k]?'yel':''}" style="border:0;cursor:pointer;height:40px;padding:0 14px" aria-pressed="${!!f[pre+k]}" data-act="formToggle" data-k="${pre}${k}">${f[pre+k]?ic('check',14):''} ${esc(l)}</button>`).join('')}</div>`;
 function pfGrund(k,p,an){ if(k==='herzen'){ if(pfKinder(p)) return 'Mit Kindern in der Gruppe gibt es keine Urlaubsherzen.'; return an?'Passt zu eurem Wunsch nach Kennenlernen und Feiern. Jedes Mitglied entscheidet selbst, ob es mitmacht.':'Eher nichts für diese Gruppe. Du kannst die Herzen trotzdem einschalten.'; }
   if(k==='barometer') return an?'Getränke zählen, Barometer und Auszeichnungen sorgen für Stimmung.':'Für eine ruhige Reise nicht nötig. Jederzeit wieder einschaltbar.';
-  if(k==='zimmer') return an?'Alle tragen ihre Zimmerwünsche ein, der Admin legt die Zimmer an.':'Nur nötig, wenn ihr vorab klären wollt, wer sich mit wem ein Zimmer teilt.';
+  if(k==='zimmer') return an?'Alle tragen ihre Zimmerwünsche ein, die Reiseleitung legt die Zimmer an.':'Nur nötig, wenn ihr vorab klären wollt, wer sich mit wem ein Zimmer teilt.';
   return 'Alle zeigen, wo sie gerade sind. Praktisch für jede Gruppe.'; }
 function pfModuleKarte(f){ const p=pfAusForm(f);
   return `<div class="card"><h3>Funktionen für eure Gruppe</h3><div class="col" style="gap:12px">${PF_MODULE.map(([k,l,s])=>{ const an=pfAn(f,k); const sperre=k==='herzen'&&pfKinder(p);
@@ -7029,7 +7032,7 @@ V.willkommen = ()=>{ const p=S.profile[S.uid]||{};
   return `<div class="hero" style="padding-top:20px">${I.logo(80)}<div class="wordmark" style="font-size:34px">Pool<b>position</b></div></div>
   <h1>Schön, dass du da bist, ${esc(p.vorname||'')}!</h1>
   <div class="card hot"><h2>Poolposition ist die App für Gruppenreisen.</h2>
-    <p>Ihr plant gemeinsam, erlebt den Urlaub zusammen und habt alles im Blick. Die App lebt von eurer Reisegruppe.</p>
+    <p>Ihr plant gemeinsam, erlebt den Urlaub zusammen und habt alles im Blick. Die App lebt von eurer Herde.</p>
     <div class="col small" style="gap:8px"><div class="row">${ic('check',16,'style="color:var(--yelt)"')}<span>Termine und Treffpunkte für alle</span></div><div class="row">${ic('check',16,'style="color:var(--yelt)"')}<span>Gruppenchat und gemeinsames Album</span></div><div class="row">${ic('check',16,'style="color:var(--yelt)"')}<span>Kasse, Packliste, Infos und Notfall an einem Ort</span></div></div></div>
   <h3>Wie möchtest du starten?</h3>
   <button class="card hot" style="text-align:left;color:var(--tx)" data-act="assistStart"><div class="row"><span style="color:var(--yelt)">${ic('suitcase',28)}</span><div class="grow"><div class="ttl">Schritt für Schritt</div><div class="small" style="color:var(--redtx)">Ich begleite dich zu deiner ersten Reise. Dauert etwa zwei Minuten.</div></div>${ic('right',20)}</div></button>
@@ -7041,9 +7044,9 @@ A.direktStart = async ()=>{ await willkommenFertig(); go('neu'); };
 A.codeStart = async ()=>{ await willkommenFertig(); S.hist=[]; S.route={v:'beitreten'}; S.form={}; render(); };
 
 /* Kurze Einführung für Eingeladene */
-const EF = [['Willkommen in der Gruppe','Ihr reist als Gruppe, und Poolposition ist euer gemeinsamer Ort für Planung und Urlaub. Wer dich eingeladen hat, hat die Reise schon angelegt.'],
+const EF = [['Willkommen in der Herde','Ihr reist als Gruppe, und Poolposition ist euer gemeinsamer Ort für Planung und Urlaub. Wer dich eingeladen hat, hat die Reise schon angelegt.'],
   ['Das findest du in der App','Mein Tag zeigt, was heute ansteht. Im Chat sprecht ihr euch ab, im Album landen die Fotos. Unter Reise findest du Termine, Kasse, Packliste, Infos und Notfall.'],
-  ['Du bestimmst, was andere sehen','Welche Extras wie Barometer oder Urlaubsherzen aktiv sind, legt der Admin passend zur Gruppe fest. Dein Profil und deine privaten Notizen bleiben bei dir.']];
+  ['Du bestimmst, was andere sehen','Welche Extras wie Barometer oder Urlaubsherzen aktiv sind, legt die Reiseleitung passend zur Gruppe fest. Dein Profil und deine privaten Notizen bleiben bei dir.']];
 V.einfuehrung = ()=>{ const i=Math.min(+S.ui.ef||0, EF.length-1); const letzte=i===EF.length-1;
   return `<div class="hero" style="padding-top:20px">${I.logo(72)}<div class="wordmark" style="font-size:30px">Pool<b>position</b></div></div>
   <div class="azbar" aria-hidden="true"><i style="width:${Math.round((i+1)/EF.length*100)}%"></i></div>
@@ -7082,7 +7085,7 @@ function herzInteresseLaden(r){ if(typeof PPAuth!=='undefined' || S.ui.hiAnzahl?
   S.db.collection('herzinteresse').where('rid','==',r.id).get().then(s=>{ S.ui.hiAnzahl[r.id]=snapDocs(s).filter(x=>x.offen).length; render(); }).catch(()=>{}); }
 function herzHinweisAdmin(r){ if(modulAn('herzen',r) || pfKinder(r.profil) || !r.profil) return ''; herzInteresseLaden(r); const n=herzInteresseAnzahl(r); if(n<1 || zugesagt().length<4) return '';
   return `<div class="card hot"><div class="row">${I.s(P.heart,22,'fill="var(--red2)" stroke="none"')}<div class="grow col" style="gap:2px"><b>Einige aus eurer Gruppe würden Urlaubsherzen nutzen</b><span class="small mut">Wer das ist, erfährst du nicht. Du kannst die Funktion im Gruppenprofil einschalten.</span></div></div><button class="btn sm" data-act="go" data-v="gruppenprofil">Gruppenprofil öffnen</button></div>`; }
-V.gruppenprofil = ()=>{ const r=cur(); if(!r) return splash('…'); if(!canMod(r)) return `${hdrPlain()}${backBtn()}<div class="warn">Nur der Admin kann das Gruppenprofil ändern.</div>`; pfInit(r); const f=S.form; herzInteresseLaden(r);
+V.gruppenprofil = ()=>{ const r=cur(); if(!r) return splash('…'); if(!canMod(r)) return `${hdrPlain()}${backBtn()}<div class="warn">Nur die Reiseleitung kann das Gruppenprofil ändern.</div>`; pfInit(r); const f=S.form; herzInteresseLaden(r);
   const n=herzInteresseAnzahl(r);
   return `${hdrPlain('Gruppenprofil')}${backBtn()}<h1>Gruppenprofil</h1><p class="small mut">Das Profil bestimmt, welche Funktionen eure Reise zeigt. Du kannst es jederzeit ändern.</p>
   <div class="card"><h3>Wer reist?</h3>${pfGruppeWahl(f)}</div>
@@ -7103,7 +7106,7 @@ function herzFrageKarte(){ const r=cur(), m=myM(); if(!r?.profil || modulAn('her
   if(!S.ui.hiMein) S.ui.hiMein={}; const id=`${r.id}_${S.uid}`; const v=S.ui.hiMein[r.id];
   if(v===undefined){ S.ui.hiMein[r.id]=null; S.db.doc(`herzinteresse/${id}`).get().then(s=>{ S.ui.hiMein[r.id]=s.exists?{offen:!!s.data().offen}:false; render(); }).catch(()=>{ S.ui.hiMein[r.id]=false; }); return ''; }
   if(v===null || v) return '';
-  return `<div class="card herzkarte"><div class="col" style="gap:4px"><b>Nur für dich, ganz privat</b><span class="small" style="opacity:.9">Wären Urlaubsherzen für diese Reise etwas für dich? Niemand sieht deine Antwort. Melden sich mehrere, bekommt der Admin einen anonymen Hinweis.</span></div>
+  return `<div class="card herzkarte"><div class="col" style="gap:4px"><b>Nur für dich, ganz privat</b><span class="small" style="opacity:.9">Wären Urlaubsherzen für diese Reise etwas für dich? Niemand sieht deine Antwort. Melden sich mehrere, bekommt die Reiseleitung einen anonymen Hinweis.</span></div>
     <div class="row" style="gap:8px"><button class="btn grow" data-act="herzInteresse" data-v="1">Ja, gern</button><button class="btn sec" data-act="herzInteresse" data-v="0">Nein, danke</button></div></div>`; }
 A.herzInteresse = async el => { const r=cur(); const offen=el.dataset.v==='1'; el.disabled=true;
   try{ await S.db.doc(`herzinteresse/${r.id}_${S.uid}`).set({rid:r.id, uid:S.uid, offen, at:now()}); S.ui.hiMein[r.id]={offen}; toast(offen?'Danke, gespeichert. Anonym.':'Alles klar'); render(); }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
@@ -7157,7 +7160,7 @@ function zBudgetMein(){ if(S.ui.zbMein===undefined || S.ui.zbMeinRid!==S.rid){ S
 const eurZ = n => `${Math.round(n).toLocaleString('de-DE')} €`;
 
 /* ---------- Hauptansicht ---------- */
-V.zimmer = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!modulAn('zimmer',r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="empty small">Der Bettenmanager ist für diese Reise nicht aktiv. Der Admin kann ihn im Gruppenprofil einschalten.</div>`;
+V.zimmer = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!modulAn('zimmer',r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="empty small">Der Bettenmanager ist für diese Reise nicht aktiv. Die Reiseleitung kann ihn im Gruppenprofil einschalten.</div>`;
   zBudgetLaden(r); const p=zPlan(); const admin=canMod(r); const rooms=zRooms(); const betten=rooms.reduce((s,x)=>s+(+x.betten||0),0); const pers=p.personen.length; const ich=zEntry(S.uid);
   const ichText = ich.zimmerId && rooms.some(x=>x.id===ich.zimmerId) ? `${zRoomName(ich.zimmerId)}${ich.einzel?' (für dich allein)':''}` : (ich.einzel?'Einzelzimmer, noch kein Zimmer gewählt':(ich.typ&&ich.typ!=='egal'?`${zWunschName(ich.typ)}, noch kein Zimmer gewählt`:'noch nichts gewählt'));
   const nm_ = p.nichtMoeglich.find(x=>x.u===S.uid);
@@ -7170,7 +7173,7 @@ V.zimmer = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!modulAn('z
     ${(ich.mit||[]).length?`<span class="small mut">Wunsch-Zimmerpartner: ${esc(ich.mit.map(zName).join(', '))}</span>`:''}</div>
   ${zVorschlagKarte(r,admin)}
   ${admin||rooms.length?`<div class="row between"><h3 style="margin:0">Zimmer</h3>${admin&&!r.geschlossen?`<button class="btn xs" data-act="zraumAuf">${ic('plus',14)} Zimmer</button>`:''}</div>`:''}
-  ${!rooms.length?`<div class="empty small">${admin?'Übernimm oben den Vorschlag der App, oder lege die Zimmer von Hand an, zum Beispiel die Zimmer eures Ferienhauses.':'Der Admin hat noch keine Zimmer angelegt.'}</div>
+  ${!rooms.length?`<div class="empty small">${admin?'Übernimm oben den Vorschlag der App, oder lege die Zimmer von Hand an, zum Beispiel die Zimmer eures Ferienhauses.':'Die Reiseleitung hat noch keine Zimmer angelegt.'}</div>
     ${admin?`<div class="row wrap" style="gap:8px"><button class="btn sm sec" data-act="zraumSchnell" data-typ="doppel">+ Doppelzimmer</button><button class="btn sm sec" data-act="zraumSchnell" data-typ="einzel">+ Einzelzimmer</button><button class="btn sm sec" data-act="zraumSchnell" data-typ="mehr">+ Mehrbettzimmer</button></div>`:''}`:''}
   ${p.rooms.map(z=>zRaumKarte(z,admin)).join('')}
   ${p.ohne.length&&rooms.length?`<div class="card"><h3>Noch ohne Zimmer</h3><div class="row wrap" style="gap:8px">${p.ohne.map(u=>`<button class="chip zperson" data-act="zwunschAuf" data-u="${u}" ${zDarfBearbeiten(u)?'':'disabled'}>${zAv(u,22)} ${esc(zVor(u))}${zEntry(u).einzel?' · allein':(zEntry(u).typ&&zEntry(u).typ!=='egal'?' · '+zWunschName(zEntry(u).typ):'')}</button>`).join('')}</div>
@@ -7182,7 +7185,7 @@ function zRaumKarte(z,admin){ const {room,belegt,einzelUid,cap,ueber,frei}=z; co
   return `<div class="card zraum ${ueber?'ueber':''}"><div class="row between"><div class="col" style="gap:0"><b>${esc(room.name)}</b><span class="tiny mut">${esc(typ)} · ${zBettenText(cap)}</span></div>${admin?`<button class="icbtn sm0" data-act="zraumAuf" data-id="${room.id}" aria-label="${esc(room.name)} bearbeiten">${ic('pencil',14)}</button>`:''}</div>
     <div class="row wrap" style="gap:8px">${belegt.map(u=>`<button class="chip zperson ${einzelUid===u?'ez':''}" data-act="zwunschAuf" data-u="${u}" ${zDarfBearbeiten(u)?'':'disabled'}>${zAv(u,22)} ${esc(zVor(u))}${einzelUid===u?' · allein':''}</button>`).join('')}${!belegt.length?'<span class="small mut">Noch niemand</span>':''}${frei>0?`<span class="tiny mut">${zBettenText(frei)} frei</span>`:''}</div>
     ${einzelUid?`<span class="tiny mut">Einzelzimmer-Wunsch hat Vorrang, hier kann sich niemand dazubuchen.</span>`:''}
-    ${ueber?`<div class="warn small">Überbelegt: ${belegt.length} Wünsche für ${zBettenText(cap)}. Es muss abgestimmt oder festgelegt werden.</div>${admin?`<div class="row wrap" style="gap:8px"><button class="btn xs" data-act="zAbstimmen" data-id="${room.id}">Abstimmen lassen</button><button class="btn xs sec" data-act="zFestlegen" data-id="${room.id}">Selbst festlegen</button></div>`:'<span class="tiny mut">Der Admin entscheidet.</span>'}`:''}</div>`; }
+    ${ueber?`<div class="warn small">Überbelegt: ${belegt.length} Wünsche für ${zBettenText(cap)}. Es muss abgestimmt oder festgelegt werden.</div>${admin?`<div class="row wrap" style="gap:8px"><button class="btn xs" data-act="zAbstimmen" data-id="${room.id}">Abstimmen lassen</button><button class="btn xs sec" data-act="zFestlegen" data-id="${room.id}">Selbst festlegen</button></div>`:'<span class="tiny mut">Die Reiseleitung entscheidet.</span>'}`:''}</div>`; }
 function zWuenscheKarte(p){ const l=p.personen.filter(u=>{ const e=zEntry(u); return (e.mit||[]).length; }); if(!l.length) return '';
   return `<div class="card"><h3>Wunsch-Zimmerpartner</h3><div class="col" style="gap:6px">${l.map(u=>{ const e=zEntry(u); const erf=(e.mit||[]).every(v=>{ const a=zEntry(u).zimmerId, b=zEntry(v).zimmerId; return a && a===b; });
     return `<div class="row" style="gap:8px">${zAv(u,24)}<span class="grow small"><b>${esc(zVor(u))}</b> möchte mit ${esc(e.mit.map(zVor).join(', '))}</span><span class="tiny ${erf?'':'mut'}">${erf?'✓ passt':'noch nicht im selben Zimmer'}</span></div>`; }).join('')}</div></div>`; }
@@ -7202,7 +7205,7 @@ OV.zwunsch = ()=>{ const f=S.form; const u=f.zu; const p=zPlan(); const rooms=p.
   const wirkt = f.zroom && f.zeinzel ? (rooms.find(z=>z.room.id===f.zroom)?.belegt||[]).filter(x=>x!==u) : [];
   return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Zimmerwunsch"><div class="row">${zAv(u,36)}<h2 class="grow">${u===S.uid?'Mein Zimmerwunsch':`Zimmer für ${esc(zVor(u))}`}</h2></div>
   ${rooms.length?`<span class="small mut" style="font-weight:600">Zimmer wählen</span><div class="col" style="gap:8px">${rooms.map(z=>{ const fremdEz=z.einzelUid && z.einzelUid!==u; const sel=f.zroom===z.room.id; const wer=z.belegt.filter(x=>x!==u);
-    return `<button type="button" class="pfopt ${sel?'on':''}" ${fremdEz?'disabled':''} aria-pressed="${sel}" data-act="zRoomWahl" data-id="${z.room.id}"><b>${esc(z.room.name)} <span class="tiny mut">${esc(zTypName(z.room.typ))} · ${zBettenText(z.cap)}</span></b><span class="small mut">${fremdEz?`Einzelzimmer von ${esc(zVor(z.einzelUid))} (Vorrang)`:wer.length?`Schon dort: ${esc(wer.map(zVor).join(', '))}${wer.length>=z.cap?' · voll':''}`:'noch frei'}</span></button>`; }).join('')}</div>`:'<div class="info small">Der Admin hat noch keine Zimmer angelegt. Du kannst trotzdem schon einen Einzelzimmer-Wunsch eintragen.</div>'}
+    return `<button type="button" class="pfopt ${sel?'on':''}" ${fremdEz?'disabled':''} aria-pressed="${sel}" data-act="zRoomWahl" data-id="${z.room.id}"><b>${esc(z.room.name)} <span class="tiny mut">${esc(zTypName(z.room.typ))} · ${zBettenText(z.cap)}</span></b><span class="small mut">${fremdEz?`Einzelzimmer von ${esc(zVor(z.einzelUid))} (Vorrang)`:wer.length?`Schon dort: ${esc(wer.map(zVor).join(', '))}${wer.length>=z.cap?' · voll':''}`:'noch frei'}</span></button>`; }).join('')}</div>`:'<div class="info small">Die Reiseleitung hat noch keine Zimmer angelegt. Du kannst trotzdem schon einen Einzelzimmer-Wunsch eintragen.</div>'}
   <span class="small mut" style="font-weight:600">Wie möchtest du schlafen?</span><div class="col" style="gap:8px">${ZWUNSCH.map(([k,n,t])=>`<button type="button" class="pfopt ${f.ztyp===k?'on':''}" aria-pressed="${f.ztyp===k}" data-act="zTypWahl" data-t="${k}"><b>${n}</b><span class="small mut">${t}${k==='einzel'?'. Hat Vorrang, andere können sich dort nicht dazubuchen.':''}</span></button>`).join('')}</div>
   ${wirkt.length?`<div class="warn small">${esc(wirkt.map(zVor).join(', '))} ${wirkt.length===1?'ist':'sind'} dort schon eingetragen und muss${wirkt.length===1?'':'en'} sich ein anderes Zimmer suchen.</div>`:''}
   ${andere.length&&f.ztyp!=='einzel'?`<span class="small mut" style="font-weight:600">Mit wem möchtest du ein Zimmer teilen? (freiwillig)</span><div class="row wrap" style="gap:6px">${andere.map(x=>`<button type="button" class="chip ${f['zm_'+x]?'yel':''}" style="border:0;cursor:pointer;height:36px;gap:6px" aria-pressed="${!!f['zm_'+x]}" data-act="zMitUm" data-u="${x}">${zAv(x,20)} ${esc(zVor(x))}</button>`).join('')}</div>`:''}
@@ -7255,7 +7258,7 @@ A.zfSpeichern = async ()=>{ const z=zPlan().rooms.find(x=>x.room.id===S.form.zfi
 /* ---------- Budget ---------- */
 A.zbudgetAuf = ()=>{ const m=S.ui.zbMein; S.form.zbetrag=typeof m==='number'&&m>0?m:''; S.form.zbegal=m==='egal'; openOv('zbudget',{}); };
 A.zbEgalUm = el => { S.form.zbegal=!!el.checked; renderOv(); };
-OV.zbudget = ()=>{ const pflicht=cur()?.status==='abstimmung'; return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Budget"><h2>Mein Budget${pflicht?' *':''}</h2><p class="small mut">Was bist du bereit, für die Reise insgesamt auszugeben (Unterkunft, Anreise, alles)? ${pflicht?'Pflichtangabe: Für die Anfrage ans Reisebüro braucht der Admin die Angabe von allen.':'Freiwillig.'} Nur du siehst deine Angabe. Die Gruppe sieht erst ab 3 Angaben Spanne und Durchschnitt.</p>
+OV.zbudget = ()=>{ const pflicht=cur()?.status==='abstimmung'; return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Budget"><h2>Mein Budget${pflicht?' *':''}</h2><p class="small mut">Was bist du bereit, für die Reise insgesamt auszugeben (Unterkunft, Anreise, alles)? ${pflicht?'Pflichtangabe: Für die Anfrage ans Reisebüro braucht die Reiseleitung die Angabe von allen.':'Freiwillig.'} Nur du siehst deine Angabe. Die Gruppe sieht erst ab 3 Angaben Spanne und Durchschnitt.</p>
   ${S.form.zbegal?'':`<label class="f">Betrag in Euro<input class="in" id="f_zbetrag" inputmode="numeric" maxlength="6" placeholder="z. B. 800" value="${esc(S.form.zbetrag||'')}"></label>`}
   <label class="toggle" style="align-items:flex-start"><input type="checkbox" data-change="zbEgalUm" ${S.form.zbegal?'checked':''}><span><b>Egal, es kostet was es kostet</b><br><span class="small mut">Du setzt dir keine Obergrenze. Das zählt als Angabe.</span></span></label>
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="zbudgetSpeichern">Speichern</button></div>${S.ui.zbMein&&!pflicht?`<button class="btn ghost sm" data-act="zbudgetWeg">Angabe zurückziehen</button>`:''}</div>`; };
@@ -7284,7 +7287,7 @@ function zAnfrageText(f){ const r=cur(); const b=zBedarf(); const n=zPersAnz(f);
   if((f.zhinweis||'').trim()) lines.push('','Hinweise:',f.zhinweis.trim());
   lines.push('','Wir freuen uns auf Ihr Angebot.','','Freundliche Grüße',nm(S.uid)); return lines.filter((x,i,a)=>!(x==='' && a[i-1]==='')).join('\n'); }
 const zStandQuo = () => { const r=cur(); const b=typeof zBudgetStand==='function'?zBudgetStand(r):null; return b; };
-V.zanfrage = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!canMod(r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="warn">Nur der Admin kann die Anfrage vorbereiten.</div>`; const f=S.form; zBudgetLaden(r); const s=zBudgetSumme(r); const betreff=`Anfrage Unterkunft ${r.titel}${r.ort?` – ${r.ort}`:''}`;
+V.zanfrage = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!canMod(r)) return `${hdrTrip('Zimmer')}${backBtn()}<div class="warn">Nur die Reiseleitung kann die Anfrage vorbereiten.</div>`; const f=S.form; zBudgetLaden(r); const s=zBudgetSumme(r); const betreff=`Anfrage Unterkunft ${r.titel}${r.ort?` – ${r.ort}`:''}`;
   const st=zStandQuo(); const n=zPersAnz(f); const vorschlag = s&&s.n ? Math.round(s.avg/10)*10 : 0;
   return `${hdrTrip('Zimmer')}${backBtn()}<h1>Anfrage ans Reisebüro</h1><p class="small mut">Aus Reise, Zimmern, Budget und deinen Angaben entsteht ein fertiger Text. Wenn alles stimmt, halte den Stand fest und schick die Anfrage ab.</p>
   ${st&&st.fehlt.length?`<div class="info small"><b>Budget fehlt noch von:</b> ${esc(st.fehlt.map(zVor).join(', '))}. Die Anfrage nutzt bis dahin den Schnitt der vorhandenen Angaben.</div>`:''}
@@ -7318,7 +7321,7 @@ function zKonfKarte(r){ if(!modulAn('zimmer',r)) return ''; const p=zPlan(); con
   const andereTyp=['doppel','mehr'].map(t=>[t,pers.filter(u=>zEntry(u).typ===t)]).filter(x=>x[1].length);
   const meins = [ich.einzel?'Einzelzimmer (allein)':(ich.typ&&ich.typ!=='egal'?zWunschName(ich.typ):''), (ich.mit||[]).length?`mit ${ich.mit.map(zName).join(', ')}`:'', ich.zimmerId?zRoomName(ich.zimmerId):''].filter(Boolean).join(', ') || (ich.typ==='egal'?'egal, bin flexibel':'noch nichts angegeben');
   return `<div class="card"><div class="row between"><h3 style="margin:0">${hubSvg('bett',18)} Zimmerplanung</h3><span class="tiny mut">${haben} von ${pers.length} haben Wünsche</span></div>
-    <p class="small mut" style="margin:0">${r.buchung?'Trag ein, wie du schlafen möchtest und mit wem. Der Admin verteilt danach die Zimmer und kann sie bis zur Buchung (und danach) jederzeit ändern.':'Noch ist nicht klar, wohin es geht. Trag trotzdem schon ein, wie du schlafen möchtest und mit wem. So können alle bei der Wahl der Unterkunft darauf achten.'}</p>
+    <p class="small mut" style="margin:0">${r.buchung?'Trag ein, wie du schlafen möchtest und mit wem. Die Reiseleitung verteilt danach die Zimmer und kann sie bis zur Buchung (und danach) jederzeit ändern.':'Noch ist nicht klar, wohin es geht. Trag trotzdem schon ein, wie du schlafen möchtest und mit wem. So können alle bei der Wahl der Unterkunft darauf achten.'}</p>
     <div class="ttl small">Mein Wunsch: ${esc(meins)}</div>
     ${ez.length?`<span class="small mut">Einzelzimmer: ${esc(ez.map(zVor).join(', '))}</span>`:''}${andereTyp.map(([t,l])=>`<span class="small mut">${zWunschName(t)}: ${esc(l.map(zVor).join(', '))}</span>`).join('')}
     ${mit.map(u=>`<span class="small mut">${esc(zVor(u))} möchte mit ${esc(zEntry(u).mit.map(zVor).join(', '))}</span>`).join('')}
@@ -7366,11 +7369,11 @@ function zVorschlagKarte(r,admin){ const v=zVorschlag(); if(!zPersonen().length)
     <div class="col" style="gap:6px">${v.zim.map(z=>`<div class="row" style="gap:8px;align-items:flex-start"><span>${zAmpelIc(z.ampel)}</span><span class="grow small"><b>${esc(zKatText(z))}</b>: ${esc(z.belegt.map(zVor).join(', '))}${z.hinweis?`<br><span class="tiny mut">${esc(z.hinweis)}</span>`:''}</span></div>`).join('')}</div>
     ${v.konfl.map(k=>`<div class="warn small">🔴 ${esc(zVor(k.u))} möchte mit ${esc(zVor(k.v))}, aber ${esc(zVor(k.v))} wünscht ein Einzelzimmer. Einer von beiden sollte den Wunsch ändern.</div>`).join('')}
     ${v.offen.map(o=>`<div class="card tight"><div class="row" style="gap:8px">${zAv(o.u,24)}<span class="grow small"><b>${esc(zVor(o.u))}</b> hat noch keinen Zimmerpartner ${o.gefragt?'<span class="tiny mut">· Gruppe wurde gefragt</span>':''}</span><span>🟡</span></div>
-      ${admin?`<div class="col" style="gap:6px">${ZE_OPT.map(([k,n,t])=>`<button type="button" class="pfopt" data-act="zEntsch" data-u="${o.u}" data-v="${k}"><b>${n}</b><span class="small mut">${t}</span></button>`).join('')}</div>`:'<span class="tiny mut">Der Admin entscheidet, wie es weitergeht.</span>'}</div>`).join('')}
+      ${admin?`<div class="col" style="gap:6px">${ZE_OPT.map(([k,n,t])=>`<button type="button" class="pfopt" data-act="zEntsch" data-u="${o.u}" data-v="${k}"><b>${n}</b><span class="small mut">${t}</span></button>`).join('')}</div>`:'<span class="tiny mut">Die Reiseleitung entscheidet, wie es weitergeht.</span>'}</div>`).join('')}
     ${admin&&v.zim.length?`<button class="btn block" data-act="zUebernehmen">${hatZimmer?'Vorschlag neu übernehmen':'Vorschlag übernehmen'}</button><span class="tiny mut">${hatZimmer?'Ersetzt die bisherigen Zimmer. ':''}Legt die Zimmer an und trägt alle ein. Danach kannst du alles von Hand ändern.</span>`:''}</div>`; }
 A.zEntsch = async el => { const u=el.dataset.u, w=el.dataset.v, r=cur(); const neu={...(r.zEntsch||{}), [u]:w};
   try{ await S.db.doc(`reisen/${r.id}`).update({zEntsch:neu});
-    if(w==='gruppe') await S.db.collection('nachrichten').add({rid:r.id, typ:'system', text:`🛏 ${zName(u)} hat noch keinen Zimmerpartner. Wer möchte das Zimmer teilen oder tauschen? Bitte meldet euch beim Admin.`, by:S.uid, createdAt:now()}).catch(()=>{});
+    if(w==='gruppe') await S.db.collection('nachrichten').add({rid:r.id, typ:'system', text:`🛏 ${zName(u)} hat noch keinen Zimmerpartner. Wer möchte das Zimmer teilen oder tauschen? Bitte meldet euch bei der Reiseleitung.`, by:S.uid, createdAt:now()}).catch(()=>{});
     toast(w==='gruppe'?'Die Gruppe wurde im Chat gefragt':'Gespeichert'); }catch(e){ fail(e,'Speichern'); } };
 A.zUebernehmen = ()=>{ const alt=zRooms(); const go_=async ()=>{ const v=zVorschlag(); const t0=now();
     for(const x of alt) await S.db.doc(`zimmer/${x.id}`).delete();
@@ -7485,7 +7488,7 @@ function buchungKarten(r){ const adm=isAdmin(r); zBudgetLaden(r); buchungSync(r)
   const mehr = `<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">${ic('gear',14)} ${adm?'Verwalten':'Mehr'}</summary>
     ${adm?`<button class="btn sm sec" style="align-self:flex-start" data-act="go" data-v="freigabe">Ort oder Zeitraum ändern</button>
     ${b!=='vorgemerkt'?`<button class="btn sm ghost" style="align-self:flex-start" data-act="reiseStarten">Schon anders gebucht: Reise direkt starten</button>`:''}
-    <button class="btn sm sec" style="align-self:flex-start" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',14)} Leute einladen</button>
+    <button class="btn sm sec" style="align-self:flex-start" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',14)} Herde einladen</button>
     <button class="btn sm ghost" style="align-self:flex-start;color:var(--pinktx)" data-act="reiseLoeschen" data-rid="${r.id}">${ic('trash',14)} Konferenz löschen</button>`
     :`<button class="btn sm ghost" style="align-self:flex-start" data-act="mwStart" data-s="q1">Meine Angaben ändern</button><button class="link" style="align-self:flex-start;color:var(--mut)" data-act="leaveKonf">Konferenz verlassen</button>`}</details>`;
   return `${naechsterSchritt(r)}${fortschrittKarte(r)}${angebotsBereich}<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">Zimmer, Budget und Anreise der Gruppe</summary>${budgetMein}${typeof zKonfKarte==='function'?zKonfKarte(r):''}${anreiseKarte(r)}</details>${anfrageKarte}${mehr}`; }
@@ -7944,7 +7947,7 @@ function statusSeite(r){ const adm=isAdmin(r); const g=gruppenStatus(r); const f
 /* ---------- Angaben ändern: erst deutlich nachfragen ---------- */
 A.aendernAuf = ()=>openOv('aendern',{});
 OV.aendern = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label="Angaben ändern"><h2>⚠️ Angaben wirklich ändern?</h2>
-  <div class="warn"><b>Achtung: Deine Angaben sind Teil der Reiseplanung für die gesamte Gruppe.</b><br>Eine Änderung bei Anreise, Budget oder Zimmer kann die Zimmerplanung, das Budget, die Anfrage beim Reisebüro und damit die Reise aller verändern. Der Admin wird informiert, sobald du etwas änderst.</div>
+  <div class="warn"><b>Achtung: Deine Angaben sind Teil der Reiseplanung für die gesamte Gruppe.</b><br>Eine Änderung bei Anreise, Budget oder Zimmer kann die Zimmerplanung, das Budget, die Anfrage beim Reisebüro und damit die Reise aller verändern. Die Reiseleitung wird informiert, sobald du etwas änderst.</div>
   <p style="margin:0"><b>Willst du deine Angaben wirklich ändern?</b></p>
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Nein, nichts ändern</button><button class="btn grow" data-act="aendernJa">Ja, ändern</button></div></div>`;
 function aendSnap(f){ const modus=f.mw_modus; const ab=Object.keys(f.an_ab||{}).filter(k=>f.an_ab[k]).sort(); const mit=Object.keys(f).filter(k=>k.startsWith('zm_')&&f[k]).sort();
@@ -7996,7 +7999,7 @@ function npGruppenKarte(){ const l=npGeteilt(); if(!l.length) return '';
 A.passAuf = ()=>{ const p=npDaten(); NP_FELDER.forEach(([k])=>S.form['np_'+k]=p[k]||''); S.form.np_entsperr=p.entsperr||'';
   for(let i=0;i<npAnz;i++){ const a=p.angehoerige[i]||{}; S.form[`np_a${i}n`]=a.name||''; S.form[`np_a${i}b`]=a.bez||''; S.form[`np_a${i}t`]=a.tel||''; } openOv('passForm'); };
 OV.passForm = () => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Notfallpass"><div class="row between"><h2 style="margin:0">Mein Notfallpass</h2><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
-  <p class="small mut">Alles ist freiwillig. Die Angaben sind privat, bis du sie selbst mit einer Reisegruppe teilst.</p>
+  <p class="small mut">Alles ist freiwillig. Die Angaben sind privat, bis du sie selbst mit einer Gruppe teilst.</p>
   ${Array.from({length:npAnz},(_,i)=>`<div class="card tight"><b class="small">${i?`Weitere/r Angehörige/r ${i+1}`:'Nächste Angehörige'}</b>
     <label class="f">Name<input class="in" id="f_np_a${i}n" maxlength="60" placeholder="Vor- und Nachname"></label>
     <label class="f">Zugehörigkeit<input class="in" id="f_np_a${i}b" autocomplete="off" maxlength="40" placeholder="z. B. Partnerin, Mutter, Bruder"></label>
@@ -8040,7 +8043,7 @@ V.notpass = ()=>{ const trips=S.meineM.filter(m=>['zugesagt','teilnehmer'].inclu
     <p class="small mut">Geteilt wird pro Reise: Öffne die Reise, dort unter „Notfall“ kannst du deinen Pass mit der Gruppe teilen. ${trips.length?'':'Du bist noch in keiner Reise.'}</p>
     <div class="card tight">${trips.length?trips.map(m=>`<div class="row between"><span>${esc(S.reisen[m.rid].titel)}</span><button class="btn xs sec" data-act="openTrip" data-rid="${m.rid}">Zur Reise</button></div>`).join(''):'<span class="small mut">Noch keine Reise.</span>'}</div>`; };
 /* ===================== Reise-Rückblick =====================
-   Nach der Reise: die Reise in Zahlen und ein direkter Weg zur nächsten Planung mit derselben Truppe („Gleiche Truppe, neue Reise?“).
+   Nach der Reise: die Reise in Zahlen und ein direkter Weg zur nächsten Planung mit derselben Herde („Gleiche Herde, neue Reise?“).
    Alles wird aus den vorhandenen Daten der Reise berechnet, es wird nichts Neues gespeichert. */
 function rueckblickDaten(r){ const M=S.rt.mitglied.filter(m=>m.status==='zugesagt');
   const tage = r.von&&r.bis ? tageZw(r.von,r.bis)+1 : 0;
@@ -8061,7 +8064,7 @@ V.rueckblick = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const d
     ${d.top&&d.top[1]>1?`<div class="card tight"><span class="tiny mut">Beliebtester Termin</span><b>${esc(d.top[0].titel||'Termin')}</b><span class="small mut">${d.top[1]} waren dabei</span></div>`:''}
     ${d.helfer?`<div class="card tight"><span class="tiny mut">Fleißigster Helfer</span><b>🥇 ${esc(nm(d.helfer[0]))}</b><span class="small mut">${d.helfer[1]} ${d.helfer[1]===1?'Aufgabe':'Aufgaben'} erledigt</span></div>`:''}
     ${d.M.length?`<div class="stack" style="align-self:flex-start">${d.M.slice(0,10).map(m=>av(m.uid,36)).join('')}</div>`:''}
-    <div class="card gold"><div class="ttl">Gleiche Truppe, neue Reise?</div><p class="small" style="color:var(--goldtx);margin:0">Wir starten eine neue Koffer-Konferenz und laden alle ein, die diesmal dabei waren.</p><button class="btn block yel" data-act="nochmal" data-rid="${r.id}">Neue Reise planen</button></div>
+    <div class="card gold"><div class="ttl">Gleiche Herde, neue Reise?</div><p class="small" style="color:var(--goldtx);margin:0">Wir starten eine neue Koffer-Konferenz und laden alle ein, die diesmal dabei waren.</p><button class="btn block yel" data-act="nochmal" data-rid="${r.id}">Neue Reise planen</button></div>
     <div class="row" style="gap:8px"><button class="btn sec grow" data-act="go" data-v="album">${ic('cam',16)} Zum Album</button><button class="btn sec grow" data-act="go" data-v="mitglieder">Kassenbuch</button></div>`; };
 /* ===================== Meine Daten und Konto löschen (Pflicht für App Store und Google Play) =====================
    Export: Server-Funktion datenExport (komplette Daten), in der Testversion ohne Server nur die lokal geladenen Daten.
@@ -8074,7 +8077,7 @@ V.datenschutz = ()=>{ const adm=S.meineM.filter(m=>m.status!=='ausgetreten'&&S.r
   <div class="card" style="border-color:var(--pinktx)"><h3 style="margin:0;color:var(--pinktx)">Konto löschen</h3>
     <p class="small" style="margin:0">Dein Profil, deine Einstellungen, dein Notfallpass, deine Zimmer-, Budget- und Anreiseangaben und dein Zugang werden endgültig gelöscht. Deine Chatnachrichten werden anonymisiert. Das lässt sich nicht rückgängig machen.</p>
     <p class="tiny mut" style="margin:0">Kassenbuch-Einträge bleiben für die Abrechnung der anderen erhalten, ohne deinen Namen.</p>
-    ${adm.length?`<div class="warn small">Du bist Admin von ${esc(adm.join(', '))}. Sind noch andere Mitglieder dabei, musst du die Reisen vorher löschen. Reisen ohne weitere Mitglieder werden mit gelöscht.</div>`:''}
+    ${adm.length?`<div class="warn small">Du bist Reiseleitung von ${esc(adm.join(', '))}. Sind noch andere Mitglieder dabei, musst du die Reisen vorher löschen. Reisen ohne weitere Mitglieder werden mit gelöscht.</div>`:''}
     ${FB?`<label class="f">Tippe zur Bestätigung LÖSCHEN<input class="in" id="f_dsBest" autocomplete="off" autocapitalize="characters" placeholder="LÖSCHEN"></label>
     <button class="btn block" style="background:var(--pinktx);color:#fff" data-act="kontoLoeschen" ${S.ui.dsBusy?'disabled':''}>${ic('trash',16)} ${S.ui.dsBusy==='del'?'Wird gelöscht …':'Konto endgültig löschen'}</button>`
       :'<span class="small mut">In dieser Testversion gibt es kein eigenes Konto zum Löschen. In der Poolposition-App steht hier die Löschfunktion.</span>'}</div>`; };
@@ -8258,7 +8261,7 @@ OV.ideeNeu = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label=
   <label class="f">Warum? (freiwillig)<input class="in" id="f_id_notiz" maxlength="140" placeholder="z. B. Strand, günstig, direkt vom Flughafen"></label>
   <label class="f">Link (freiwillig)<input class="in" id="f_id_link" maxlength="300" placeholder="Hotel, Ort oder Foto"></label>
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ideeSpeichern">Einwerfen</button></div></div>`;
-A.ideeSpeichern = async el => { if(!ideeDarf(cur())) return toast('Nur der Admin kann hier Ideen einwerfen.'); const t=(document.getElementById('f_id_titel')?.value||'').trim().slice(0,60); if(!t) return toast('Bitte gib deiner Idee einen Namen.');
+A.ideeSpeichern = async el => { if(!ideeDarf(cur())) return toast('Nur die Reiseleitung kann hier Ideen einwerfen.'); const t=(document.getElementById('f_id_titel')?.value||'').trim().slice(0,60); if(!t) return toast('Bitte gib deiner Idee einen Namen.');
   if(ideenListe().some(i=>i.titel.toLowerCase()===t.toLowerCase())) return toast('Diese Idee gibt es schon im Pool.');
   const d={rid:S.rid, titel:t, notiz:(document.getElementById('f_id_notiz')?.value||'').trim().slice(0,140), link:(typeof ortLinkFix==='function'?ortLinkFix(document.getElementById('f_id_link')?.value||''):''), by:S.uid, createdAt:now(), stimmen:{}};
   el.disabled=true; try{ await S.db.collection('ideen').add(d); closeOv(); toast('Idee eingeworfen'); }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
@@ -8291,7 +8294,7 @@ const wsJaNein = (k, val, frage, jaT, neinT) => `<h2 style="margin:0">${frage}</
 const altNeuWs = V.neu;
 V.neu = ()=>{ const f=S.form; if(f.modus!=='abst') return altNeuWs(); const n=wsSchritt(f); let body='', btn='Weiter';
   if(n===1){ body=`${wsKopf(1,'Name')}
-    <div class="info small">${ic('suitcase',16,'style="vertical-align:-3px"')} In vier Schritten richten wir die ersten Vorschläge für deine Reisegruppe ein: <b>Name, Ort, Zeit und Art der Reise</b>. Danach lädst du die anderen ein.</div>
+    <div class="info small">${ic('suitcase',16,'style="vertical-align:-3px"')} In vier Schritten richten wir die ersten Vorschläge für deine Herde ein: <b>Name, Ort, Zeit und Art der Reise</b>. Danach lädst du die anderen ein.</div>
     ${f.invite?.length?`<div class="info">Nochmal zusammen: ${f.invite.length} Mitreisende von damals werden automatisch eingeladen.</div>`:''}
     <h2 style="margin:0">Wie soll die Reise heißen?</h2>
     <input class="in" id="f_titel" maxlength="40" placeholder="z. B. Sommer 2027" data-enter="wsWeiter" autocomplete="off">`; }
@@ -8358,6 +8361,10 @@ A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 2.33', t:'Neue Begriffe: Reiseleitung und Herde', p:[
+    'Wer die Reise organisiert, heißt jetzt überall „Reiseleitung“.',
+    'Ihr alle zusammen seid die „Herde“, zum Beispiel im Morgenbericht: „Guten Morgen, liebe Herde!“ Habt ihr einen eigenen Gruppennamen, bleibt er.',
+  ] },
   { v:'Beta 2.32', t:'Packliste: Koffer packen aufgeräumt', p:[
     'Neue Rubrik „Reiseapotheke“ mit konkreten Vorschlägen je Beschwerde (z. B. gegen Schmerzen, Durchfall, Allergie, Insektenstiche). Sie ist nur eine Erinnerung und keine Handlungsempfehlung.',
     'Weitere Rubriken: Papiere & Geld, Vorher erledigen, Technik, Handgepäck, Vor der Abreise, Kinder & Baby, Auto sowie auf Wunsch Haustier, Sport und Ferienhaus.',
@@ -8382,8 +8389,8 @@ const NEUES = [
     'Läuft ein Ticket ab, schützt jetzt auch die Datenbank: Du kannst weiter alles ansehen, aber nichts mehr ändern.',
   ] },
   { v:'Beta 2.28', t:'Tickets, Kiosk, Statusseite und Zimmerplan', p:[
-    'Neue Statusseite: Haben alle abgestimmt, siehst du nur den Gesamtstand der Gruppe, z. B. „beim Reisebüro angefragt“. Unten kannst du deine Angaben ändern, nach deutlicher Warnung und Rückfrage. Der Admin bekommt dann eine Meldung.',
-    'Neuer Zimmerplan: Die App berechnet den Zimmerbedarf aus den Wünschen, zum Beispiel „1 Doppelzimmer, 1 Einzelzimmer“, mit Ampel. Wer keinen Partner hat, wird vom Admin eingeordnet. Virtuelle Begleitpersonen gibt es nicht mehr.',
+    'Neue Statusseite: Haben alle abgestimmt, siehst du nur den Gesamtstand der Gruppe, z. B. „beim Reisebüro angefragt“. Unten kannst du deine Angaben ändern, nach deutlicher Warnung und Rückfrage. Die Reiseleitung bekommt dann eine Meldung.',
+    'Neuer Zimmerplan: Die App berechnet den Zimmerbedarf aus den Wünschen, zum Beispiel „1 Doppelzimmer, 1 Einzelzimmer“, mit Ampel. Wer keinen Partner hat, wird von der Reiseleitung eingeordnet. Virtuelle Begleitpersonen gibt es nicht mehr.',
     'Tickets: Tageskarte, Wochenkarte, Monatskarte, Jahreskarte bestimmen, wie lange ein Account bearbeiten darf. Neue Nutzer starten mit einer Tageskarte, danach kann man nur noch ansehen.',
     'Neuer Kiosk: Hier siehst du Wochen-, Monats- und Jahreskarte als Schwimmbad-Tickets. Kaufen geht in der Beta noch nicht, die Preise folgen. Dein eigenes Ticket mit Restlaufzeit steht in deinem Profil.',
   ] },
@@ -8396,31 +8403,31 @@ const NEUES = [
   ] },
   { v:'Beta 2.26', t:'Zimmerwünsche, Buchungsstufe, Anfrage und Angebote', p:[
     'Zimmerwunsch: Einzelzimmer, Doppelzimmer, Mehrbettzimmer oder „ist mir egal“, schon in der Koffer-Konferenz.',
-    'Nach der Abstimmung ist die Reise noch nicht aktiv. Der Admin hält das Ergebnis fest und kümmert sich um die Buchung. Zimmer lassen sich weiter ändern.',
-    'Jede Person gibt ihr Budget an (auch „Egal, es kostet was es kostet“). Der Admin legt Hotel, maximales Gesamtbudget und Personenzahl fest und setzt „Reise beim Anbieter angefragt“. Im Chat erscheint eine Zusammenfassung.',
+    'Nach der Abstimmung ist die Reise noch nicht aktiv. Die Reiseleitung hält das Ergebnis fest und kümmert sich um die Buchung. Zimmer lassen sich weiter ändern.',
+    'Jede Person gibt ihr Budget an (auch „Egal, es kostet was es kostet“). Die Reiseleitung legt Hotel, maximales Gesamtbudget und Personenzahl fest und setzt „Reise beim Anbieter angefragt“. Im Chat erscheint eine Zusammenfassung.',
     'Vorschläge in der Abstimmung (Ort, Zeitraum, Monat) lassen sich jederzeit korrigieren, zum Beispiel bei Schreibfehlern. Die Stimmen bleiben erhalten.',
     'Der Reiter „Heimreise“ erscheint erst, wenn der Urlaub begonnen hat.',
-    'Neu unter „Reise“: Aufgaben mit Verantwortlichem und Frist, eine gemeinsame Einkaufsliste und eine Musik-Seite mit Spotify-Playlists und Songwünschen. Der Admin kann passende Aufgaben für eure Reise vorschlagen lassen, Mitglieder schlagen vor oder übernehmen mit „Ich mach das“.',
+    'Neu unter „Reise“: Aufgaben mit Verantwortlichem und Frist, eine gemeinsame Einkaufsliste und eine Musik-Seite mit Spotify-Playlists und Songwünschen. Die Reiseleitung kann passende Aufgaben für eure Reise vorschlagen lassen, Mitglieder schlagen vor oder übernehmen mit „Ich mach das“.',
     'Beim Anlegen wählt ihr, wie ihr anreist: Flug, Zug, Auto oder gemischt. Nach der Terminabstimmung gibt jeder seine Anreise an: Abflughäfen (mehrfach wählbar), Zug zum Flug, nächster Bahnhof oder Startort. Das Reisebüro bekommt eine Übersicht pro Teilnehmer.',
-    'Das Budget ist Pflichtangabe von allen und Teil des Ablaufs (auch „Egal, es kostet was es kostet“). Fehlen Angaben, kann der Admin bewusst mit dem gerundeten Schnitt der vorhandenen fortfahren („Unser Budget liegt bei 560 € pro Person …“).',
-    'Neuer Ablauf für jedes Mitglied: Eine Karte „Das fehlt noch“ führt durch Abstimmen, Zimmerwunsch, Budget und Anreise (alles Pflicht, in beliebiger Reihenfolge, jederzeit nachholbar). Der Admin sieht, wer noch etwas offen hat.',
+    'Das Budget ist Pflichtangabe von allen und Teil des Ablaufs (auch „Egal, es kostet was es kostet“). Fehlen Angaben, kann die Reiseleitung bewusst mit dem gerundeten Schnitt der vorhandenen fortfahren („Unser Budget liegt bei 560 € pro Person …“).',
+    'Neuer Ablauf für jedes Mitglied: Eine Karte „Das fehlt noch“ führt durch Abstimmen, Zimmerwunsch, Budget und Anreise (alles Pflicht, in beliebiger Reihenfolge, jederzeit nachholbar). Die Reiseleitung sieht, wer noch etwas offen hat.',
     'Wer sich selbst um seine Reise kümmert, sagt das mit einem Tipp und ist aus Zimmerplanung, Budget-Schnitt und Anfrage ans Reisebüro heraus.',
     'Bei der Anreise per Flug wählt jeder nur noch seine Abflughäfen aus der Liste.',
     'Kacheln aufgeräumt: „Anreise“ heißt jetzt „Meine Reise“, „Infos“ heißt „Reiseinfo“. „Mitbringen“ ist in die neue Kachel „To-do“ gewandert (Reiter To-dos, Mitbringen, Einkauf, Musik), „Herde“ ist ein Reiter in „Mitglieder“.',
     'Der Notfallpass gehört jetzt zu deinem Profil und gilt für jede Reise. Neu: nächste Angehörige (Name, Zugehörigkeit, Telefon, bis zu drei) und der Entsperrcode deines Handys, alles freiwillig. Unter „Notfall“ kannst du den Pass mit allen oder ausgewählten Mitgliedern der Reise teilen, den Code nur auf ausdrücklichen Wunsch.',
-    'Dienste reihum: Der Admin legt unter „To-do“ Dienste wie „Kochen“ oder „Abwaschen“ an. Die App verteilt sie jeden Tag der Reihe nach, „Mein Tag“ zeigt, wenn du dran bist.',
+    'Dienste reihum: Die Reiseleitung legt unter „To-do“ Dienste wie „Kochen“ oder „Abwaschen“ an. Die App verteilt sie jeden Tag der Reihe nach, „Mein Tag“ zeigt, wenn du dran bist.',
     'Erinnerungen per Push: am Tag vor der Abreise und zwei Tage sowie am Tag vor einer To-do-Frist (in den Einstellungen abschaltbar).',
-    'Nach der Reise gibt es den „Rückblick“ mit Zahlen zu eurer Reise und dem Knopf „Gleiche Truppe, neue Reise?“.',
+    'Nach der Reise gibt es den „Rückblick“ mit Zahlen zu eurer Reise und dem Knopf „Gleiche Herde, neue Reise?“.',
     'Unter „Mein Profil“ gibt es jetzt „Meine Daten“: alle deine Daten als Datei herunterladen oder dein Konto endgültig löschen.',
-    'Ansagen: Der Admin schickt mit „📣 Ansage an alle“ eine wichtige Nachricht an die ganze Gruppe. Sie erscheint hervorgehoben auf „Mein Tag“ und als Push, bis jeder „Gelesen“ getippt hat. Der Admin sieht, wie viele sie gelesen haben.',
-    'Ideen-Pool in der Koffer-Konferenz: Jeder wirft Reiseziele ein, dann wischt die Gruppe durch die Karten (rechts passt, oben vielleicht, links nein). Die Rangliste zeigt die Favoriten, der Admin übernimmt sie mit einem Tipp in die Abstimmung.',
+    'Ansagen: Die Reiseleitung schickt mit „📣 Ansage an alle“ eine wichtige Nachricht an die ganze Gruppe. Sie erscheint hervorgehoben auf „Mein Tag“ und als Push, bis jeder „Gelesen“ getippt hat. Die Reiseleitung sieht, wie viele sie gelesen haben.',
+    'Ideen-Pool in der Koffer-Konferenz: Jeder wirft Reiseziele ein, dann wischt die Gruppe durch die Karten (rechts passt, oben vielleicht, links nein). Die Rangliste zeigt die Favoriten, die Reiseleitung übernimmt sie mit einem Tipp in die Abstimmung.',
     'Offene Aufgaben auf einen Blick: Die Kachel „To-do“ zeigt mit kleinen Symbolen, was offen ist (To-dos, Mitbringen, Einkauf, Musik), und ein kleines Symbol in „Mein Tag“ zeigen z. B. 2/12 (2 von 12 noch zu erledigen). Ein Tipp öffnet die Aufgaben. Die WLAN-Anzeige in „Mein Tag“ ist dafür entfallen.',
-    'Angebote vom Anbieter lassen sich hochladen, alle stimmen ab. Haben alle angenommen, ist die Reise vorgemerkt. Der Admin startet sie, sobald die Reisebestätigung da ist.'] },
+    'Angebote vom Anbieter lassen sich hochladen, alle stimmen ab. Haben alle angenommen, ist die Reise vorgemerkt. Die Reiseleitung startet sie, sobald die Reisebestätigung da ist.'] },
   { v:'Beta 2.25', t:'Zimmerwünsche schon in der Koffer-Konferenz', p:[
     'Ist der Bettenmanager eingeschaltet, erscheint in der Abstimmung eine Karte „Zimmerplanung“.',
     'Jeder kann schon vorab eintragen, ob er allein schlafen möchte und mit wem, und optional ein Budget angeben.'] },
   { v:'Beta 2.24', t:'Einladen nach dem Anlegen, Link pro Ort', p:[
-    'Nach dem Anlegen einer Reise geht es gleich weiter mit „Leute einladen“: Code und Link mit fertigem Einladungstext, bequem per WhatsApp.',
+    'Nach dem Anlegen einer Reise geht es gleich weiter mit „Herde einladen“: Code und Link mit fertigem Einladungstext, bequem per WhatsApp.',
     'In der Abstimmung gibt es dafür einen eigenen Button.',
     'In der Koffer-Konferenz bekommt jeder vorgeschlagene Ort seinen eigenen Link, zum Beispiel zum Hotel.',
     'Den Link kannst du später ändern oder hinzufügen.'] },
@@ -8429,7 +8436,7 @@ const NEUES = [
     'Das Gruppenprofil schlägt passende Funktionen vor: Herzen, Barometer und Herde lassen sich pro Reise ein- und ausschalten.',
     'Im Chat gibt es bei „Events“ jetzt ein „+ Neu“.',
     'Umfragen im Gruppenchat, auch mit Mehrfachauswahl, über das neue „+“.',
-    'Bettenmanager: Zimmer und Betten vorab verteilen und eine Anfrage fürs Reisebüro erstellen (der Admin schaltet ihn ein).'] },
+    'Bettenmanager: Zimmer und Betten vorab verteilen und eine Anfrage fürs Reisebüro erstellen (die Reiseleitung schaltet ihn ein).'] },
   { v:'Beta 2.22', t:'Termine bearbeiten und Herzen für die Gruppe', p:[
     'Termine lassen sich ändern und löschen, mit Link und Kartenauswahl für den Ort.',
     'Urlaubsherzen kannst du jetzt auch Mitgliedern der Gruppe schenken. Wer erwidert, löst ein anonymes „Es knistert“ im Chat aus.'] },

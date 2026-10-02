@@ -37,7 +37,7 @@ exports.kontoLoeschen = onCall(CALL, async req => { const uid = pruefen(req, tru
   const reisen = (await db.collection('reisen').where('admin', '==', uid).get()).docs.filter(d => d.data().status !== 'geloescht');
   const blocker = [];
   for (const r of reisen) { const m = (await db.collection('mitglied').where('rid', '==', r.id).get()).docs.map(d => d.data()).filter(x => x.uid !== uid && ['teilnehmer', 'zugesagt', 'eingeladen'].includes(x.status)); if (m.length) blocker.push(r.data().titel || r.id); }
-  if (blocker.length) throw new HttpsError('failed-precondition', `Du bist Admin von: ${blocker.join(', ')}. Lösche diese Reisen vorher oder bitte die Gruppe, eine neue Reise ohne dich anzulegen.`);
+  if (blocker.length) throw new HttpsError('failed-precondition', `Du bist Reiseleitung von: ${blocker.join(', ')}. Lösche diese Reisen vorher oder bitte die Gruppe, eine neue Reise ohne dich anzulegen.`);
   // Reisen ohne weitere Mitglieder werden mit gelöscht
   await batchUpdate(reisen.map(r => [r.ref, { status: 'geloescht', geloeschtAm: Date.now(), geloeschtVon: uid }]));
   // eigene Angaben löschen
