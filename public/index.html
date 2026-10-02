@@ -771,6 +771,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .tkt .eine{font-style:normal;font-weight:900;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;letter-spacing:.04em}
 .tkempf{border:2px solid var(--yel);border-radius:18px;padding:10px;background:rgba(245,197,24,.07);box-shadow:0 0 0 4px rgba(245,197,24,.12)}
 .tkband{align-self:flex-start;background:var(--yel);color:#2a1d00;font-weight:800;font-size:12px;letter-spacing:.04em;padding:4px 10px;border-radius:999px}
+.msg img,.grid3 img,.bildbox img,button[data-act=openBild] img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 </style>
 
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
@@ -1679,7 +1680,7 @@ A.like = async el => { const col=el.dataset.col; const list=col==='nachrichten'?
   await W(()=>S.db.doc(`${col}/${x.id}`).update({likes:{[S.uid]:!on}}),'Speichern'); };
 A.msgMenu = el => openOv('msgmenu',{id:el.dataset.id, col:el.dataset.col});
 /* Großansicht: alle Bilder der aktuellen Ansicht in Reihenfolge merken, damit man blättern kann */
-A.openBild = el => { const m0=findMsg(el.dataset.id, el.dataset.col||'nachrichten'); if(m0 && !m0.vor && !tkDarf('foto_gross')) return void tkSperre('foto_gross'); const seen=new Set(); const liste=[...document.querySelectorAll('#app [data-act=openBild]')].map(b=>({id:b.dataset.id, col:b.dataset.col||'nachrichten'})).filter(x=>!seen.has(x.id) && seen.add(x.id));
+A.openBild = el => { const m0=findMsg(el.dataset.id, el.dataset.col||'nachrichten'); if(m0 && !m0.gastSichtbar && !tkDarf('foto_gross')) return void tkSperre('foto_gross'); const seen=new Set(); const liste=[...document.querySelectorAll('#app [data-act=openBild]')].map(b=>({id:b.dataset.id, col:b.dataset.col||'nachrichten'})).filter(x=>!seen.has(x.id) && seen.add(x.id));
   openOv('bild',{id:el.dataset.id, col:el.dataset.col||'nachrichten', liste}); };
 function bildNav(d){ const o=S.ov; if(!o || o.v!=='bild' || !(o.liste||[]).length) return; const i=o.liste.findIndex(x=>x.id===o.id); const j=i+d; if(i<0 || j<0 || j>=o.liste.length) return;
   S.ov={...o, id:o.liste[j].id, col:o.liste[j].col}; renderOv(); }
@@ -2809,7 +2810,7 @@ const umStimmen = mid => (S.rt.ustimmen||[]).filter(s=>s.mid===mid);
 const umWahl = s => Array.isArray(s?.opts) ? s.opts : (s?.opt ? [s.opt] : []);
 const umDarfVerwalten = x => x.by===S.uid || canMod(cur());
 
-A.umfrageAuf = ()=>{ S.form.umehr=false; S.form.uedit=''; S.form.ufrage=''; S.form.uc=2; S.form.uweg=0; for(let i=0;i<UM_MAX;i++){ S.form['uopt'+i]=''; S.form['uid'+i]=''; } openOv('umfrageNeu',{}); };
+A.umfrageAuf = ()=>{ if(tkSperre('umfrage')) return; S.form.umehr=false; S.form.uedit=''; S.form.ufrage=''; S.form.uc=2; S.form.uweg=0; for(let i=0;i<UM_MAX;i++){ S.form['uopt'+i]=''; S.form['uid'+i]=''; } openOv('umfrageNeu',{}); };
 /* Umfrage bearbeiten: Frage ändern, Antworten ändern, löschen oder ergänzen */
 A.umfrageEdit = el => { const x=S.rt.msgs.find(m=>m.id===el.dataset.mid); if(!x || !umDarfVerwalten(x)) return; const o=x.optionen||[];
   S.form.uedit=x.id; S.form.umehr=!!x.mehrfach; S.form.ufrage=x.frage||''; S.form.uc=o.length; S.form.uweg=0; for(let i=0;i<UM_MAX;i++){ S.form['uopt'+i]=o[i]?.text||''; S.form['uid'+i]=o[i]?.id||''; } openOv('umfrageNeu',{}); };
@@ -2827,7 +2828,7 @@ A.umfrageMehr = ()=>{ S.form.uc=Math.min(UM_MAX,(+S.form.uc||2)+1); renderOv(); 
 A.umfrageOptWeg = el => { const f=S.form; const n=+f.uc||2; if(n<=2) return toast('Eine Umfrage braucht mindestens zwei Antworten.'); const i=+el.dataset.i;
   if(f.uedit && f['uid'+i]) f.uweg=(+f.uweg||0)+umStimmen(f.uedit).filter(s=>umWahl(s).includes(f['uid'+i])).length;
   for(let k=i;k<UM_MAX-1;k++){ f['uopt'+k]=f['uopt'+(k+1)]||''; f['uid'+k]=f['uid'+(k+1)]||''; } f['uopt'+(UM_MAX-1)]=''; f['uid'+(UM_MAX-1)]=''; f.uc=n-1; renderOv(); };
-A.umfrageSenden = async el => { const f=S.form; const frage=(f.ufrage||'').trim(); if(frage.length<3) return toast('Bitte gib eine Frage ein.');
+A.umfrageSenden = async el => { if(!S.form.uedit && tkSperre('umfrage')) return; const f=S.form; const frage=(f.ufrage||'').trim(); if(frage.length<3) return toast('Bitte gib eine Frage ein.');
   const opts=[]; for(let i=0;i<(+f.uc||2);i++){ const t=(f['uopt'+i]||'').trim(); if(t && !opts.some(o=>o.text.toLowerCase()===t.toLowerCase())) opts.push({id:f['uid'+i]||('n'+rid16().slice(0,6)), text:t}); }
   if(opts.length<2) return toast('Bitte gib mindestens zwei verschiedene Antworten ein.');
   el.disabled=true;
@@ -4776,9 +4777,9 @@ const TICKETS = [['tag','Tageskarte','gratis'],['pauschal','Pauschalreise','Von 
 /* Beta 3.1: Rechte je Ticket. Die Tageskarte ist gratis und läuft nie ab, sie kann ansehen, lesen, chatten, abstimmen und planen. Bezahlte Tickets (und die Freikarte) dürfen zusätzlich Fotos, Videos, Sprachnachrichten und Reisen anlegen.
    Läuft ein bezahltes Ticket ab, gilt wieder die Tageskarte. */
 const TK_BEZAHLT = ['pauschal','woche','monat','jahr','frei'];
-const TK_PLUS = ['foto_hoch','foto_gross','foto_laden','video','sprache','reise_anlegen','admin'];
+const TK_PLUS = ['foto_hoch','foto_gross','foto_laden','video','sprache','reise_anlegen','umfrage','admin'];
 const TK_LIMIT = { pauschal:{foto:200}, woche:{foto:100}, monat:{foto:150}, jahr:{foto:300}, frei:{} };
-const TK_SPERRTEXT = { foto_hoch:'Fotos hochladen', foto_gross:'Fotos vergrößern', foto_laden:'Fotos herunterladen', video:'Videos', sprache:'Sprachnachrichten', reise_anlegen:'Reisen anlegen', admin:'Reisen verwalten' };
+const TK_SPERRTEXT = { foto_hoch:'Fotos hochladen', foto_gross:'Fotos vergrößern', foto_laden:'Fotos herunterladen', video:'Videos', sprache:'Sprachnachrichten', reise_anlegen:'Reisen anlegen', umfrage:'Umfragen erstellen', admin:'Reisen verwalten' };
 const ticketName = a => TICKETS.find(t=>t[0]===a)?.[1] || 'Ticket';
 function ticketBis(art, von=now()){ const d=new Date(von); if(art==='tag') return von+864e5; if(art==='pauschal') return von+90*864e5; if(art==='frei'){ d.setFullYear(d.getFullYear()+1); return d.getTime(); } if(art==='woche') return von+7*864e5; if(art==='monat'){ d.setMonth(d.getMonth()+1); return d.getTime(); } if(art==='jahr'){ d.setFullYear(d.getFullYear()+1); return d.getTime(); } return von+864e5; }
 S.ticket = null; S.ticketDa = false;
@@ -5163,6 +5164,7 @@ const ADMLOG = [
   { v:'Beta 3.2', t:'Ticketsystem aktiviert, Kiosk-Preise', d:[
     'Kiosk: Beispielpreise sichtbar (19,99 / 4,99 / 9,99 / 29,99 €), Pauschalreise als Empfehlung hervorgehoben, einheitliche Laufzeit-Texte, Fotolimits aus den Erklärungstexten entfernt. Kaufen bleibt „Bald erhältlich“.',
     'Freikarte des Teams wird anderen wie jede Freikarte angezeigt, Ticketnachrichten nennen Tag, Monat und Jahr.',
+    'Gratis-Nutzer: keine Großansicht von Fotos (Hinweis statt Bild), Langdruck auf Vorschaubildern abgeschaltet. Umfragen im Chat erstellen ist ein Ticketrecht (umfrage, auch in den Firestore-Regeln als Nachrichtentyp), Abstimmen bleibt für alle.',
     'Tester-Tickets müssen manuell auf Freikarte gesetzt werden (Mitgliederverwaltung, Ticket für Auswahl).',
   ] },
   { v:'Beta 3.1', t:'Ticketmodell: Rechte, Freikarte, Pauschalreise, Medien-Sperre', d:[

@@ -166,7 +166,7 @@ service cloud.firestore {
       // Gäste lesen nur freigegebene Nachrichten ihrer Aktivität
       allow read: if isMember(resource.data.rid) || isAdmin()
         || (resource.data.get('gastSichtbar', false) == true && isGast(resource.data.aktId));
-      allow create: if ticketOk() && ((isMember(request.resource.data.rid) && request.resource.data.by == me() && (!(request.resource.data.typ in ['bild', 'audio']) || bezahlt())) || isAdmin()
+      allow create: if ticketOk() && ((isMember(request.resource.data.rid) && request.resource.data.by == me() && (!(request.resource.data.typ in ['bild', 'audio', 'umfrage']) || bezahlt())) || isAdmin()
         || (recht('ausschliessen') && request.resource.data.typ == 'system' && request.resource.data.by == 'support')
         || (request.resource.data.by == me() && request.resource.data.gastSichtbar == true
             && request.resource.data.aktId is string && isGast(request.resource.data.aktId)
