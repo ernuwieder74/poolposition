@@ -11,6 +11,9 @@ service cloud.firestore {
     // Bademeister: Rechte vergibt der Oberbademeister (Superadmin) einzeln, gespeichert unter rollen/{uid}.rechte
     function rollenDoc(u) { return /databases/$(database)/documents/rollen/$(u); }
     function recht(r) { return signedIn() && exists(rollenDoc(me())) && get(rollenDoc(me())).data.get('rechte', {}).get(r, false) == true; }
+    // Tickets (Mitgliedschaft): Schreiben ist nur mit gültigem Ticket erlaubt. Oberbademeister und Badeaufsicht sind ausgenommen. Lesen bleibt immer möglich.
+    function ticketDoc(u) { return /databases/$(database)/documents/tickets/$(u); }
+    function ticketOk() { return isSuper() || (signedIn() && exists(ticketDoc(me())) && get(ticketDoc(me())).data.bis > request.time.toMillis()) || (signedIn() && exists(rollenDoc(me()))); }
     function isAdmin() { return isSuper() || recht('reisen'); }
     function isMod() { return isSuper() || recht('meldungen') || recht('verwarnen') || recht('nutzer'); }
     function mDoc(rid, uid) { return /databases/$(database)/documents/mitglied/$(rid + '_' + uid); }
@@ -50,45 +53,45 @@ service cloud.firestore {
     // Reisen: lesbar für Angemeldete
     match /reisen/{rid} {
       allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.createdBy == me() && request.resource.data.admin == me();
+      allow create: if ticketOk() && (signedIn() && request.resource.data.createdBy == me() && request.resource.data.admin == me());
       // Admin der Reise und System-Admin dürfen alles (auch die Admin-Rolle übertragen).
       // Normale Mitglieder dürfen nur Vortreffen-Hinweis, neue Getränke und den Stand der Auszeichnungen eintragen – nie Admin, Sperren oder Reisedaten.
-      allow update: if isTripAdmin(rid) || isAdmin()
+      allow update: if ticketOk() && (isTripAdmin(rid) || isAdmin()
         || (recht('ausschliessen') && onlyChanges(['gesperrt']))
         || (isMember(rid) && onlyChanges(['naechstesVortreffen', 'getraenkeKat', 'auszeichnungen']))
         // Infos der Unterkunft: alle Mitglieder, wenn der Gruppenadmin es erlaubt hat
-        || (isMember(rid) && resource.data.get('infosOffen', false) == true && onlyChanges(['infos', 'infosVon', 'infosAm']));
-      allow delete: if isAdmin();
+        || (isMember(rid) && resource.data.get('infosOffen', false) == true && onlyChanges(['infos', 'infosVon', 'infosAm'])));
+      allow delete: if ticketOk() && (isAdmin());
     }
 
     // Mitgliedschaften
     match /mitglied/{id} {
       allow read: if signedIn();
-      allow create: if signedIn() && (
+      allow create: if ticketOk() && (signedIn() && (
         (request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
           && trip(request.resource.data.rid).get('gesperrt', {}).get(me(), false) != true
           && (trip(request.resource.data.rid).admin == me()
               || (request.resource.data.einladung is string && exists(einl(request.resource.data.einladung))
                   && einlOk(request.resource.data.einladung, request.resource.data.rid))))
         || (request.resource.data.status == 'eingeladen' && isMember(request.resource.data.rid))
-        || isAdmin());
-      allow update: if signedIn() && (
+        || isAdmin()));
+      allow update: if ticketOk() && (signedIn() && (
         (resource.data.uid == me() && resource.data.status != 'entfernt' && request.resource.data.status != 'entfernt')
         || isTripAdmin(resource.data.rid)
         || (isMember(resource.data.rid) && onlyChanges(['platzDabei', 'abholer']))
         || (recht('ausschliessen') && onlyChanges(['status', 'entferntAm']))
         || (recht('reisedaten') && onlyChanges(['anreise', 'abreise']))
-        || isAdmin());
-      allow delete: if isAdmin();
+        || isAdmin()));
+      allow delete: if ticketOk() && (isAdmin());
     }
 
     // Einladungen (Einmalcodes): einzeln abrufbar per Code, Liste nur für den Admin der Reise
     match /einladungen/{code} {
       allow get: if signedIn();
       allow list: if signedIn() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin());
-      allow create: if signedIn() && request.resource.data.by == me() && request.resource.data.used == 0
-        && (isTripAdmin(request.resource.data.rid) || isAdmin());
-      allow update: if signedIn() && (
+      allow create: if ticketOk() && (signedIn() && request.resource.data.by == me() && request.resource.data.used == 0
+        && (isTripAdmin(request.resource.data.rid) || isAdmin()));
+      allow update: if ticketOk() && (signedIn() && (
         ((isTripAdmin(resource.data.rid) || isAdmin()) && onlyChanges(['widerrufen']))
         || (onlyChanges(['used', 'nutzer'])
             && request.resource.data.used == resource.data.used + 1
@@ -98,72 +101,73 @@ service cloud.firestore {
             && resource.data.nutzer.get(me(), false) != true
             && request.resource.data.nutzer.get(me(), false) == true
             && existsAfter(mDoc(resource.data.rid, me()))
-            && getAfter(mDoc(resource.data.rid, me())).data.get('einladung', '') == code));
-      allow delete: if isTripAdmin(resource.data.rid) || isAdmin();
+            && getAfter(mDoc(resource.data.rid, me())).data.get('einladung', '') == code)));
+      allow delete: if ticketOk() && (isTripAdmin(resource.data.rid) || isAdmin());
     }
 
     // Inhalte einer Reise: nur für ihre Mitglieder
     match /vorschlaege/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me();
-      allow update: if (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()) && onlyChanges(['link', 'name', 'von', 'bis', 'monat']);
-      allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.by == me());
+      allow update: if ticketOk() && ((resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()) && onlyChanges(['link', 'name', 'von', 'bis', 'monat']));
+      allow delete: if ticketOk() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     match /stimmen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create, update: if isMember(request.resource.data.rid) && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me();
+      allow create, update: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me());
     }
     match /aktivitaeten/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin() || isGast(id);
-      allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me();
+      allow create: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.by == me());
       // Ändern darf nur, wer den Termin angelegt hat, der Admin der Reise und die Badeaufsicht.
       // Alle anderen Mitglieder dürfen ausschließlich ihre eigene Antwort „dabei“ ändern, sonst nichts.
-      allow update: if isAdmin() || resource.data.by == me() || isTripAdmin(resource.data.rid)
+      allow update: if ticketOk() && (isAdmin() || resource.data.by == me() || isTripAdmin(resource.data.rid)
         || (recht('ausblenden') && onlyChanges(['ausgeblendet']))
         || (isMember(resource.data.rid) && onlyChanges(['dabei'])
-            && request.resource.data.get('dabei', {}).diff(resource.data.get('dabei', {})).affectedKeys().hasOnly([me()]));
-      allow delete: if resource.data.by == me() || isAdmin();
+            && request.resource.data.get('dabei', {}).diff(resource.data.get('dabei', {})).affectedKeys().hasOnly([me()])));
+      allow delete: if ticketOk() && (resource.data.by == me() || isAdmin());
     }
     match /nachrichten/{id} {
       // Gäste lesen nur freigegebene Nachrichten ihrer Aktivität
       allow read: if isMember(resource.data.rid) || isAdmin()
         || (resource.data.get('gastSichtbar', false) == true && isGast(resource.data.aktId));
-      allow create: if (isMember(request.resource.data.rid) && request.resource.data.by == me()) || isAdmin()
+      allow create: if ticketOk() && ((isMember(request.resource.data.rid) && request.resource.data.by == me()) || isAdmin()
         || (recht('ausschliessen') && request.resource.data.typ == 'system' && request.resource.data.by == 'support')
         || (request.resource.data.by == me() && request.resource.data.gastSichtbar == true
             && request.resource.data.aktId is string && isGast(request.resource.data.aktId)
             && akt(request.resource.data.aktId).rid == request.resource.data.rid
             && request.resource.data.typ in ['text', 'bild', 'audio']
-            && request.time.toMillis() <= akt(request.resource.data.aktId).gastBis + (request.resource.data.typ == 'bild' ? 172800000 : 0));
-      allow update: if isMember(resource.data.rid) || isAdmin() || (recht('ausblenden') && onlyChanges(['ausgeblendet']))
+            && request.time.toMillis() <= akt(request.resource.data.aktId).gastBis + (request.resource.data.typ == 'bild' ? 172800000 : 0)));
+      allow update: if ticketOk() && (isMember(resource.data.rid) || isAdmin() || (recht('ausblenden') && onlyChanges(['ausgeblendet']))
         || (resource.data.get('gastSichtbar', false) == true && isGast(resource.data.aktId)
             && (onlyChanges(['reakt', 'likes'])
-                || (resource.data.by == me() && onlyChanges(['text', 'bearbeitet', 'geloescht']))));
-      allow delete: if resource.data.by == me() || isAdmin();
+                || (resource.data.by == me() && onlyChanges(['text', 'bearbeitet', 'geloescht'])))));
+      allow delete: if ticketOk() && (resource.data.by == me() || isAdmin());
     }
 
     // Einladungscodes für Tagesaktivitäten
     match /aktcodes/{code} {
       allow get: if signedIn();
-      allow create: if signedIn() && request.resource.data.by == me() && isMember(request.resource.data.rid);
-      allow update: if signedIn() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()) && onlyChanges(['widerrufen', 'bis']);
+      allow create: if ticketOk() && (signedIn() && request.resource.data.by == me() && isMember(request.resource.data.rid));
+      allow update: if ticketOk() && (signedIn() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()) && onlyChanges(['widerrufen', 'bis']));
     }
     // Mitteilung an ausgeladene Gäste: nur die betroffene Person liest und löscht sie
     match /ausladungen/{id} {
-      allow read, delete: if signedIn() && resource.data.uid == me();
-      allow create: if signedIn() && request.resource.data.by == me()
-        && (akt(request.resource.data.aktId).by == me() || isTripAdmin(akt(request.resource.data.aktId).rid) || isAdmin());
+      allow read: if signedIn() && resource.data.uid == me();
+      allow delete: if ticketOk() && (signedIn() && resource.data.uid == me());
+      allow create: if ticketOk() && (signedIn() && request.resource.data.by == me()
+        && (akt(request.resource.data.aktId).by == me() || isTripAdmin(akt(request.resource.data.aktId).rid) || isAdmin()));
     }
     // Gäste einer Tagesaktivität: beitreten nur mit gültigem Code, entfernen durch Ersteller oder Admin
     match /aktgast/{id} {
       allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.uid == me() && id == request.resource.data.aktId + '_' + me()
+      allow create: if ticketOk() && (signedIn() && request.resource.data.uid == me() && id == request.resource.data.aktId + '_' + me()
         && request.resource.data.code is string
         && get(/databases/$(database)/documents/aktcodes/$(request.resource.data.code)).data.aktId == request.resource.data.aktId
         && get(/databases/$(database)/documents/aktcodes/$(request.resource.data.code)).data.widerrufen == false
         && get(/databases/$(database)/documents/aktcodes/$(request.resource.data.code)).data.bis > request.time.toMillis()
-        && akt(request.resource.data.aktId).get('gastGesperrt', {}).get(me(), '') != request.resource.data.code;
-      allow delete: if signedIn() && (resource.data.uid == me() || akt(resource.data.aktId).by == me() || isTripAdmin(resource.data.rid) || isAdmin());
+        && akt(request.resource.data.aktId).get('gastGesperrt', {}).get(me(), '') != request.resource.data.code);
+      allow delete: if ticketOk() && (signedIn() && (resource.data.uid == me() || akt(resource.data.aktId).by == me() || isTripAdmin(resource.data.rid) || isAdmin()));
     }
 
     // Kassenbuch: nur Mitglieder der Reise; ändern und löschen darf, wer den Eintrag gemacht hat, oder der Admin
@@ -172,38 +176,38 @@ service cloud.firestore {
       allow read: if isMember(resource.data.rid) || isAdmin()
         || (resource.data.get('aktId', '') != '' && isGast(resource.data.aktId));
       // Eine Rückzahlung („ausgleich“) trägt nur ein, wer das Geld bekommen hat
-      allow create: if request.resource.data.by == me()
+      allow create: if ticketOk() && (request.resource.data.by == me()
         && request.resource.data.betrag is int && request.resource.data.betrag > 0
         && (request.resource.data.typ != 'ausgleich' || request.resource.data.an == me())
         && (isMember(request.resource.data.rid)
             || (request.resource.data.aktId is string && isGast(request.resource.data.aktId)
-                && akt(request.resource.data.aktId).rid == request.resource.data.rid));
-      allow update: if (resource.data.by == me() || isTripAdmin(resource.data.rid)) && request.resource.data.rid == resource.data.rid
-        && request.resource.data.get('aktId', '') == resource.data.get('aktId', '');
-      allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
+                && akt(request.resource.data.aktId).rid == request.resource.data.rid)));
+      allow update: if ticketOk() && ((resource.data.by == me() || isTripAdmin(resource.data.rid)) && request.resource.data.rid == resource.data.rid
+        && request.resource.data.get('aktId', '') == resource.data.get('aktId', ''));
+      allow delete: if ticketOk() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
 
     // Flüstern: Inhalte nur für die beiden Beteiligten (und den Support)
     match /fluester/{pid} {
       allow read: if signedIn();
-      allow write: if signedIn() && (me() in pid.split('__') || isAdmin() || (isMod() && 'support' in pid.split('__')));
+      allow write: if ticketOk() && (signedIn() && (me() in pid.split('__') || isAdmin() || (isMod() && 'support' in pid.split('__'))));
     }
     match /fluesternachrichten/{id} {
       allow read: if signedIn() && (me() in resource.data.pair.split('__') || isAdmin() || (isMod() && 'support' in resource.data.pair.split('__')));
-      allow create: if signedIn() && (
+      allow create: if ticketOk() && (signedIn() && (
         (me() in request.resource.data.pair.split('__') && request.resource.data.by == me())
         || (isMod() && request.resource.data.by == 'support' && 'support' in request.resource.data.pair.split('__'))
         // Eingangsbestätigung einer eigenen Meldung: nur im eigenen Chat mit der Badeaufsicht, nur Status „offen“
         || (request.resource.data.by == 'support' && request.resource.data.typ == 'meldstatus' && request.resource.data.status == 'offen'
             && me() in request.resource.data.pair.split('__') && 'support' in request.resource.data.pair.split('__')
             && request.resource.data.keys().hasOnly(['pair', 'by', 'typ', 'meld', 'vorgang', 'art', 'kategorie', 'status', 'createdAt'])
-            && exists(/databases/$(database)/documents/meldungen/$(me())/eintraege/$(request.resource.data.meld))));
-      allow update: if signedIn() && (me() in resource.data.pair.split('__') || isAdmin() || (isMod() && 'support' in resource.data.pair.split('__')) || (recht('ausblenden') && onlyChanges(['ausgeblendet'])));
+            && exists(/databases/$(database)/documents/meldungen/$(me())/eintraege/$(request.resource.data.meld)))));
+      allow update: if ticketOk() && (signedIn() && (me() in resource.data.pair.split('__') || isAdmin() || (isMod() && 'support' in resource.data.pair.split('__')) || (recht('ausblenden') && onlyChanges(['ausgeblendet']))));
     }
     match /fluestercodes/{code} {
       allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.uid == me();
-      allow update: if signedIn();
+      allow create: if ticketOk() && (signedIn() && request.resource.data.uid == me());
+      allow update: if ticketOk() && (signedIn());
     }
 
     // „schreibt gerade …“: je Chat ein Dokument mit Zeitstempeln, jeder schreibt nur seinen eigenen Eintrag
@@ -245,133 +249,133 @@ service cloud.firestore {
     // Urlaubsherzen an Gruppenmitglieder: sehen dürfen nur die beiden Beteiligten
     match /herzanfragen/{id} {
       allow read: if signedIn() && (resource.data.von == me() || resource.data.an == me());
-      allow create: if request.resource.data.von == me() && request.resource.data.an != me()
+      allow create: if ticketOk() && (request.resource.data.von == me() && request.resource.data.an != me()
         && isMember(request.resource.data.rid)
         && exists(mDoc(request.resource.data.rid, request.resource.data.an))
         && get(mDoc(request.resource.data.rid, request.resource.data.an)).data.status == 'zugesagt'
         && request.resource.data.status == 'offen' && request.resource.data.knisterGepostet == false
-        && request.resource.data.keys().hasOnly(['rid', 'von', 'an', 'status', 'vonZeigen', 'anZeigen', 'knisterGepostet', 'offengelegt', 'createdAt']);
+        && request.resource.data.keys().hasOnly(['rid', 'von', 'an', 'status', 'vonZeigen', 'anZeigen', 'knisterGepostet', 'offengelegt', 'createdAt']));
       // Empfänger erwidert (oder ändert seine Freigabe), Absender ändert nur seine Freigabe; offengelegt setzt, wer das Geheimnis lüftet
-      allow update: if signedIn() && (
+      allow update: if ticketOk() && (signedIn() && (
           (resource.data.an == me() && onlyChanges(['status', 'anZeigen', 'bestaetigtAm', 'bestaetigtTag', 'knisterAm', 'offengelegt']) && request.resource.data.status in ['offen', 'bestaetigt'])
-          || (resource.data.von == me() && onlyChanges(['vonZeigen', 'offengelegt'])));
-      allow delete: if signedIn() && (resource.data.von == me() || resource.data.an == me());
+          || (resource.data.von == me() && onlyChanges(['vonZeigen', 'offengelegt']))));
+      allow delete: if ticketOk() && (signedIn() && (resource.data.von == me() || resource.data.an == me()));
     }
     // Private, anonyme Angabe „Urlaubsherzen wären etwas für mich“: nur die Person selbst sieht ihre Angabe, den Zähler setzt der Server
     match /herzinteresse/{id} {
       allow read: if signedIn() && id.matches('.*_' + me());
-      allow create, update: if signedIn() && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
-        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'offen', 'at']);
-      allow delete: if signedIn() && id.matches('.*_' + me());
+      allow create, update: if ticketOk() && (signedIn() && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
+        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'offen', 'at']));
+      allow delete: if ticketOk() && (signedIn() && id.matches('.*_' + me()));
     }
     // Umfragen im Gruppenchat: eine Stimme pro Mitglied und Umfrage; alle Mitglieder der Reise sehen die Stimmen
     match /umfragestimmen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create, update: if request.resource.data.uid == me() && id == request.resource.data.mid + '_' + me()
-        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'mid', 'uid', 'opt', 'opts', 'at']);
-      allow delete: if id.matches('.*_' + me());
+      allow create, update: if ticketOk() && (request.resource.data.uid == me() && id == request.resource.data.mid + '_' + me()
+        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'mid', 'uid', 'opt', 'opts', 'at']));
+      allow delete: if ticketOk() && (id.matches('.*_' + me()));
     }
     // Bettenmanager: Zimmer legt der Reise-Admin an; Zimmerwünsche sind für alle Mitglieder der Reise sichtbar
     match /zimmer/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isTripAdmin(request.resource.data.rid) || isAdmin();
-      allow update, delete: if isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isTripAdmin(request.resource.data.rid) || isAdmin());
+      allow update, delete: if ticketOk() && (isTripAdmin(resource.data.rid) || isAdmin());
     }
     // Jedes Mitglied trägt seinen eigenen Wunsch ein, der Admin für alle
     match /zimmerwahl/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'zimmerId', 'einzel', 'typ', 'mit', 'claimAt', 'by', 'updatedAt'])
+      allow create, update: if ticketOk() && ((isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'zimmerId', 'einzel', 'typ', 'mit', 'claimAt', 'by', 'updatedAt'])
           && ((request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me())))
-        || isTripAdmin(request.resource.data.rid) || isAdmin();
-      allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
+        || isTripAdmin(request.resource.data.rid) || isAdmin());
+      allow delete: if ticketOk() && (resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     // Budget: privat, nur die Person selbst liest ihre Angabe; die Spanne an der Reise setzt der Server
     match /zimmerbudget/{id} {
       allow read: if signedIn() && id.matches('.*_' + me());
-      allow create, update: if signedIn() && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
-        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'betrag', 'egal', 'at']) && request.resource.data.betrag is number;
-      allow delete: if signedIn() && id.matches('.*_' + me());
+      allow create, update: if ticketOk() && (signedIn() && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
+        && isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'betrag', 'egal', 'at']) && request.resource.data.betrag is number);
+      allow delete: if ticketOk() && (signedIn() && id.matches('.*_' + me()));
     }
     // Buchungsstufe: Angebote lädt der Reise-Admin hoch, abstimmen kann jedes Mitglied für sich
     match /angebote/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isTripAdmin(request.resource.data.rid) || isAdmin();
-      allow update, delete: if isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isTripAdmin(request.resource.data.rid) || isAdmin());
+      allow update, delete: if ticketOk() && (isTripAdmin(resource.data.rid) || isAdmin());
     }
     match /angebotstimmen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create, update: if isMember(request.resource.data.rid) && request.resource.data.uid == me() && id == request.resource.data.aid + '_' + me()
-        && request.resource.data.keys().hasOnly(['rid', 'aid', 'uid', 'wahl', 'at']) && request.resource.data.wahl in ['ja', 'nein'];
-      allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create, update: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.uid == me() && id == request.resource.data.aid + '_' + me()
+        && request.resource.data.keys().hasOnly(['rid', 'aid', 'uid', 'wahl', 'at']) && request.resource.data.wahl in ['ja', 'nein']);
+      allow delete: if ticketOk() && (resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     // Aufgaben, Einkaufsliste und Musik der Gruppe
     /* Ansagen: nur der Admin der Reise schreibt, Mitglieder lesen und tragen ausschließlich ihr eigenes „gelesen“ ein */
     match /rundnachrichten/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isTripAdmin(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'createdAt', 'gelesen']) && request.resource.data.text.size() <= 280;
-      allow update: if isMember(resource.data.rid) && onlyChanges(['gelesen']) && request.resource.data.get('gelesen', {}).diff(resource.data.get('gelesen', {})).affectedKeys().hasOnly([me()]);
-      allow delete: if isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isTripAdmin(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'createdAt', 'gelesen']) && request.resource.data.text.size() <= 280);
+      allow update: if ticketOk() && (isMember(resource.data.rid) && onlyChanges(['gelesen']) && request.resource.data.get('gelesen', {}).diff(resource.data.get('gelesen', {})).affectedKeys().hasOnly([me()]));
+      allow delete: if ticketOk() && (isTripAdmin(resource.data.rid) || isAdmin());
     }
     /* Änderungen von Angaben: das Mitglied meldet sie, nur der Admin der Reise (und das Mitglied selbst) liest sie */
     match /aenderungen/{id} {
       allow read: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
-      allow create: if isMember(request.resource.data.rid) && request.resource.data.uid == me() && request.resource.data.keys().hasOnly(['rid', 'uid', 'text', 'themen', 'at']) && request.resource.data.text.size() <= 200;
-      allow update: if resource.data.uid == me() && onlyChanges(['text', 'themen', 'at']);
-      allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.uid == me() && request.resource.data.keys().hasOnly(['rid', 'uid', 'text', 'themen', 'at']) && request.resource.data.text.size() <= 200);
+      allow update: if ticketOk() && (resource.data.uid == me() && onlyChanges(['text', 'themen', 'at']));
+      allow delete: if ticketOk() && (resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     /* Ideen-Pool der Koffer-Konferenz: alle Mitglieder werfen Ideen ein; jeder ändert nur seine eigene Stimme */
     match /ideen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.titel.size() <= 60
-        && request.resource.data.keys().hasOnly(['rid', 'titel', 'notiz', 'link', 'by', 'createdAt', 'stimmen']);
-      allow update: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()
-        || (isMember(resource.data.rid) && onlyChanges(['stimmen']) && request.resource.data.get('stimmen', {}).diff(resource.data.get('stimmen', {})).affectedKeys().hasOnly([me()]));
-      allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.titel.size() <= 60
+        && request.resource.data.keys().hasOnly(['rid', 'titel', 'notiz', 'link', 'by', 'createdAt', 'stimmen']));
+      allow update: if ticketOk() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin()
+        || (isMember(resource.data.rid) && onlyChanges(['stimmen']) && request.resource.data.get('stimmen', {}).diff(resource.data.get('stimmen', {})).affectedKeys().hasOnly([me()])));
+      allow delete: if ticketOk() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     match /aufgaben/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isTripAdmin(request.resource.data.rid) || isAdmin()
-        || (isMember(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.vorgeschlagen == true && request.resource.data.get('wer', '') == '');
-      allow update: if isTripAdmin(resource.data.rid) || isAdmin()
+      allow create: if ticketOk() && (isTripAdmin(request.resource.data.rid) || isAdmin()
+        || (isMember(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.vorgeschlagen == true && request.resource.data.get('wer', '') == ''));
+      allow update: if ticketOk() && (isTripAdmin(resource.data.rid) || isAdmin()
         || (isMember(resource.data.rid) && resource.data.get('vorgeschlagen', false) == false && resource.data.get('wer', '') in ['', me()] && request.resource.data.get('wer', '') in ['', me()]
-            && onlyChanges(['wer', 'done', 'doneBy', 'doneAt']));
-      allow delete: if isTripAdmin(resource.data.rid) || isAdmin();
+            && onlyChanges(['wer', 'done', 'doneBy', 'doneAt'])));
+      allow delete: if ticketOk() && (isTripAdmin(resource.data.rid) || isAdmin());
     }
     match /einkauf/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me()
-        && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'createdAt', 'gekauft', 'kaeufer', 'gekauftAt']);
-      allow update: if isMember(resource.data.rid) && onlyChanges(['gekauft', 'kaeufer', 'gekauftAt']);
-      allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.by == me()
+        && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'createdAt', 'gekauft', 'kaeufer', 'gekauftAt']));
+      allow update: if ticketOk() && (isMember(resource.data.rid) && onlyChanges(['gekauft', 'kaeufer', 'gekauftAt']));
+      allow delete: if ticketOk() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     match /musik/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me()
-        && request.resource.data.keys().hasOnly(['rid', 'typ', 'titel', 'link', 'by', 'createdAt']) && request.resource.data.typ in ['playlist', 'song'];
-      allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.by == me()
+        && request.resource.data.keys().hasOnly(['rid', 'typ', 'titel', 'link', 'by', 'createdAt']) && request.resource.data.typ in ['playlist', 'song']);
+      allow delete: if ticketOk() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     // Anreise: jede Person für sich, für Begleitpersonen deren Ersteller, der Admin für alle. Sichtbar für alle Mitglieder.
     /* Notfallpass: nur die Person selbst und die von ihr gewählten Mitglieder der Reise (an = ['alle'] oder Liste von UIDs). Auch die Badeaufsicht liest ihn nicht. */
     match /notfallpass/{id} {
       allow read: if signedIn() && (resource.data.uid == me() || (isMember(resource.data.rid) && (me() in resource.data.an || 'alle' in resource.data.an)));
-      allow create, update: if signedIn() && isMember(request.resource.data.rid) && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
-        && request.resource.data.keys().hasOnly(['rid', 'uid', 'an', 'daten', 'mitCode', 'at']) && request.resource.data.an.size() > 0 && request.resource.data.an.size() <= 60;
-      allow delete: if signedIn() && resource.data.uid == me();
+      allow create, update: if ticketOk() && (signedIn() && isMember(request.resource.data.rid) && request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me()
+        && request.resource.data.keys().hasOnly(['rid', 'uid', 'an', 'daten', 'mitCode', 'at']) && request.resource.data.an.size() > 0 && request.resource.data.an.size() <= 60);
+      allow delete: if ticketOk() && (signedIn() && resource.data.uid == me());
     }
     match /anreisewunsch/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'art', 'abflug', 'ziel', 'zugZumFlug', 'bahnhof', 'startort', 'hinweis', 'selbstAlles', 'by', 'at'])
+      allow create, update: if ticketOk() && ((isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'art', 'abflug', 'ziel', 'zugZumFlug', 'bahnhof', 'startort', 'hinweis', 'selbstAlles', 'by', 'at'])
           && ((request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me())))
-        || isTripAdmin(request.resource.data.rid) || isAdmin();
-      allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
+        || isTripAdmin(request.resource.data.rid) || isAdmin());
+      allow delete: if ticketOk() && (resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     match /mitbringen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create: if isMember(request.resource.data.rid) && request.resource.data.by == me()
-        && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'wer', 'createdAt']) && request.resource.data.text is string && request.resource.data.text.size() <= 60;
-      allow update: if isMember(resource.data.rid) && onlyChanges(['wer', 'am'])
-        && (request.resource.data.wer == me() && resource.data.wer == null || resource.data.wer == me() && request.resource.data.wer == null);
-      allow delete: if resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if ticketOk() && (isMember(request.resource.data.rid) && request.resource.data.by == me()
+        && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'wer', 'createdAt']) && request.resource.data.text is string && request.resource.data.text.size() <= 60);
+      allow update: if ticketOk() && (isMember(resource.data.rid) && onlyChanges(['wer', 'am'])
+        && (request.resource.data.wer == me() && resource.data.wer == null || resource.data.wer == me() && request.resource.data.wer == null));
+      allow delete: if ticketOk() && (resource.data.by == me() || isTripAdmin(resource.data.rid) || isAdmin());
     }
     // Push-Benachrichtigungen: Geräte-Schlüssel und Einstellungen, nur für einen selbst
     match /pushtokens/{uid} {
