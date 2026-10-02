@@ -870,6 +870,8 @@ const fD = s => { const d=parseDay(s); return d?`${pad(d.getDate())}.${pad(d.get
 const fDY = s => { const d=parseDay(s); return d?`${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`:''; };
 const fRange = (a,b) => { if(!a) return ''; if(!b||a===b) return fDY(a); const A=parseDay(a),B=parseDay(b); return A.getFullYear()===B.getFullYear()?`${fD(a)} – ${fDY(b)}`:`${fDY(a)} – ${fDY(b)}`; };
 const fTime = ms => { const d=new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+/* Mit Jahreszahl: 02.10.2026 22:30 Uhr */
+const fStampJ = ms => { const d=new Date(ms); return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${fTime(ms)} Uhr`; };
 const fStamp = ms => { const d=new Date(ms); return `${pad(d.getDate())}.${pad(d.getMonth()+1)}. ${fTime(ms)} Uhr`; };
 const dayLabel = s => { const n=daysUntil(s); if(n===0) return 'Heute'; if(n===-1) return 'Gestern'; if(n===1) return 'Morgen'; const d=parseDay(s); return `${WD[d.getDay()]}, ${fD(s)}`; };
 const nights = (a,b) => Math.max(0, Math.round((parseDay(b)-parseDay(a))/864e5));
@@ -4802,7 +4804,7 @@ async function rechteAbgleich(){ try{ if(typeof FB==='undefined' || !FB || S.sup
 let ticketTimer=null;
 function ticketAbo(){ if(!S.db || !S.uid) return;
   try{ unsubs.global.push(S.db.doc(`kontingent/${S.uid}`).onSnapshot(s=>{ const vor=kontWerte(); S.kont=s.exists?s.data():null; const nach=kontWerte(); for(const k of ['foto','video','sprache']) if(nach[k]>vor[k]) kontHinweis(k, nach[k]); }, e=>console.warn('Kontingent', e))); }catch(e){}
-  try{ unsubs.global.push(S.db.doc(`tickets/${S.uid}`).onSnapshot(async s=>{ S.ticketDa=true; const vorher=(S.ticket?.art||'')+(S.ticket?.bis||''); S.ticket=s.exists?{id:s.id,...s.data()}:null; if(!FB && S.ticket && !S.supportVon){ const sig=S.ticket.art+'|'+(S.ticket.bis||0); if(S.tkSig!==sig){ S.tkSig=sig; try{ S.db.doc(`ticketart/${S.uid}`).set({art:S.ticket.art, bis:S.ticket.bis||0}); }catch(e){} } } if(vorher!==((S.ticket?.art||'')+(S.ticket?.bis||''))) rechteAbgleich();
+  try{ unsubs.global.push(S.db.doc(`tickets/${S.uid}`).onSnapshot(async s=>{ S.ticketDa=true; const vorher=(S.ticket?.art||'')+(S.ticket?.bis||''); S.ticket=s.exists?{id:s.id,...s.data()}:null; if(!FB && S.ticket && !S.supportVon){ const sig=(ticketFrei()?'frei|0':S.ticket.art+'|'+(S.ticket.bis||0)); if(S.tkSig!==sig){ S.tkSig=sig; try{ S.db.doc(`ticketart/${S.uid}`).set(ticketFrei()?{art:'frei',bis:4102444800000}:{art:S.ticket.art, bis:S.ticket.bis||0}); }catch(e){} } } if(vorher!==((S.ticket?.art||'')+(S.ticket?.bis||''))) rechteAbgleich();
       if(!S.ticket && S.supportVon){ S.ticket=KONTO.tick?.[S.uid]||null; render(); return; }
       if(!S.ticket){ const von=now(); const d={art:'tag', von, bis:ticketBis('tag',von), by:S.uid, at:von, auto:true}; S.ticket={id:S.uid,...d}; render(); try{ await S.db.doc(`tickets/${S.uid}`).set(d); }catch(e){ console.warn('Ticket', e); } }
       clearTimeout(ticketTimer); const rest=(S.ticket.bis||0)-now(); if(rest>0 && rest<2147e6) ticketTimer=setTimeout(()=>render(), rest+500);
@@ -4832,7 +4834,8 @@ function kaufKarte(list){ try{ if(!S.ticketDa || tkBezahlt() || ticketFrei()) re
     const wann=d>1?`In ${d} Tagen geht es los`:d===1?'Morgen geht es los':d===0?'Heute geht es los':'Ihr seid unterwegs';
     return `<button class="tkbtn" data-act="go" data-v="kiosk"><div class="card hot tight"><div class="row between"><b>${ic('star',14)} ${wann}: ${esc(r.titel||'Reise')}</b></div><span class="small">Möchtest du auch Fotos und Videos teilen? Mit der ${empf} geht das. Tippe, um die Tickets anzusehen.</span></div></button>`; }catch(e){ return ''; } }
 /* Ticket neben dem Profilbild (antippen = Kiosk) */
-function ticketKopf(){ try{ if(!S.ticketDa || !S.ticket) return ''; const t=S.ticket; const ab=!ticketFrei() && t.art!=='tag' && ticketAbgelaufen(t);
+function ticketKopf(){ try{ if(ticketFrei()) return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild('frei',{nr:tkNr(S.uid), gueltig:'Dauerhaft gültig'})}</div>`;
+  if(!S.ticketDa || !S.ticket) return ''; const t=S.ticket; const ab=!ticketFrei() && t.art!=='tag' && ticketAbgelaufen(t);
   return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen ${tkEnde(t.bis).replace(' Uhr','')}`:`Gültig bis ${tkEnde(t.bis).replace(' Uhr','')}`})}</div>`; }catch(e){ return ''; } }
 /* Karte „Kiosk“ unter dem Kopf */
 function ticketKarte(){ try{ const t=S.ticket; let info='Tickets ansehen';
@@ -4842,7 +4845,7 @@ function ticketKarte(){ try{ const t=S.ticket; let info='Tickets ansehen';
 
 /* ---------- Admin: Tickets zuweisen ---------- */
 const ticketVon = u => KONTO.tick?.[u] || null;
-function ticketChip(u){ const t=ticketVon(u); if(!KONTO.daten) return ''; if(!t) return '<span class="tiny mut">kein Ticket</span>'; const ab=ticketAbgelaufen(t)&&t.art!=='tag'; return `<span class="tiny" style="${ab?'color:var(--pinktx)':'color:var(--yelt)'}">${esc(ticketName(t.art))} · ${t.art==='tag'?'gratis':ab?'abgelaufen':'bis '+fStamp(t.bis)}</span>`; }
+function ticketChip(u){ const t=ticketVon(u); if(!KONTO.daten) return ''; if(!t) return '<span class="tiny mut">kein Ticket</span>'; const ab=ticketAbgelaufen(t)&&t.art!=='tag'; return `<span class="tiny" style="${ab?'color:var(--pinktx)':'color:var(--yelt)'}">${esc(ticketName(t.art))} · ${t.art==='tag'?'gratis':ab?'abgelaufen':'bis '+fStampJ(t.bis)}</span>`; }
 A.ticketAuf = el => { if(!istSuper()) return; const us = el.dataset.uid ? [el.dataset.uid] : (S.ui.ticketUs||[]); if(!us.length) return; S.form.tkArt=''; openOv('ticketZuw',{us}); };
 A.ticketAlle = ()=>{ if(!istSuper()) return; S.ui.ticketUs=(S.ui.ticketListe||[]).filter(u=>u!==S.uid); if(!S.ui.ticketUs.length) return toast('Niemand in dieser Auswahl.'); S.form.tkArt=''; openOv('ticketZuw',{us:S.ui.ticketUs}); };
 A.tkArt = el => { S.form.tkArt=el.dataset.k; S.form.tkbis=''; renderOv(); };
@@ -4850,16 +4853,16 @@ const tkDatum = ms => { const d=new Date(ms); return `${d.getFullYear()}-${pad(d
 const tkBisWahl = a => { if(a!=='pauschal'&&a!=='frei') return ticketBis(a); const v=S.form.tkbis; if(v){ const d=new Date(v+'T23:59:00'); if(!isNaN(d)) return d.getTime(); } return ticketBis(a); };
 OV.ticketZuw = o => { const us=o.us; const eins=us.length===1; const a=S.form.tkArt; const t=eins?ticketVon(us[0]):null;
   return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Ticket zuweisen"><h2>Ticket zuweisen</h2>
-  <p class="small mut">${eins?`Für <b>${esc(nm(us[0]))}</b>${t?`. Aktuell: ${esc(ticketName(t.art))}, ${ticketAbgelaufen(t)?'abgelaufen am':'gültig bis'} ${fStamp(t.bis)}`:''}.`:`Für <b>${us.length} Mitglieder</b>.`} Die Gültigkeit beginnt jetzt und ersetzt das bisherige Ticket.</p>
-  <div class="col" style="gap:8px">${TICKETS.map(([k,n,d])=>`<button type="button" class="pfopt ${a===k?'on':''}" aria-pressed="${a===k}" data-act="tkArt" data-k="${k}"><b>${n}</b><span class="small mut">${d}${a===k?`, gültig bis ${fStamp(tkBisWahl(k))}`:''}</span></button>`).join('')}</div>
+  <p class="small mut">${eins?`Für <b>${esc(nm(us[0]))}</b>${t?`. Aktuell: ${esc(ticketName(t.art))}, ${ticketAbgelaufen(t)?'abgelaufen am':'gültig bis'} ${fStampJ(t.bis)}`:''}.`:`Für <b>${us.length} Mitglieder</b>.`} Die Gültigkeit beginnt jetzt und ersetzt das bisherige Ticket.</p>
+  <div class="col" style="gap:8px">${TICKETS.map(([k,n,d])=>`<button type="button" class="pfopt ${a===k?'on':''}" aria-pressed="${a===k}" data-act="tkArt" data-k="${k}"><b>${n}</b><span class="small mut">${d}${a===k?`, gültig bis ${fStampJ(tkBisWahl(k))}`:''}</span></button>`).join('')}</div>
   ${a==='pauschal'||a==='frei'?`<label class="col" style="gap:4px"><span class="small"><b>Gültig bis</b> ${a==='pauschal'?'(Reiseende plus 30 Tage)':'(Testzeitraum)'}</span><input class="in" type="date" id="f_tkbis" value="${tkDatum(tkBisWahl(a))}" min="${tkDatum(now())}"></label>`:''}
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ticketSpeichern" ${a?'':'disabled'}>Zuweisen</button></div></div>`; };
 A.ticketSpeichern = async el => { if(!istSuper()) return; const art=S.form.tkArt; if(!art) return; const us=S.ov?.us||[]; el.disabled=true; const von=now(); const bis=tkBisWahl(art);
   try{ for(const u of us){ const d={art, von, bis, by:S.uid, at:von}; await S.db.doc(`tickets/${u}`).set(d); if(!FB) await S.db.doc(`ticketart/${u}`).set({art, bis}); if(KONTO.tick) KONTO.tick[u]={id:u,...d}; if(typeof tkLog==='function') await tkLog(u,d,'zugewiesen');
-      try{ await supportSend(u, `Dein Ticket wurde geändert: ${ticketName(art)}, gültig bis ${fStamp(bis)}. Viel Spaß mit Poolposition!`); }catch(e){} }
+      try{ await supportSend(u, `Dein Ticket wurde geändert: ${ticketName(art)}, gültig bis ${fStampJ(bis)}. Viel Spaß mit Poolposition!`); }catch(e){} }
     closeOv(); toast(us.length===1?'Ticket zugewiesen':`${us.length} Tickets zugewiesen`); render(); }catch(e){ el.disabled=false; fail(e,'Zuweisen'); } };
 
-/* Ticketart eines anderen Mitglieds, neben dem Namen: für alle sichtbar (nur die Art, ohne Datum). Der Server schreibt sie nach ticketart/{uid}, Team-Mitglieder haben dort keinen Eintrag (Badeaufsicht bleibt anonym).
+/* Ticketart eines anderen Mitglieds, neben dem Namen: für alle sichtbar (nur die Art, ohne Datum). Der Server schreibt sie nach ticketart/{uid}, Das Team erscheint dort als Freikarte, wie die Tester, damit eine fehlende Karte nichts verrät.
    Das Team mit dem Recht „Nutzer“ sieht zusätzlich Ablaufdatum aus der Mitgliederverwaltung. */
 S.tkArt = {};
 const tkTeamNutzer = () => { try{ return !!S.rechte?.nutzer; }catch(e){ return false; } };
@@ -4894,8 +4897,8 @@ function ticketBild(art, opt={}){ const i=TK_INFO[art]||TK_INFO.tag; const nr=op
       ${opt.preis?`<span class="tkpreis" aria-label="Preis folgt"><i>00,00 €</i></span>`:''}</div>
     <div class="tkstub"><span class="tksym">${i.sym}</span><span class="tknr">Nr.<br><b>${nr}</b></span><span class="tkein">EINTRITT</span></div></div>`; }
 const TK_LEIST = { pauschal:'Von Kauf bis 30 Tage nach der Reise · bis 200 Fotos', woche:'7 Tage ab Aktivierung · bis 100 Fotos', monat:'1 Monat · bis 150 Fotos', jahr:'1 Jahr · bis 300 Fotos' };
-V.kiosk = ()=>{ const t=S.ticket; const ab=t && t.art!=='tag' && !ticketFrei() && ticketAbgelaufen(t);
-  const mein = t && S.ticketDa ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen am ${tkEnde(t.bis)}`:`Gültig bis ${tkEnde(t.bis)}`})}<span class="small ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${ticketFrei()?'Als Team bist du von Tickets ausgenommen.':t.art==='tag'?'Die Tageskarte ist gratis und läuft nie ab.':ab?`Abgelaufen am ${tkEnde(t.bis)}. Es gilt wieder die Tageskarte.`:`${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}.`}</span></div>` : '';
+V.kiosk = ()=>{ const t=ticketFrei()?{art:'frei',bis:4102444800000}:S.ticket; const ab=t && t.art!=='tag' && !ticketFrei() && ticketAbgelaufen(t);
+  const mein = t && (S.ticketDa||ticketFrei()) ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen am ${tkEnde(t.bis)}`:`Gültig bis ${tkEnde(t.bis)}`})}<span class="small ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${ticketFrei()?'Als Team bist du von Tickets ausgenommen.':t.art==='tag'?'Die Tageskarte ist gratis und läuft nie ab.':ab?`Abgelaufen am ${tkEnde(t.bis)}. Es gilt wieder die Tageskarte.`:`${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}.`}</span></div>` : '';
   return `${hdrPlain('Kiosk')}${backBtn()}
   <div class="kioskdach" aria-hidden="true"></div>
   <div class="col" style="gap:2px"><h1>Der Kiosk</h1><span class="mut">Hier gibt es bald deine Mitgliedschaft. Wähle dein Ticket für Poolposition.</span></div>
@@ -5024,7 +5027,7 @@ A.mvLogF = el => { S.ui.mvLogF=el.dataset.k; render(); };
 A.mvVerl = async el => { if(!istSuper()) return; const u=el.dataset.uid; const t=KONTO.tick?.[u]; if(!t) return; el.disabled=true;
   const von=t.von||now(); const bis=ticketBis(t.art, Math.max(now(), t.bis)); const d={art:t.art, von, bis, by:S.uid, at:now()}; if(!FB) S.db.doc(`ticketart/${u}`).set({art:t.art, bis}).catch(()=>{});
   try{ await S.db.doc(`tickets/${u}`).set(d); KONTO.tick[u]={id:u,...d}; await tkLog(u,d,'verlaengert');
-    try{ await supportSend(u, `Dein Ticket wurde verlängert: ${ticketName(t.art)}, gültig bis ${fStamp(bis)}.`); }catch(e){}
+    try{ await supportSend(u, `Dein Ticket wurde verlängert: ${ticketName(t.art)}, gültig bis ${fStampJ(bis)}.`); }catch(e){}
     toast('Verlängert'); render(); if(S.ov?.v==='mvProfil') renderOv(); }catch(e){ el.disabled=false; fail(e,'Verlängern'); } };
 
 /* ---------- Profil in der Verwaltung ---------- */
