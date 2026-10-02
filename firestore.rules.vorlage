@@ -38,6 +38,15 @@ service cloud.firestore {
       allow update: if recht('ausblenden') && onlyChanges(['foto', 'fotoOrig', 'fotoEntfernt']);
     }
 
+    // Tickets (Mitgliedschaft): jeder liest sein eigenes, die Tageskarte legt der Nutzer beim ersten Start selbst an, alles andere nur der Oberbademeister
+    match /tickets/{uid} {
+      allow read: if signedIn() && (me() == uid || isSuper() || recht('nutzer'));
+      allow create: if signedIn() && me() == uid && request.resource.data.art == 'tag' && request.resource.data.by == me()
+        && request.resource.data.keys().hasOnly(['art', 'von', 'bis', 'by', 'at', 'auto'])
+        && request.resource.data.bis <= request.time.toMillis() + 90000000;
+      allow create, update, delete: if isSuper();
+    }
+
     // Reisen: lesbar für Angemeldete
     match /reisen/{rid} {
       allow read: if signedIn();
@@ -268,14 +277,13 @@ service cloud.firestore {
       allow create: if isTripAdmin(request.resource.data.rid) || isAdmin();
       allow update, delete: if isTripAdmin(resource.data.rid) || isAdmin();
     }
-    // Jedes Mitglied trägt seinen eigenen Wunsch ein, für Begleitpersonen ohne App deren Ersteller, der Admin für alle
+    // Jedes Mitglied trägt seinen eigenen Wunsch ein, der Admin für alle
     match /zimmerwahl/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'zimmerId', 'einzel', 'typ', 'mit', 'claimAt', 'gast', 'name', 'by', 'updatedAt'])
-          && ((request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me())
-              || (request.resource.data.gast == true && request.resource.data.by == me() && id == request.resource.data.rid + '_' + request.resource.data.uid)))
+      allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'zimmerId', 'einzel', 'typ', 'mit', 'claimAt', 'by', 'updatedAt'])
+          && ((request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me())))
         || isTripAdmin(request.resource.data.rid) || isAdmin();
-      allow delete: if (resource.data.get('gast', false) == true && resource.data.by == me()) || resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
     }
     // Budget: privat, nur die Person selbst liest ihre Angabe; die Spanne an der Reise setzt der Server
     match /zimmerbudget/{id} {
@@ -303,6 +311,13 @@ service cloud.firestore {
       allow create: if isTripAdmin(request.resource.data.rid) && request.resource.data.by == me() && request.resource.data.keys().hasOnly(['rid', 'text', 'by', 'createdAt', 'gelesen']) && request.resource.data.text.size() <= 280;
       allow update: if isMember(resource.data.rid) && onlyChanges(['gelesen']) && request.resource.data.get('gelesen', {}).diff(resource.data.get('gelesen', {})).affectedKeys().hasOnly([me()]);
       allow delete: if isTripAdmin(resource.data.rid) || isAdmin();
+    }
+    /* Änderungen von Angaben: das Mitglied meldet sie, nur der Admin der Reise (und das Mitglied selbst) liest sie */
+    match /aenderungen/{id} {
+      allow read: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
+      allow create: if isMember(request.resource.data.rid) && request.resource.data.uid == me() && request.resource.data.keys().hasOnly(['rid', 'uid', 'text', 'themen', 'at']) && request.resource.data.text.size() <= 200;
+      allow update: if resource.data.uid == me() && onlyChanges(['text', 'themen', 'at']);
+      allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
     }
     /* Ideen-Pool der Koffer-Konferenz: alle Mitglieder werfen Ideen ein; jeder ändert nur seine eigene Stimme */
     match /ideen/{id} {
@@ -345,11 +360,10 @@ service cloud.firestore {
     }
     match /anreisewunsch/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();
-      allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'art', 'abflug', 'ziel', 'zugZumFlug', 'bahnhof', 'startort', 'hinweis', 'gast', 'name', 'selbstAlles', 'by', 'at'])
-          && ((request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me())
-              || (request.resource.data.gast == true && request.resource.data.by == me() && id == request.resource.data.rid + '_' + request.resource.data.uid)))
+      allow create, update: if (isMember(request.resource.data.rid) && request.resource.data.keys().hasOnly(['rid', 'uid', 'art', 'abflug', 'ziel', 'zugZumFlug', 'bahnhof', 'startort', 'hinweis', 'selbstAlles', 'by', 'at'])
+          && ((request.resource.data.uid == me() && id == request.resource.data.rid + '_' + me())))
         || isTripAdmin(request.resource.data.rid) || isAdmin();
-      allow delete: if resource.data.uid == me() || (resource.data.get('gast', false) == true && resource.data.by == me()) || isTripAdmin(resource.data.rid) || isAdmin();
+      allow delete: if resource.data.uid == me() || isTripAdmin(resource.data.rid) || isAdmin();
     }
     match /mitbringen/{id} {
       allow read: if isMember(resource.data.rid) || isAdmin();

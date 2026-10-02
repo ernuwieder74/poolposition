@@ -688,6 +688,31 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .ktag.fest:not(.von):not(.bis){background:rgba(63,163,107,.28)}
 .ktag.festvon:not(.von):not(.bis),.ktag.festbis:not(.von):not(.bis){background:#3fa36b;color:#fff;font-weight:800}
 .ktag.festvon:not(.von):not(.bis){border-radius:12px 0 0 12px}.ktag.festbis:not(.von):not(.bis){border-radius:0 12px 12px 0}.ktag.festvon.festbis:not(.von):not(.bis){border-radius:12px}
+
+/* ---- Kiosk und Schwimmbad-Tickets ---- */
+.kioskdach{height:30px;border-radius:14px 14px 4px 4px;background:repeating-linear-gradient(90deg,#e8523f 0 28px,#fff7ea 28px 56px);box-shadow:0 5px 0 -1px rgba(0,0,0,.18)}
+.tkt{--c1:#f5c518;--c2:#fff2b8;--ink:#3b2a05;display:flex;position:relative;border-radius:14px;color:var(--ink);background:linear-gradient(135deg,var(--c2),var(--c1));box-shadow:0 3px 0 rgba(0,0,0,.18),0 10px 22px rgba(0,0,0,.18);overflow:hidden;border:2px solid var(--ink);min-height:148px}
+.tkt.klein{min-height:130px}.tkt.klein .tksym{font-size:20px}.tkt.klein .tkstub{padding:12px 6px}
+.tkt.tag{--c1:#f2c84b;--c2:#fff3c4;--ink:#4a3606}
+.tkt.woche{--c1:#33b6c9;--c2:#d7f5f8;--ink:#073a44}
+.tkt.monat{--c1:#e8654f;--c2:#ffe0d6;--ink:#4a1308}
+.tkt.jahr{--c1:#c9962b;--c2:#fff0c8;--ink:#2e1d02}
+.tkt.jahr .tkmain::after{content:"";position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;border:2px dashed var(--ink);opacity:.35}
+.tkmain{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:3px;position:relative}
+.tkkopf{font-size:9px;letter-spacing:.14em;font-weight:700;opacity:.75}
+.tktitel{font-family:"Arial Black","Helvetica Neue",Arial,sans-serif;font-size:24px;line-height:1.05;letter-spacing:.02em}
+.tkt.klein .tktitel{font-size:19px}
+.tkwelle{width:100%;height:9px;color:var(--ink);opacity:.55}
+.tksub{font-size:13px;font-style:italic}
+.tkdauer{font-size:12px;font-weight:700;letter-spacing:.03em}
+.tkpreis{margin-top:4px;align-self:flex-start;background:rgba(255,255,255,.55);border:1.5px dashed var(--ink);border-radius:8px;padding:2px 12px;font-weight:800;font-size:17px}
+.tkpreis i{font-style:normal;filter:blur(6px);user-select:none}
+.tkstub{width:86px;flex-shrink:0;border-left:2.5px dashed var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 6px;background:rgba(255,255,255,.28);position:relative;text-align:center}
+.tkstub::before,.tkstub::after{content:"";position:absolute;left:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg)}
+.tkstub::before{top:-12px}.tkstub::after{bottom:-12px}
+.tksym{font-size:24px}.tknr{font-size:10px;line-height:1.2;font-weight:600}.tknr b{font-size:13px;letter-spacing:.06em}
+.tkein{writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;letter-spacing:.3em;font-weight:800;opacity:.7}
+.tkbtn{display:block;width:100%;text-align:left;background:none;border:0;padding:0;cursor:pointer;color:inherit}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -700,7 +725,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.27";
+const APP_VERSION = "Beta 2.28";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -847,7 +872,7 @@ function renderToast(){ let el=document.getElementById('toast'); if(!S.toast){ e
   if(!el){ el=document.createElement('div'); el.id='toast'; el.className='toast'; el.setAttribute('role','status'); document.body.appendChild(el); }
   el.style.bottom = document.querySelector('.composer') ? 'calc(166px + env(safe-area-inset-bottom,0px))' : '';
   el.innerHTML=`${ic('check',20,'style="color:#1d8a4e"')}<span class="grow">${esc(S.toast.text)}</span>${S.toast.undo?`<button type="button" data-act="toastUndo">${esc(S.toast.label||'Rückgängig')}</button>`:''}`; }
-function fail(e, what){ console.error(what, e); const c=e?.code; let t = what ? `${what} hat nicht geklappt.` : 'Das hat nicht geklappt.';
+function fail(e, what){ console.error(what, e); if(e?.ticket){ toast('Dein Ticket ist abgelaufen. Du kannst alles ansehen, aber nichts ändern.'); return; } const c=e?.code; let t = what ? `${what} hat nicht geklappt.` : 'Das hat nicht geklappt.';
   if(c==='invalid_argument') t += ' Dir fehlt vermutlich die Berechtigung zum Mitmachen.'; else if(c==='quota_exceeded') t+=' Der Speicher ist voll.'; else t+=' Bitte versuch es gleich noch einmal.'; toast(t); }
 function openOv(v, data={}){ S.ov={v, ...data}; renderOv(); }
 function closeOv(){ S.ov=null; renderOv(); }
@@ -914,7 +939,7 @@ async function boot(){
 
 function subGlobal(){
   const U = unsubs.global; const db=S.db;
-  if(typeof rollenAbo==='function') rollenAbo();
+  if(typeof rollenAbo==='function') rollenAbo(); if(typeof ticketAbo==='function') ticketAbo();
   U.push(db.collection('profile').onSnapshot(s=>{ S.profile={}; snapDocs(s).forEach(p=>S.profile[p.id]=p); S.profilesLoaded=true; render(); refreshProfiles(); }, e=>console.warn(e)));
   U.push(db.collection('mitglied').where('uid','==',S.uid).onSnapshot(s=>{ S.meineM=snapDocs(s); syncReisen(); render(); }, e=>console.warn(e)));
   U.push(db.collection('fluester').where('members','array-contains',S.uid).onSnapshot(s=>{ S.pairs=snapDocs(s).sort((a,b)=>(b.lastAt||0)-(a.lastAt||0)); checkNeueFluester(); render(); refreshProfiles(); }, e=>console.warn(e)));
@@ -931,7 +956,7 @@ function syncReisen(){
 }
 function setTrip(rid){
   if(S.rid===rid) return;
-  unsubs.trip.forEach(u=>u()); unsubs.trip=[]; S.rid=rid; S.tripAt=now(); S.rt={mitglied:[],vorschlaege:[],stimmen:[],akt:[],msgs:[],kasse:[],mitbringen:[],herzAn:[],herzVon:[],ustimmen:[],zimmer:[],zwahl:[],angebote:[],astimmen:[],aufgaben:[],einkauf:[],musik:[],anreisen:[], npMein:[], npAn:[], npAlle:[], rund:[], ideen:[]}; S.myVote=null; S.voteDirty=false;
+  unsubs.trip.forEach(u=>u()); unsubs.trip=[]; S.rid=rid; S.tripAt=now(); S.rt={mitglied:[],vorschlaege:[],stimmen:[],akt:[],msgs:[],kasse:[],mitbringen:[],herzAn:[],herzVon:[],ustimmen:[],zimmer:[],zwahl:[],angebote:[],astimmen:[],aufgaben:[],einkauf:[],musik:[],anreisen:[], npMein:[], npAn:[], npAlle:[], rund:[], ideen:[], aend:[]}; S.myVote=null; S.voteDirty=false;
   if(!rid) return;
   const db=S.db, T=unsubs.trip, q=c=>db.collection(c).where('rid','==',rid);
   T.push(q('mitglied').onSnapshot(s=>{ S.rt.mitglied=snapDocs(s); render(); refreshProfiles(); awPruefenBald(); konfPruefenBald(); setTimeout(morgenPruefen, 5500); }, e=>console.warn(e)));
@@ -950,6 +975,7 @@ function setTrip(rid){
   T.push(S.db.collection('notfallpass').where('rid','==',rid).where('an','array-contains','alle').onSnapshot(s=>{ S.rt.npAlle=snapDocs(s); render(); }, e=>console.warn('Notfallpass',e)));
   T.push(q('rundnachrichten').onSnapshot(s=>{ S.rt.rund=snapDocs(s); render(); }, e=>console.warn('Ansagen',e)));
   T.push(q('ideen').onSnapshot(s=>{ S.rt.ideen=snapDocs(s); render(); }, e=>console.warn('Ideen',e)));
+  if(S.reisen?.[rid]?.admin===S.uid) T.push(q('aenderungen').onSnapshot(s=>{ S.rt.aend=snapDocs(s); render(); }, e=>console.warn('Änderungen',e)));
   T.push(q('zimmerwahl').onSnapshot(s=>{ S.rt.zwahl=snapDocs(s); render(); }, e=>console.warn('Zimmerwahl',e)));
   T.push(q('umfragestimmen').onSnapshot(s=>{ S.rt.ustimmen=snapDocs(s); render(); }, e=>console.warn('Umfragen',e)));
   T.push(q('mitbringen').onSnapshot(s=>{ S.rt.mitbringen=snapDocs(s); render(); }, e=>console.warn('Mitbringen',e)));
@@ -977,7 +1003,7 @@ function doRender(){
   const a=document.activeElement; const fid=a&&a.id&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')?a.id:null; let ss,se; try{ ss=a.selectionStart; se=a.selectionEnd; }catch(e){}
   let html='';
   try { html = view(); } catch(e){ console.error(e); html = `<div class="warn">Hier ist ein Fehler aufgetreten: ${esc(e.message)}</div><button class="btn sec" data-act="home">Zu Meine Reisen</button>`; }
-  const nb = navHtml(); $app.innerHTML = (typeof supportBanner==='function'?supportBanner():'') + html.replace('<!--pushhinweis-->', typeof pushHinweis==='function'?pushHinweis():'') + nb;
+  const nb = navHtml(); $app.innerHTML = (typeof supportBanner==='function'?supportBanner():'') + (typeof ticketBanner==='function'?ticketBanner():'') + html.replace('<!--pushhinweis-->', typeof pushHinweis==='function'?pushHinweis():'') + nb;
   $app.classList.toggle('nonav', !nb);
   document.body.classList.toggle('adminmodus', S.route?.v==='sysadmin');
   // Formularwerte zurückspielen
@@ -1433,7 +1459,7 @@ V.tag = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), a=art(r), m=my
   return `${hdrTrip('Mein Tag')}${geschlossenBanner()}<!--pushhinweis-->
   <div class="col" style="gap:10px">${reiseSzene(r, '', false, `${greet()}, ${nm(S.uid)}`, true)}<div class="row wrap">${vorChip(r)}<span class="chip yel">${ic('sun',16)} ${esc(cnt)}</span><span class="chip">${ic('tag',16)} ${dayLabel(day)} ${acts.length} ${acts.length===1?'Termin':'Termine'}</span>${aufChip()}</div>${isToday?herdeLeiste():''}</div>
   ${days.length>1?`<div class="scrollx" role="group" aria-label="Tag wählen">${days.map((d,i)=>{ const dd=parseDay(d); const out=d<md.von||d>md.bis; const gap=i>0 && addDays(days[i-1],1)!==d; return `${gap?'<span class="daygap" aria-hidden="true">…</span>':''}<button class="daybtn ${out?'out':''}" aria-pressed="${d===day}" data-act="ui" data-k="day" data-val="${d}" aria-label="${dayLabel(d)}${out?', außerhalb der Reise':''}"><span>${d===today()?'Heute':out?`${pad(dd.getDate())}.${pad(dd.getMonth()+1)}.`:WD[dd.getDay()]}</span><b class="num">${out?WD[dd.getDay()]:dd.getDate()}</b></button>`; }).join('')}</div>`:''}
-  ${rundKarte()}${herzAnfrageKarte()}${herzFrageKarte()}${tafelKarte(day)}${dienstHeuteKarte()}${aufKarte()}${packKarte()}${heimKarte()}
+  ${aendKarte()}${rundKarte()}${herzAnfrageKarte()}${herzFrageKarte()}${tafelKarte(day)}${dienstHeuteKarte()}${aufKarte()}${packKarte()}${heimKarte()}
   ${kasseMini()}
   ${isToday && !r.geschlossen?(istZu('platz')?zuKarte('platz',a.platzIcon,myPlatz?`Mein Platz: ${myPlatz}`:'Mein Platz heute','umbruch','',myPlatz?'':'noch nicht geteilt'):`<div class="card tight"><div class="row between"><div class="row"><span style="color:var(--yelt)">${ic(a.platzIcon,22)}</span><span class="ttl">Mein Platz heute</span></div><span class="row" style="gap:6px">${myPlatz?`<button class="link" data-act="platzEdit">Ändern</button>`:''}${klappBtn('platz','Mein Platz heute')}</span></div>
     ${myPlatz && !S.ui.platzEdit?`<div class="row"><span class="grow" style="font-size:16px;font-weight:700">${esc(myPlatz)}</span>${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).length?`<div class="stack">${Object.entries(m.platzDabei||{}).filter(([u,d])=>d===today()).map(([u])=>av(u,26)).join('')}</div>`:''}</div>`
@@ -1833,6 +1859,7 @@ V.profil = ()=>{ const p=pr(S.uid); const z=zodiac(p.geb); const r=cur(); const 
   return `${inTrip?hdrTrip('Mein Profil'):hdrPlain('Mein Profil')}${backBtn()}
   <div class="row" style="gap:16px"><button class="avedit" data-act="fotoMenu" aria-label="Profilbild ändern">${inTrip?avAw(S.uid,88):av(S.uid,88)}<span class="cam">${ic('cam',16)}</span></button>
   <div class="grow col" style="gap:4px;min-width:0"><h1 class="ell">${esc(nm(S.uid))}</h1>${vollName(p)&&vollName(p)!==nm(S.uid)?`<div class="mut ell">${esc(vollName(p))}</div>`:''}${z?`<span class="chip yel" style="align-self:flex-start">${z.sym} ${esc(z.name)}</span>`:''}</div></div>
+  ${typeof ticketKarte==='function'?ticketKarte():''}
   <div class="list">
     ${punkt('profilEdit', ic('mitgl',20), 'Mein Profil', 'Name, Geburtstag, Foto, Telefon, E-Mail und Passwort')}
     ${punkt('go', ic('shield',20), 'Notfallpass', 'Angehörige, Gesundheit, Handy-Code. Gehört zu dir, nicht zur Reise', 'data-v="notpass"')}
@@ -3423,7 +3450,7 @@ const rdOffen = (r, rd) => rd.offen!==undefined ? !!rd.offen : !!r.vorschlaegeOf
 V.konferenz = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'); if(r.status==='geloescht') return `${hdrPlain()}<div class="empty">Diese Koffer-Konferenz wurde gelöscht.</div><button class="btn sec" data-act="home">Zu Meine Reisen</button>`;
   if(r.status!=='abstimmung'){ S.route={v:'dabei'}; return V.dabei(); }
   const a=art(r); const adm=isAdmin(r); const RD=runden(r); const offen=RD.filter(x=>x.status==='offen');
-  if(!offen.length && !r.buchung && konfDabei() && S.ui.konfAlles!==r.id) return mwSeite(r,true);
+  if(konfDabei() && S.ui.konfAlles!==r.id){ if(S.form.mw_edit) return mwSeite(r,true); if(alleAbgestimmt(r)) return statusSeite(r); if(!offen.length && !r.buchung) return mwSeite(r,true); }
   const eingeladen=S.rt.mitglied.filter(m=>m.status==='eingeladen').length;
   // Fertig ist, wer in jeder laufenden Frage bei mindestens einem Vorschlag abgestimmt hat
   const {mem, fertig:abgestimmt}=konfStand(r);
@@ -3435,6 +3462,7 @@ V.konferenz = ()=>{ const r=cur(); if(!r) return splash('Reise wird geladen …'
   const legacyIdeen = RD.some(x=>x.typ==='ort'&&x.status==='offen'&&!x.pool);
   return `${kopf}
   ${stepper}
+  ${aendKarte(r)}
   ${aktRd ? (aktRd.pool?poolKarte(r,aktRd,adm):rundeKarte(r,aktRd,adm)) + (nxt?`<button class="btn block" data-act="konfStep" data-id="${nxt.id}">Weiter: ${RUNDEN[nxt.typ].frage} ${ic('right',18)}</button>`:`<button class="btn block" data-act="mwStart" data-s="">Weiter: Meine Angaben ${ic('right',18)}</button>`) + (offen.length>1&&!nxt?`<button class="btn block sec" data-act="konfStep" data-id="${offen[0].id}">${ic('back',18)} Zurück zu: ${RUNDEN[offen[0].typ].frage}</button>`:'') + frageDazuHtml(r,adm)
     : `<div class="card gold"><div class="ttl">Alle Runden sind entschieden</div><p class="small" style="color:var(--goldtx)">${adm?'Jetzt nur noch die Reise festlegen.':`${esc(nm(r.admin))} legt die Reise gleich fest.`}</p>${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">Reise festlegen</button>`:''}<button class="btn xs ghost" style="align-self:flex-start" data-act="mwPager">Meine Schritte</button></div>`}
   ${offen.length?'':schritteKarte(r)}
@@ -3592,13 +3620,14 @@ function buchungAnsicht(r){ const a=art(r); const adm=isAdmin(r); const o=S.rt.v
     return `${kopf}
   <div class="card gold"><span class="tag"><span class="dot"></span>ERGEBNIS STEHT</span><div class="ttl" style="font-size:20px">${esc(r.ort||'')}</div><div class="num">${fRange(r.von,r.bis)}</div>${o?.link?`<div class="small">${optInfo(o)}</div>`:''}
     <p class="small" style="color:var(--goldtx);margin:0">${r.buchung==='vorgemerkt'?'Vorgemerkt, aber noch nicht gebucht.':'Gebucht ist noch nichts.'} ${adm?'Trag das Budget aller zusammen, schick die Anfrage ans Reisebüro und starte die Reise, sobald gebucht ist.':`${esc(nm(r.admin))} kümmert sich um die Buchung. Die Reise startet, sobald sie gebucht ist.`}</p></div>
+  ${aendKarte(r)}${statusKarte(r)}
   ${buchungKarten(r)}
   ${adm?`<div class="row" style="justify-content:flex-end"><button class="btn xs ghost" data-act="einladenOeffnen" data-rid="${r.id}">${ic('ticket',14)} Einladen</button></div>`:''}
   ${adm?`<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">${ic('gear',14)} Konferenz verwalten</summary>
     <button class="btn sm ghost" style="align-self:flex-start;color:var(--pinktx)" data-act="reiseLoeschen" data-rid="${r.id}">${ic('trash',14)} Konferenz löschen</button></details>`
   :`<button class="link" style="align-self:center;color:var(--mut)" data-act="leaveKonf">Konferenz verlassen</button>`}`; }
 const altKonfV = V.konferenz;
-V.konferenz = ()=>{ const r=cur(); if(inBuchung(r)) return buchungAnsicht(r); return altKonfV(); };
+V.konferenz = ()=>{ const r=cur(); if(inBuchung(r)){ if(konfDabei() && S.ui.konfAlles!==r.id){ if(S.form.mw_edit) return mwSeite(r,true); if(!isAdmin(r) && meineFertig(r)) return statusSeite(r); } return buchungAnsicht(r); } return altKonfV(); };
 
 /* ---------- Neue Koffer-Konferenz: nur die erste Frage ---------- */
 const altNeu = V.neu, altCreate = A.createReise;
@@ -4524,7 +4553,8 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 
 /* ---------- Support-Ansicht: beim Start erkennen und auf „nur ansehen“ schalten ---------- */
 async function supportPruefen(){ S.echteUid=S.uid; S.dbEcht=S.db; S.assetsEcht=S.assets;
-  if(FB){ S.supportVon = await PPAuth.supportVon?.().catch(()=>null) || null; if(S.supportVon){ S.db=nurLesen(S.db); S.assets=null; } } }
+  if(FB){ S.supportVon = await PPAuth.supportVon?.().catch(()=>null) || null; if(S.supportVon){ S.db=nurLesen(S.db); S.assets=null; } }
+  if(FB && typeof ticketWaechter==='function'){ S.dbEcht=ticketWaechter(S.dbEcht); if(!S.supportVon) S.db=S.dbEcht; } }
 /* Claude-Vorschau: Wechsel ohne Neuladen der Seite (alle Abos beenden, mit anderer Kennung neu starten) */
 function supportWechsel(als){ const echt=S.echteUid;
   unsubs.global.forEach(u=>{ try{ u(); }catch(e){} }); unsubs.global=[];
@@ -4553,23 +4583,24 @@ A.supportEnde = async el => { if(el) el.disabled=true;
   neuLaden(); };
 
 /* ---------- Liste „Nutzer“ im Adminbereich ---------- */
-const KONTO = { daten:null, laedt:false, auth:{}, authLaedt:false };
-async function kontenLaden(){ if(KONTO.laedt) return; KONTO.laedt=true; try{ const s=await S.db.collection('konten').get(); KONTO.daten={}; snapDocs(s).forEach(x=>KONTO.daten[x.id]=x); }catch(e){ console.warn('Konten', e); KONTO.daten={}; } KONTO.laedt=false; render();
+const KONTO = { daten:null, tick:null, laedt:false, auth:{}, authLaedt:false };
+async function kontenLaden(){ if(KONTO.laedt) return; KONTO.laedt=true; try{ const s=await S.db.collection('konten').get(); KONTO.daten={}; snapDocs(s).forEach(x=>KONTO.daten[x.id]=x); KONTO.tick={}; try{ const ts=await S.db.collection('tickets').get(); snapDocs(ts).forEach(x=>KONTO.tick[x.id]=x); }catch(e){ console.warn('Tickets', e); } }catch(e){ console.warn('Konten', e); KONTO.daten={}; } KONTO.laedt=false; render();
   if(FB && !KONTO.authLaedt){ KONTO.authLaedt=true; const ids=Object.keys(S.profile); for(let i=0;i<ids.length;i+=100){ try{ const r=await PPAuth.call('kontoInfos', {uids:ids.slice(i,i+100)}); Object.assign(KONTO.auth, r.infos||{}); }catch(e){ console.warn('Konto-Infos', e); break; } } render(); } }
 const zuletzt = u => Math.max(KONTO.daten?.[u]?.zuletztAktiv||0, KONTO.auth[u]?.aktiv||0);
 const beigetreten = u => KONTO.auth[u]?.erstellt || KONTO.daten?.[u]?.erstesLogin || S.profile[u]?.createdAt || 0;
 function vorWann(t){ if(!t) return 'unbekannt'; const m=Math.round((now()-t)/60000); if(m<2) return 'gerade eben'; if(m<60) return `vor ${m} Min.`; const h=Math.round(m/60); if(h<24) return `vor ${h} Std.`; const d=Math.round(h/24); return d<=1?'gestern':d<30?`vor ${d} Tagen`:fD(isoDay(new Date(t))); }
 function nutzerTab(D){ if(!KONTO.daten) kontenLaden(); const q=(S.form.nSuche||'').trim().toLowerCase(); const f=S.form.nFilter||'alle';
   const gesp=u=>{ const sp=D.sperren?.[u]; return !!sp && (sp.typ==='konto'||sp.bis>now()); };
-  const filt={ alle:()=>true, heute:u=>zuletzt(u)>=heuteStart(), neu:u=>beigetreten(u)>=now()-7*864e5, gesperrt:gesp, alt:u=>!!KONTO.daten?.[u]?.version && KONTO.daten[u].version!==APP_VERSION, bm:u=>{ const ro=D.rollen?.[u]; return !!ro && (ro.super || Object.values(rechteVon(ro)).some(Boolean)); } };
+  const filt={ alle:()=>true, heute:u=>zuletzt(u)>=heuteStart(), neu:u=>beigetreten(u)>=now()-7*864e5, gesperrt:gesp, alt:u=>!!KONTO.daten?.[u]?.version && KONTO.daten[u].version!==APP_VERSION, tabg:u=>!!KONTO.tick?.[u] && now()>=KONTO.tick[u].bis, kein:u=>!!KONTO.tick && !KONTO.tick[u], bm:u=>{ const ro=D.rollen?.[u]; return !!ro && (ro.super || Object.values(rechteVon(ro)).some(Boolean)); } };
   const alle=Object.keys(S.profile);
   const l=alle.filter(filt[f]||filt.alle).filter(u=>!q || nm(u).toLowerCase().includes(q) || realName(u).toLowerCase().includes(q)).sort((a,b)=>zuletzt(b)-zuletzt(a) || nm(a).localeCompare(nm(b)));
   const chip=(k,t)=>`<button class="fchip ${f===k?'an':''}" data-act="nFilter" data-k="${k}" aria-pressed="${f===k}">${t} <span class="mut">${alle.filter(filt[k]).length}</span></button>`;
-  return `<input class="in" id="f_nSuche" placeholder="Mitglied suchen" data-live="1" autocomplete="off">
-  <div class="fchips">${chip('alle','Alle')}${chip('heute','Heute aktiv')}${chip('neu','Neu (7 Tage)')}${chip('gesperrt','Gesperrt')}${chip('alt','Alte App-Version')}${chip('bm','Badeaufsicht')}</div>
+  S.ui.ticketListe=l; return `<input class="in" id="f_nSuche" placeholder="Mitglied suchen" data-live="1" autocomplete="off">
+  <div class="fchips">${chip('alle','Alle')}${chip('heute','Heute aktiv')}${chip('neu','Neu (7 Tage)')}${chip('gesperrt','Gesperrt')}${chip('alt','Alte App-Version')}${chip('bm','Badeaufsicht')}${chip('tabg','Ticket abgelaufen')}${chip('kein','Ohne Ticket')}</div>
+  ${istSuper()&&l.length?`<button class="btn sm sec" data-act="ticketAlle">${ic('star',14)} Ticket für alle in dieser Auswahl (${l.filter(u=>u!==S.uid).length})</button>`:''}
   <span class="tiny mut">Sortiert nach letzter Aktivität. Antippen für Details.</span>
   <div class="list">${l.map(u=>{ const sp=D.sperren?.[u]; const act=gesp(u); const ro=D.rollen?.[u]; const ver=KONTO.daten?.[u]?.version;
-    return `<div class="li"><button class="nutzerauf" data-act="nutzerAuf" data-uid="${u}" aria-label="Details zu ${esc(nm(u))}">${av(u,36)}<span class="grow col" style="gap:2px;min-width:0"><b class="ell">${esc(nm(u))}</b><span class="tiny mut ell">${esc(realName(u))}${ro?.super?' · Oberbademeister':ro&&rangVon(ro)?` · ${RANG[rangVon(ro)]}`:''}</span><span class="tiny ell"><span class="mut">zuletzt aktiv ${KONTO.daten?vorWann(zuletzt(u)):'…'}</span>${act?` · <span style="color:var(--pinktx)">gesperrt${sp.typ==='konto'?'':' bis '+fD(isoDay(new Date(sp.bis)))}</span>`:''}${ver&&ver!==APP_VERSION?` · <span class="warnt">${esc(ver)}</span>`:''}</span></span>${ic('right',16,'style="color:var(--mut);flex-shrink:0"')}</button>
+    return `<div class="li"><button class="nutzerauf" data-act="nutzerAuf" data-uid="${u}" aria-label="Details zu ${esc(nm(u))}">${av(u,36)}<span class="grow col" style="gap:2px;min-width:0"><b class="ell">${esc(nm(u))}</b><span class="tiny mut ell">${esc(realName(u))}${ro?.super?' · Oberbademeister':ro&&rangVon(ro)?` · ${RANG[rangVon(ro)]}`:''}</span><span class="tiny ell"><span class="mut">zuletzt aktiv ${KONTO.daten?vorWann(zuletzt(u)):'…'}</span>${act?` · <span style="color:var(--pinktx)">gesperrt${sp.typ==='konto'?'':' bis '+fD(isoDay(new Date(sp.bis)))}</span>`:''}${ver&&ver!==APP_VERSION?` · <span class="warnt">${esc(ver)}</span>`:''}</span><span>${ticketChip(u)}</span></span>${ic('right',16,'style="color:var(--mut);flex-shrink:0"')}</button>
       ${act&&darf('sperren')?`<button class="btn xs sec" data-act="sysUnban" data-uid="${u}">Entsperren</button>`:''}</div>`; }).join('')||'<div class="empty small">Niemand in dieser Auswahl.</div>'}</div>`; }
 A.nFilter = el => { S.form.nFilter=el.dataset.k; render(); };
 /* ---------- Details zu einem Mitglied ---------- */
@@ -4595,12 +4626,13 @@ OV.nutzerInfo = o => { const u=o.uid, I=S.ui.ninfo?.uid===u?S.ui.ninfo:{}; const
       ${I.konto?.version?zeile('App-Version', esc(I.konto.version)):''}
       ${a.email?zeile('E-Mail', `<span style="user-select:all">${esc(a.email)}</span>`):''}
       ${zeile('Rolle', ro?.super?'Oberbademeister':RANG[rangVon(ro)]||'Mitglied')}
+      ${KONTO.tick?zeile('Ticket', ticketChip(u)||'kein Ticket'):''}
       ${gesp?zeile('Sperre', `<span style="color:var(--pinktx)">${sp.typ==='konto'?'dauerhaft gesperrt':'gesperrt bis '+fStamp(sp.bis)}</span>`):''}
       ${!FB?'<span class="tiny mut">„Beigetreten“ und „Zuletzt aktiv“ werden ab dieser Version erfasst.</span>':''}</div>
     <div class="card tight"><b class="small">Reisen und Gruppen (${(I.reisen||[]).length})</b>
       ${(I.reisen||[]).map(({m,r})=>`<div class="row" style="gap:8px;align-items:flex-start"><span style="color:var(--yelt);display:flex">${ic(art(r).icon,18)}</span><span class="grow col" style="gap:1px;min-width:0"><span class="small ell"><b>${esc(r.titel||'Reise')}</b>${r.admin===u?' <span class="chip yel" style="height:20px;font-size:11px">Admin</span>':''}</span><span class="tiny mut">${esc(MSTAT[m.status]||m.status||'')} · ${r.status==='fest'&&r.von?fRange(r.von,r.bis):r.status==='abstimmung'?'Koffer-Konferenz':esc(r.status||'')}${r.geschlossen?' · geschlossen':''}</span>${r.status==='fest'&&m.status==='zugesagt'?`<span class="tiny">Eigene Reisedaten: <b>${fRange(m.anreise||r.von, m.abreise||r.bis)}</b></span>`:''}</span>${r.status==='fest'&&m.status==='zugesagt'&&darf('reisedaten')&&!S.supportVon?`<button class="btn xs sec" data-act="rdAdminAuf" data-mid="${esc(m.id)}">${ic('pencil',13)} Reisedaten</button>`:''}</div>`).join('')||(I.laedt?'':'<span class="small mut">Keine Reisen.</span>')}</div>
     ${darf('support')&&(I.log||[]).length?`<div class="card tight"><b class="small">Support-Ansicht (Protokoll)</b>${I.log.map(x=>`<span class="tiny">${x.art==='ende'?'beendet':'gestartet'} von <b>${esc(nm(x.von))}</b> · ${fStamp(x.at)}${x.grund?` · „${esc(x.grund)}“`:''}</span>`).join('')}</div>`:''}
-    <div class="col" style="gap:8px">${darf('nutzer')?`<button class="btn sec block" data-act="sysMsg" data-uid="${u}">${ic('chat',18)} Schreiben</button>`:''}
+    <div class="col" style="gap:8px">${istSuper()&&u!==S.uid?`<button class="btn block" data-act="ticketAuf" data-uid="${u}">${ic('star',18)} Ticket zuweisen</button>`:''}${darf('nutzer')?`<button class="btn sec block" data-act="sysMsg" data-uid="${u}">${ic('chat',18)} Schreiben</button>`:''}
       ${alsErlaubt(u)?`<button class="btn block alsbtn" data-act="alsAuf" data-uid="${u}">${ic('shield',18)} Als ${esc(nm(u).split(' ')[0])} ansehen (Support)</button>`:''}</div></div>`; };
 
 /* ---------- Als Mitglied ansehen (Login as) ---------- */
@@ -4640,6 +4672,88 @@ A.rdAdminSpeichern = async el => { const o=S.ov; const x=(S.ui.ninfo?.reisen||[]
     supportSend(m.uid, `Die Badeaufsicht hat deine Reisedaten für „${r.titel||'deine Reise'}“ korrigiert (Anreise ${fD(an)}, Abreise ${fD(ab)}). Wenn etwas nicht stimmt, melde dich gern.`).catch(e=>console.warn(e));
     toast('Reisedaten gespeichert'); A.rdAdminZurueck(); }
   catch(e){ el.disabled=false; fail(e,'Speichern'); } };
+P.star='<path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9-4.3-4.1 5.9-.8z"/>';
+/* ===================== Tickets: Mitgliedschaft und Gültigkeit des Accounts =====================
+   tickets/{uid} = { art:'tag'|'woche'|'monat'|'jahr', von, bis, by, at, auto? }
+   Neue Nutzer und alle Bestandsnutzer bekommen beim ersten Start automatisch eine Tageskarte (24 Stunden, Demo-Account).
+   Nur der Oberbademeister (Admin) weist höhere Tickets zu. Läuft das Ticket ab, bleibt der Account gültig, der Nutzer kann aber nur noch ansehen.
+   Die Sperre sitzt im Client („Wächter“ um die Datenbank). Erlaubt bleiben Profil, Ticket, Konto, Push und Einstellungen. Die genauen Regeln folgen später.
+   Oberbademeister und Badeaufsicht (mit Dienstrang) sind ausgenommen. */
+const TICKETS = [['tag','Tageskarte','24 Stunden'],['woche','Wochenkarte','7 Tage'],['monat','Monatskarte','1 Monat'],['jahr','Jahreskarte','1 Jahr']];
+const ticketName = a => TICKETS.find(t=>t[0]===a)?.[1] || 'Ticket';
+function ticketBis(art, von=now()){ const d=new Date(von); if(art==='tag') return von+864e5; if(art==='woche') return von+7*864e5; if(art==='monat'){ d.setMonth(d.getMonth()+1); return d.getTime(); } if(art==='jahr'){ d.setFullYear(d.getFullYear()+1); return d.getTime(); } return von+864e5; }
+S.ticket = null; S.ticketDa = false;
+const ticketFrei = () => !!S.isOwner || !!S.rang || !!S.supportVon;
+const ticketAbgelaufen = t => !!t && now() >= (t.bis||0);
+/* Nur ansehen? */
+const nurAnsehen = () => { try{ return nurAnsehen_(); }catch(e){ return false; } };
+const nurAnsehen_ = () => !ticketFrei() && S.ticketDa && !!S.ticket && ticketAbgelaufen(S.ticket);
+let ticketTimer=null;
+function ticketAbo(){ if(!S.db || !S.uid || S.supportVon) return;
+  try{ unsubs.global.push(S.db.doc(`tickets/${S.uid}`).onSnapshot(async s=>{ S.ticketDa=true; S.ticket=s.exists?{id:s.id,...s.data()}:null;
+      if(!S.ticket){ const von=now(); const d={art:'tag', von, bis:ticketBis('tag',von), by:S.uid, at:von, auto:true}; S.ticket={id:S.uid,...d}; render(); try{ await S.db.doc(`tickets/${S.uid}`).set(d); }catch(e){ console.warn('Ticket', e); } }
+      clearTimeout(ticketTimer); const rest=(S.ticket.bis||0)-now(); if(rest>0 && rest<2147e6) ticketTimer=setTimeout(()=>render(), rest+500);
+      render(); }, e=>console.warn('Ticket', e))); }catch(e){ console.warn('Ticket', e); } }
+/* Wächter um die Datenbank: blockiert Schreibzugriffe, solange nurAnsehen() gilt */
+const TICKET_ERLAUBT = ['profile/','tickets/','konten/','pushtokens/','data/users/'];
+function ticketWaechter(db){ if(!db) return db;
+  const ok = p => TICKET_ERLAUBT.some(x=>String(p||'').startsWith(x));
+  const sperre = ()=>{ const e=new Error('Ticket abgelaufen'); e.ticket=true; e.code='ticket'; ticketHinweis(); return e; };
+  const doc = d => new Proxy(d, {get(t,k){ if(['set','update','delete'].includes(k)) return (...a)=>{ if(nurAnsehen() && !ok(t.path)) return Promise.reject(sperre()); return t[k](...a); }; const v=t[k]; return typeof v==='function'?v.bind(t):v; }});
+  const col = c => new Proxy(c, {get(t,k){ if(k==='add') return (...a)=>{ if(nurAnsehen() && !ok(t.path+'/')) return Promise.reject(sperre()); return t.add(...a); }; if(k==='doc') return (...a)=>doc(t.doc(...a)); const v=t[k]; return typeof v==='function'?v.bind(t):v; }});
+  return new Proxy(db, {get(t,k){ if(k==='doc') return p=>doc(t.doc(p)); if(k==='collection') return p=>col(t.collection(p));
+    if(k==='batch') return (...a)=>{ if(nurAnsehen() && Array.isArray(a[0]) && a[0].some(o=>!ok(o.path))) return Promise.reject(sperre()); return t.batch(...a); };
+    const v=t[k]; return typeof v==='function'?v.bind(t):v; }}); }
+let ticketHinweisT=0;
+function ticketHinweis(){ if(Date.now()-nutzerAktion>1500) return; if(Date.now()-ticketHinweisT>4000){ ticketHinweisT=Date.now(); toast('Dein Ticket ist abgelaufen. Du kannst alles ansehen, aber nichts ändern.'); } }
+function ticketBanner(){ try{ if(!nurAnsehen()) return ''; }catch(e){ return ''; }
+  return `<div class="supportbanner" role="status"><span class="grow small">${ic('lock',16)} <b>Nur ansehen</b><br><span style="opacity:.85">Deine ${esc(ticketName(S.ticket.art))} ist am ${fStamp(S.ticket.bis)} abgelaufen. Dein Account bleibt bestehen. Für ein neues Ticket melde dich beim Admin.</span></span></div>`; }
+function ticketKarte(){ try{ return ticketKarte_(); }catch(e){ return ''; } }
+function ticketKarte_(){ if(!S.ticketDa || !S.ticket || ticketFrei()) return `<button class="tkbtn" data-act="go" data-v="kiosk" aria-label="Zum Kiosk"><div class="card tight"><div class="row between"><b>${ic('star',14)} Ticket</b><span class="tiny mut">Zum Kiosk ${ic('right',14)}</span></div><span class="tiny mut">${S.isOwner?'Als Oberbademeister bist du von Tickets ausgenommen.':'Hier erscheint dein Ticket.'}</span></div></button>`; const t=S.ticket; const ab=ticketAbgelaufen(t);
+  return `<button class="tkbtn" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ab?'Abgelaufen':`Gültig bis ${fStamp(t.bis)}`})}
+    <span class="small ${ab?'':'mut'}" style="display:block;margin-top:6px;${ab?'color:var(--pinktx)':''}">${ab?`Deine ${esc(ticketName(t.art))} ist abgelaufen. Du kannst nur noch ansehen.`:`${esc(ticketName(t.art))}: ${tkRest(t.bis)}`} <span class="mut">· Antippen für den Kiosk</span></span></button>`; }
+
+/* ---------- Admin: Tickets zuweisen ---------- */
+const ticketVon = u => KONTO.tick?.[u] || null;
+function ticketChip(u){ const t=ticketVon(u); if(!KONTO.daten) return ''; if(!t) return '<span class="tiny mut">kein Ticket</span>'; const ab=ticketAbgelaufen(t); return `<span class="tiny" style="${ab?'color:var(--pinktx)':'color:var(--yelt)'}">${esc(ticketName(t.art))} · ${ab?'abgelaufen':'bis '+fStamp(t.bis)}</span>`; }
+A.ticketAuf = el => { if(!istSuper()) return; const us = el.dataset.uid ? [el.dataset.uid] : (S.ui.ticketUs||[]); if(!us.length) return; S.form.tkArt=''; openOv('ticketZuw',{us}); };
+A.ticketAlle = ()=>{ if(!istSuper()) return; S.ui.ticketUs=(S.ui.ticketListe||[]).filter(u=>u!==S.uid); if(!S.ui.ticketUs.length) return toast('Niemand in dieser Auswahl.'); S.form.tkArt=''; openOv('ticketZuw',{us:S.ui.ticketUs}); };
+A.tkArt = el => { S.form.tkArt=el.dataset.k; renderOv(); };
+OV.ticketZuw = o => { const us=o.us; const eins=us.length===1; const a=S.form.tkArt; const t=eins?ticketVon(us[0]):null;
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Ticket zuweisen"><h2>Ticket zuweisen</h2>
+  <p class="small mut">${eins?`Für <b>${esc(nm(us[0]))}</b>${t?`. Aktuell: ${esc(ticketName(t.art))}, ${ticketAbgelaufen(t)?'abgelaufen am':'gültig bis'} ${fStamp(t.bis)}`:''}.`:`Für <b>${us.length} Mitglieder</b>.`} Die Gültigkeit beginnt jetzt und ersetzt das bisherige Ticket.</p>
+  <div class="col" style="gap:8px">${TICKETS.map(([k,n,d])=>`<button type="button" class="pfopt ${a===k?'on':''}" aria-pressed="${a===k}" data-act="tkArt" data-k="${k}"><b>${n}</b><span class="small mut">${d}${a===k?`, gültig bis ${fStamp(ticketBis(k))}`:''}</span></button>`).join('')}</div>
+  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ticketSpeichern" ${a?'':'disabled'}>Zuweisen</button></div></div>`; };
+A.ticketSpeichern = async el => { if(!istSuper()) return; const art=S.form.tkArt; if(!art) return; const us=S.ov?.us||[]; el.disabled=true; const von=now(); const bis=ticketBis(art,von);
+  try{ for(const u of us){ const d={art, von, bis, by:S.uid, at:von}; await S.db.doc(`tickets/${u}`).set(d); if(KONTO.tick) KONTO.tick[u]={id:u,...d};
+      try{ await supportSend(u, `Dein Ticket wurde geändert: ${ticketName(art)}, gültig bis ${fStamp(bis)}. Viel Spaß mit Poolposition!`); }catch(e){} }
+    closeOv(); toast(us.length===1?'Ticket zugewiesen':`${us.length} Tickets zugewiesen`); render(); }catch(e){ el.disabled=false; fail(e,'Zuweisen'); } };
+/* ===================== Kiosk: Tickets ansehen =====================
+   Noch ohne Funktion (Beta). Später kaufen Nutzer hier ihre Mitgliedschaft. Tageskarten sind nicht kaufbar, sie gibt es nur als Demo-Zugang.
+   Die Preise sind absichtlich unkenntlich, sie werden später festgelegt. */
+const TK_INFO = {
+  tag:   {n:'TAGESKARTE',  dauer:'24 Stunden', sub:'Schnuppern im Becken', sym:'☀️'},
+  woche: {n:'WOCHENKARTE', dauer:'7 Tage',     sub:'Für den Kurztrip',      sym:'🏊'},
+  monat: {n:'MONATSKARTE', dauer:'1 Monat',    sub:'Für Dauerplaner',       sym:'🛟'},
+  jahr:  {n:'JAHRESKARTE', dauer:'1 Jahr',     sub:'Für Stammgäste',        sym:'🏆'} };
+const tkNr = u => { let h=7; for(const c of String(u||'x')) h=(h*31+c.charCodeAt(0))%1000000; return String(h).padStart(6,'0'); };
+function tkRest(bis){ const ms=bis-now(); if(ms<=0) return 'abgelaufen'; const m=Math.round(ms/60000); if(m<60) return `noch ${m} Min.`; const h=Math.round(ms/3600000); if(h<48) return `noch ${h} Std.`; const d=Math.round(ms/864e5); return d<60?`noch ${d} Tage`:`noch ${Math.round(d/30)} Monate`; }
+const TK_WELLE = '<svg class="tkwelle" viewBox="0 0 120 10" preserveAspectRatio="none" aria-hidden="true"><path d="M0 5 Q5 0 10 5 T20 5 T30 5 T40 5 T50 5 T60 5 T70 5 T80 5 T90 5 T100 5 T110 5 T120 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+/* Ein Schwimmbad-Ticket. opt: {nr, preis (verschwommen zeigen), klein, gueltig (Text)} */
+function ticketBild(art, opt={}){ const i=TK_INFO[art]||TK_INFO.tag; const nr=opt.nr||'000000';
+  return `<div class="tkt ${art}${opt.klein?' klein':''}" aria-label="${i.n}"><div class="tkmain"><span class="tkkopf">POOLPOSITION · BADEANSTALT</span><b class="tktitel">${i.n}</b>${TK_WELLE}
+      <span class="tksub">${i.sub}</span><span class="tkdauer">${opt.gueltig||`Gültig ${i.dauer}`}</span>
+      ${opt.preis?`<span class="tkpreis" aria-label="Preis folgt"><i>00,00 €</i></span>`:''}</div>
+    <div class="tkstub"><span class="tksym">${i.sym}</span><span class="tknr">Nr.<br><b>${nr}</b></span><span class="tkein">EINTRITT</span></div></div>`; }
+V.kiosk = ()=>{ const t=S.ticket; const mein = t && S.ticketDa ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketAbgelaufen(t)?'Abgelaufen':`Gültig bis ${fStamp(t.bis)}`})}<span class="small ${ticketAbgelaufen(t)?'':'mut'}" ${ticketAbgelaufen(t)?'style="color:var(--pinktx)"':''}>${ticketAbgelaufen(t)?`Abgelaufen am ${fStamp(t.bis)}. Du kannst nur noch ansehen.`:`${tkRest(t.bis)}, gültig bis ${fStamp(t.bis)}.`}</span></div>` : '';
+  return `${hdrPlain('Kiosk')}${backBtn()}
+  <div class="kioskdach" aria-hidden="true"></div>
+  <div class="col" style="gap:2px"><h1>Der Kiosk</h1><span class="mut">Hier gibt es bald deine Mitgliedschaft. Wähle dein Ticket für Poolposition.</span></div>
+  <div class="info small">${ic('clock',16)} <b>Beta-Phase:</b> Der Kiosk hat noch keine Funktion. Du kannst dir die Tickets schon einmal ansehen. Die Preise legen wir später fest, gekauft werden kann noch nichts.</div>
+  ${mein}
+  <div class="col" style="gap:14px"><h3 style="margin:0">Das gibt es bald</h3>
+    ${['woche','monat','jahr'].map(a=>`<div class="col" style="gap:8px">${ticketBild(a,{nr:'000'+({woche:'007',monat:'030',jahr:'365'})[a], preis:true})}<button class="btn sec block" disabled aria-disabled="true">Bald erhältlich</button></div>`).join('')}</div>
+  <span class="tiny mut">Mit dem Ticket bestimmst du, wie lange du Reisen planen, abstimmen und mitmachen kannst. Danach kannst du weiter alles ansehen.</span>`; };
 /* ===================== Adminbereich: Übersicht mit Kacheln, Reisen-Dashboard, Bademeister-Verwaltung =====================
    Startseite des Adminbereichs ist eine Übersicht mit Kacheln (nur die Bereiche, für die man Rechte hat).
    Jede Kachel öffnet ihren Bereich, „‹ Übersicht“ führt zurück. */
@@ -4809,6 +4923,7 @@ const PUSHKAT = [
   ['termine','Termine','Neue Termine und eine Erinnerung 30 Minuten vor Beginn'],
   ['morgen','Morgenbericht','Die Zusammenfassung am Morgen'],
   ['rund','Ansagen des Admins','Wichtige Nachrichten an die ganze Gruppe'],
+  ['aend','Änderungen von Mitgliedern','Nur für Admins: wenn jemand seine Angaben ändert'],
   ['aufgaben','Erinnerungen','Der Tag vor der Abreise und fällige To-dos'],
   ['admin','Badeaufsicht','Neue Meldungen (nur für Bademeister)']];
 const PUSH = { geprueft:false, geht:false, prefs:null, an:false };
@@ -6653,7 +6768,7 @@ A.herzInteresse = async el => { const r=cur(); const offen=el.dataset.v==='1'; e
 /* ===================== Bettenmanager: Zimmer und Betten vorab verteilen =====================
    Nur aktiv, wenn der Admin den Schalter „Bettenmanager“ im Gruppenprofil bzw. beim Anlegen der Reise eingeschaltet hat. Dann gilt er für alle.
    zimmer/{id}       = { rid, name, typ:'einzel'|'doppel'|'mehr'|'sonst', betten, pos, by }                       (nur Admin legt an/ändert)
-   zimmerwahl/{rid}_{uid} = { rid, uid, zimmerId, einzel, mit:[uids], claimAt, gast?, name?, by }                (jedes Mitglied für sich, für Begleitpersonen deren Ersteller, der Admin für alle)
+   zimmerwahl/{rid}_{uid} = { rid, uid, zimmerId, einzel, mit:[uids], claimAt, by }                (jedes Mitglied für sich, der Admin für alle)
    zimmerbudget/{rid}_{uid} = { rid, uid, betrag, at }                                                            (privat; die Gruppe sieht nur Spanne und Schnitt ab 3 Angaben)
    Regeln: Wünsche sind öffentlich. Ein Einzelzimmer-Wunsch hat Vorrang: wer zuerst ein Zimmer als Einzelzimmer wählt, bekommt es allein,
    andere können sich dort nicht einbuchen. Mehr Wünsche als Betten: der Admin lässt abstimmen oder legt fest. */
@@ -6662,17 +6777,16 @@ P.mail='<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="m3.5 7.5 8
 const ZTYPEN = [['einzel','Einzelzimmer',1],['doppel','Doppelzimmer',2],['mehr','Mehrbettzimmer',3],['sonst','Sonstiges',1]];
 const zTypName = t => ZTYPEN.find(x=>x[0]===t)?.[1] || 'Zimmer';
 const zRooms = () => (S.rt.zimmer||[]).slice().sort((a,b)=>(a.pos??a.createdAt??0)-(b.pos??b.createdAt??0));
-const zIstGast = u => String(u).startsWith('g_');
 const zEntry = u => (S.rt.zwahl||[]).find(w=>w.uid===u) || {uid:u};
-const zName = u => zIstGast(u) ? (zEntry(u).name||'Gast') : nm(u);
-const zVor = u => zIstGast(u) ? String(zName(u)).split(' ')[0] : vorname(u);
-const zAv = (u,s=28) => zIstGast(u) ? `<span class="av zgast" style="width:${s}px;height:${s}px;font-size:${Math.round(s*.42)}px" aria-hidden="true">${esc(String(zName(u)).slice(0,1).toUpperCase())}</span>` : av(u,s);
+const zName = u => nm(u);
+const zVor = u => vorname(u);
+const zAv = (u,s=28) => av(u,s);
 /* In der Koffer-Konferenz sind die Mitglieder noch „teilnehmer“, bei einer festen Reise „zugesagt“ */
 const zMitgl = () => cur()?.status==='abstimmung' ? S.rt.mitglied.filter(m=>m.status==='teilnehmer') : zugesagt();
 const zGuard = () => cur()?.status==='abstimmung' ? null : tripGuard();
-const zPersonen = () => [...zMitgl().map(m=>m.uid).filter(u=>!(S.rt.anreisen||[]).some(a=>a.uid===u&&a.selbstAlles)), ...(S.rt.zwahl||[]).filter(w=>w.gast).map(w=>w.uid)];
+const zPersonen = () => [...zMitgl().map(m=>m.uid).filter(u=>!(S.rt.anreisen||[]).some(a=>a.uid===u&&a.selbstAlles))];
 const zBettenText = n => `${n} ${n===1?'Bett':'Betten'}`;
-const zDarfBearbeiten = u => canMod(cur()) || u===S.uid || (zIstGast(u) && zEntry(u).by===S.uid);
+const zDarfBearbeiten = u => canMod(cur()) || u===S.uid;
 
 /* ---------- Auswertung: wer liegt wo, wo gibt es Konflikte ---------- */
 function zPlan(){ const rooms=zRooms(); const ids=new Set(rooms.map(r=>r.id)); const pers=zPersonen();
@@ -6707,21 +6821,21 @@ V.zimmer = ()=>{ const g=zGuard(); if(g) return g; const r=cur(); if(!modulAn('z
   const nm_ = p.nichtMoeglich.find(x=>x.u===S.uid);
   return `${hdrTrip('Zimmer')}${backBtn()}${geschlossenBanner()}
   <div class="col" style="gap:2px"><h1>Zimmer und Betten</h1><span class="mut">Wer schläft wo? Alle können Wünsche eintragen, alle sehen sie.</span></div>
-  <div class="card tight zsumme"><div class="row between"><span><b class="num">${p.untergebracht}</b> von <b class="num">${pers}</b> untergebracht</span><span class="small mut">${zBettenText(betten)} in ${rooms.length} ${rooms.length===1?'Zimmer':'Zimmern'}</span></div>
-    ${betten<pers && rooms.length?`<div class="info small">Es gibt ${zBettenText(betten)} für ${pers} Personen. Es fehlen noch Betten.</div>`:''}</div>
+  ${rooms.length?`<div class="card tight zsumme"><div class="row between"><span><b class="num">${p.untergebracht}</b> von <b class="num">${pers}</b> untergebracht</span><span class="small mut">${zBettenText(betten)} in ${rooms.length} ${rooms.length===1?'Zimmer':'Zimmern'}</span></div>
+    ${betten<pers && rooms.length?`<div class="info small">Es gibt ${zBettenText(betten)} für ${pers} Personen. Es fehlen noch Betten.</div>`:''}</div>`:''}
   <div class="card ${nm_?'hot':''}"><div class="row between"><h3 style="margin:0">Mein Wunsch</h3><button class="btn xs" data-act="zwunschAuf" data-u="${S.uid}">${ic('pencil',14)} ${ich.zimmerId||ich.einzel?'Ändern':'Eintragen'}</button></div>
     <div class="ttl">${esc(ichText)}</div>${nm_?`<div class="warn small">Dein Wunsch ist nicht möglich: ${esc(zName(nm_.von))} hat „${esc(zRoomName(nm_.room))}“ als Einzelzimmer gewählt und hat Vorrang. Bitte wähle ein anderes Zimmer.</div>`:''}
     ${(ich.mit||[]).length?`<span class="small mut">Wunsch-Zimmerpartner: ${esc(ich.mit.map(zName).join(', '))}</span>`:''}</div>
+  ${zVorschlagKarte(r,admin)}
   ${admin||rooms.length?`<div class="row between"><h3 style="margin:0">Zimmer</h3>${admin&&!r.geschlossen?`<button class="btn xs" data-act="zraumAuf">${ic('plus',14)} Zimmer</button>`:''}</div>`:''}
-  ${!rooms.length?`<div class="empty small">${admin?'Lege zuerst die Zimmer an, zum Beispiel die Zimmer eures Ferienhauses.':'Der Admin hat noch keine Zimmer angelegt.'}</div>
+  ${!rooms.length?`<div class="empty small">${admin?'Übernimm oben den Vorschlag der App, oder lege die Zimmer von Hand an, zum Beispiel die Zimmer eures Ferienhauses.':'Der Admin hat noch keine Zimmer angelegt.'}</div>
     ${admin?`<div class="row wrap" style="gap:8px"><button class="btn sm sec" data-act="zraumSchnell" data-typ="doppel">+ Doppelzimmer</button><button class="btn sm sec" data-act="zraumSchnell" data-typ="einzel">+ Einzelzimmer</button><button class="btn sm sec" data-act="zraumSchnell" data-typ="mehr">+ Mehrbettzimmer</button></div>`:''}`:''}
   ${p.rooms.map(z=>zRaumKarte(z,admin)).join('')}
-  ${p.ohne.length?`<div class="card"><h3>Noch ohne Zimmer</h3><div class="row wrap" style="gap:8px">${p.ohne.map(u=>`<button class="chip zperson" data-act="zwunschAuf" data-u="${u}" ${zDarfBearbeiten(u)?'':'disabled'}>${zAv(u,22)} ${esc(zVor(u))}${zEntry(u).einzel?' · allein':(zEntry(u).typ&&zEntry(u).typ!=='egal'?' · '+zWunschName(zEntry(u).typ):'')}</button>`).join('')}</div>
+  ${p.ohne.length&&rooms.length?`<div class="card"><h3>Noch ohne Zimmer</h3><div class="row wrap" style="gap:8px">${p.ohne.map(u=>`<button class="chip zperson" data-act="zwunschAuf" data-u="${u}" ${zDarfBearbeiten(u)?'':'disabled'}>${zAv(u,22)} ${esc(zVor(u))}${zEntry(u).einzel?' · allein':(zEntry(u).typ&&zEntry(u).typ!=='egal'?' · '+zWunschName(zEntry(u).typ):'')}</button>`).join('')}</div>
     ${p.nichtMoeglich.filter(x=>x.u!==S.uid).map(x=>`<span class="tiny mut">${esc(zVor(x.u))}: Wunsch „${esc(zRoomName(x.room))}“ nicht möglich (Einzelzimmer von ${esc(zVor(x.von))})</span>`).join('')}</div>`:''}
-  ${!r.geschlossen?`<button class="btn sec block" data-act="zgastAuf">${ic('plus',16)} Begleitperson ohne App hinzufügen</button>`:''}
   ${zWuenscheKarte(p)}
   ${zBudgetKarte(r)}
-  ${admin&&rooms.length?`<button class="btn block" data-act="zanfrageAuf">${ic('mail',18)} Anfrage fürs Reisebüro vorbereiten</button>`:''}`; };
+  ${admin&&(rooms.length||zVorschlag().zim.length)?`<button class="btn block" data-act="zanfrageAuf">${ic('mail',18)} Anfrage fürs Reisebüro vorbereiten</button>`:''}`; };
 function zRaumKarte(z,admin){ const {room,belegt,einzelUid,cap,ueber,frei}=z; const typ = einzelUid ? (cap===1?'Einzelzimmer':`${zTypName(room.typ)} zur Einzelnutzung`) : zTypName(room.typ);
   return `<div class="card zraum ${ueber?'ueber':''}"><div class="row between"><div class="col" style="gap:0"><b>${esc(room.name)}</b><span class="tiny mut">${esc(typ)} · ${zBettenText(cap)}</span></div>${admin?`<button class="icbtn sm0" data-act="zraumAuf" data-id="${room.id}" aria-label="${esc(room.name)} bearbeiten">${ic('pencil',14)}</button>`:''}</div>
     <div class="row wrap" style="gap:8px">${belegt.map(u=>`<button class="chip zperson ${einzelUid===u?'ez':''}" data-act="zwunschAuf" data-u="${u}" ${zDarfBearbeiten(u)?'':'disabled'}>${zAv(u,22)} ${esc(zVor(u))}${einzelUid===u?' · allein':''}</button>`).join('')}${!belegt.length?'<span class="small mut">Noch niemand</span>':''}${frei>0?`<span class="tiny mut">${zBettenText(frei)} frei</span>`:''}</div>
@@ -6750,24 +6864,15 @@ OV.zwunsch = ()=>{ const f=S.form; const u=f.zu; const p=zPlan(); const rooms=p.
   <span class="small mut" style="font-weight:600">Wie möchtest du schlafen?</span><div class="col" style="gap:8px">${ZWUNSCH.map(([k,n,t])=>`<button type="button" class="pfopt ${f.ztyp===k?'on':''}" aria-pressed="${f.ztyp===k}" data-act="zTypWahl" data-t="${k}"><b>${n}</b><span class="small mut">${t}${k==='einzel'?'. Hat Vorrang, andere können sich dort nicht dazubuchen.':''}</span></button>`).join('')}</div>
   ${wirkt.length?`<div class="warn small">${esc(wirkt.map(zVor).join(', '))} ${wirkt.length===1?'ist':'sind'} dort schon eingetragen und muss${wirkt.length===1?'':'en'} sich ein anderes Zimmer suchen.</div>`:''}
   ${andere.length&&f.ztyp!=='einzel'?`<span class="small mut" style="font-weight:600">Mit wem möchtest du ein Zimmer teilen? (freiwillig)</span><div class="row wrap" style="gap:6px">${andere.map(x=>`<button type="button" class="chip ${f['zm_'+x]?'yel':''}" style="border:0;cursor:pointer;height:36px;gap:6px" aria-pressed="${!!f['zm_'+x]}" data-act="zMitUm" data-u="${x}">${zAv(x,20)} ${esc(zVor(x))}</button>`).join('')}</div>`:''}
-  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="zwunschSpeichern">Speichern</button></div>${zIstGast(u)&&(zEntry(u).by===S.uid||canMod(cur()))?`<button class="btn ghost sm" style="color:var(--pinktx)" data-act="zgastWeg" data-u="${u}">${ic('trash',14)} Begleitperson entfernen</button>`:''}</div>`; };
+  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="zwunschSpeichern">Speichern</button></div></div>`; };
 A.zwunschSpeichern = async el => { const f=S.form, u=f.zu, r=cur(); const alt=zEntry(u); const mit=Object.keys(f).filter(k=>k.startsWith('zm_')&&f[k]).map(k=>k.slice(3)).filter(v=>v!==u && !f.zeinzel);
   const wirkt = f.zroom && f.zeinzel ? (zPlan().rooms.find(z=>z.room.id===f.zroom)?.belegt||[]).filter(x=>x!==u) : [];
   const ztyp=f.ztyp||'egal'; const neuEz = ztyp==='einzel'; const claimAt = neuEz && (!alt.einzel || alt.zimmerId!==f.zroom) ? now() : (alt.claimAt||0);
-  const doc={rid:S.rid, uid:u, zimmerId:f.zroom||'', einzel:neuEz, typ:ztyp, mit, claimAt, by:alt.by||S.uid, updatedAt:now(), ...(zIstGast(u)?{gast:true, name:alt.name||'Gast'}:{})};
+  const doc={rid:S.rid, uid:u, zimmerId:f.zroom||'', einzel:neuEz, typ:ztyp, mit, claimAt, by:alt.by||S.uid, updatedAt:now()};
   el.disabled=true;
   try{ await S.db.doc(`zimmerwahl/${S.rid}_${u}`).set(doc);
     if(wirkt.length) await S.db.collection('nachrichten').add({rid:S.rid, typ:'system', text:`🛏 ${zName(u)} hat „${zRoomName(f.zroom)}“ als Einzelzimmer gewählt. ${wirkt.map(zName).join(', ')} bitte ein anderes Zimmer wählen.`, by:S.uid, createdAt:now()}).catch(()=>{});
     closeOv(); toast('Zimmerwunsch gespeichert'); }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
-
-/* ---------- Begleitpersonen ohne App ---------- */
-A.zgastAuf = ()=>{ S.form.zgname=''; openOv('zgast',{}); };
-OV.zgast = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label="Begleitperson hinzufügen"><h2>Begleitperson hinzufügen</h2><p class="small mut">Für Mitreisende ohne App, zum Beispiel Partner oder Kinder. Du trägst ihren Zimmerwunsch ein.</p>
-  <label class="f">Name<input class="in" id="f_zgname" maxlength="30" placeholder="z. B. Lisa" value="${esc(S.form.zgname||'')}"></label>
-  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="zgastSpeichern">Hinzufügen</button></div></div>`;
-A.zgastSpeichern = async ()=>{ const n=(S.form.zgname||'').trim(); if(!n) return toast('Bitte gib einen Namen ein.'); const u='g_'+rid16().slice(0,8);
-  try{ await S.db.doc(`zimmerwahl/${S.rid}_${u}`).set({rid:S.rid, uid:u, gast:true, name:n, zimmerId:'', einzel:false, mit:[], claimAt:0, by:S.uid, updatedAt:now()}); closeOv(); toast(`${n} ist dabei`); }catch(e){ fail(e,'Speichern'); } };
-A.zgastWeg = el => { const u=el.dataset.u; closeOv(); openOv('confirm',{title:`${zName(u)} entfernen?`, text:'Die Begleitperson verschwindet aus der Zimmerplanung.', ok:'Entfernen', fn: async ()=>{ await W(()=>S.db.doc(`zimmerwahl/${S.rid}_${u}`).delete(),'Entfernen'); toast('Entfernt'); }}); };
 
 /* ---------- Zimmer anlegen und bearbeiten (Admin) ---------- */
 const zNaechsterName = () => `Zimmer ${zRooms().length+1}`;
@@ -6818,7 +6923,7 @@ A.zbudgetWeg = async ()=>{ try{ await S.db.doc(`zimmerbudget/${S.rid}_${S.uid}`)
 
 /* ---------- Anfrage fürs Reisebüro ---------- */
 const zKat = (cap, n, ez) => { const nm_ = {1:'Einzelzimmer',2:'Doppelzimmer',3:'Dreibettzimmer',4:'Vierbettzimmer'}[cap] || `${cap}-Bett-Zimmer`; return (ez || (n===1 && cap>1)) && cap>1 ? `${nm_} zur Einzelnutzung` : nm_; };
-function zBedarf(){ const p=zPlan(); const m={}; p.rooms.forEach(z=>{ if(!z.belegt.length && !z.einzelUid) return; const k=zKat(z.cap, z.belegt.length, !!z.einzelUid); m[k]=(m[k]||0)+1; });
+function zBedarf(){ const p=zPlan(); const m={}; if(!zRooms().length){ const v=zVorschlag(); return {zeilen:zBedarfZeilen(v.zim), offenEz:0, offen:v.offen.length, p:{rooms:v.zim.map((z,i)=>({room:{name:`Zimmer ${i+1}`}, belegt:z.belegt, einzelUid:z.ez?z.belegt[0]:'', cap:z.cap}))}}; } p.rooms.forEach(z=>{ if(!z.belegt.length && !z.einzelUid) return; const k=zKat(z.cap, z.belegt.length, !!z.einzelUid); m[k]=(m[k]||0)+1; });
   const offenEz=p.ohne.filter(u=>zEntry(u).einzel).length; const offen=p.ohne.length-offenEz; return {zeilen:Object.entries(m), offenEz, offen, p}; }
 /* Vorgaben der Anfrage: gespeicherter Stand der Anfrage oder Standardwerte */
 function zAnfrageForm(){ const r=cur(); const q=r.anfrage||{}; return {zempf:q.empf||'', zhinweis:q.hinweis||'', znamen:!!q.namen, zbud:q.bud!==false, zpers:q.personen||'', zmax:q.budgetMax||'', zpp:q.budgetPP||'', zhotel:q.hotel||'', zangefragt:r.buchung==='angefragt'||r.buchung==='vorgemerkt'}; }
@@ -6878,6 +6983,60 @@ function zKonfKarte(r){ if(!modulAn('zimmer',r)) return ''; const p=zPlan(); con
     <div class="row" style="gap:8px"><button class="btn sm grow" data-act="zwunschAuf" data-u="${S.uid}">${ic('pencil',14)} Mein Zimmerwunsch</button><button class="btn sm sec grow" data-act="go" data-v="zimmer">Alle Wünsche, Budget</button></div></div>`; }
 
 A.zppSchnitt = ()=>{ const s=zBudgetSumme(cur()); if(s&&s.n){ S.form.zpp=Math.round(s.avg/10)*10; render(); } };
+/* ===================== Zimmerplan: Vorschlag der App aus den Wünschen =====================
+   Der Admin muss keine Zimmer von Hand anlegen. Aus den Wünschen aller Mitglieder berechnet die App den Zimmerbedarf (nichts wird gespeichert):
+   1. Einzelwunsch = eigenes Einzelzimmer.  2. Gegenseitige Zimmerpartner bilden ein Zimmer (2 = Doppel, 3 und mehr = Mehrbett).
+   3. Doppelwünsche ohne Partner werden untereinander gepaart, „Egal“ füllt Lücken.  4. Wer übrig bleibt, wartet auf die Entscheidung des Admins:
+   Einzelzimmer, Doppelzimmer alleine, zu einem Doppelzimmer dazulegen (Dreibett) oder die Gruppe fragen. Gespeichert wird nur diese Entscheidung: reisen/{id}.zEntsch = { uid: 'einzel'|'allein'|'dreier'|'gruppe' }.
+   „Vorschlag übernehmen“ legt die Zimmer an und trägt alle ein, danach lässt sich alles von Hand ändern. Einen Preis für Zuschläge kennt nur das Reisebüro, deshalb nur ein Hinweis. */
+const ZE_OPT = [['einzel','Einzelzimmer','Mit Einzelzimmerzuschlag möglich'],['allein','Doppelzimmer alleine nutzen','Zuschlag möglich'],['dreier','Zu einem Doppelzimmer dazulegen','Wird ein Dreibettzimmer'],['gruppe','Gruppe fragen','Eine Nachricht im Gruppenchat']];
+function zVorschlag(){ const r=cur(); const pers=zPersonen(); const en=r?.zEntsch||{};
+  const typ=u=>zWunschTyp(zEntry(u)); const mit=u=>(zEntry(u).mit||[]).filter(v=>pers.includes(v));
+  const zim=[], konfl=[], rest=[], offen=[];
+  const neu=(t,cap,belegt,x={})=>zim.push({typ:t,cap,belegt,ez:false,ampel:'gruen',hinweis:'',...x});
+  pers.filter(u=>typ(u)==='einzel').forEach(u=>neu('einzel',1,[u],{ez:true,hinweis:'Einzelzimmerzuschlag möglich'}));
+  pers.filter(u=>typ(u)!=='einzel').forEach(u=>mit(u).filter(v=>typ(v)==='einzel').forEach(v=>konfl.push({u,v})));
+  const r0=pers.filter(u=>typ(u)!=='einzel'); const par={}; const f=x=>par[x]===x?x:(par[x]=f(par[x])); r0.forEach(u=>par[u]=u);
+  r0.forEach(u=>mit(u).filter(v=>par[v]!==undefined).forEach(v=>{ par[f(u)]=f(v); }));
+  const gr={}; r0.forEach(u=>(gr[f(u)]=gr[f(u)]||[]).push(u)); const lose=[];
+  Object.values(gr).forEach(g=>{ if(g.length>=3) neu('mehr',g.length,g,g.some(u=>typ(u)==='doppel')?{ampel:'gelb',hinweis:'Mehr als zwei Wünsche für ein Zimmer'}:{}); else if(g.length===2) neu('doppel',2,g); else lose.push(g[0]); });
+  const mehr=lose.filter(u=>typ(u)==='mehr'), dop=lose.filter(u=>typ(u)==='doppel'), eg=lose.filter(u=>typ(u)==='egal');
+  if(mehr.length>=2) neu('mehr',mehr.length,mehr); else if(mehr.length===1 && eg.length) neu('doppel',2,[mehr[0],eg.shift()]); else rest.push(...mehr);
+  while(dop.length>=2) neu('doppel',2,dop.splice(0,2));
+  if(dop.length===1 && eg.length) neu('doppel',2,[dop.pop(),eg.shift()]);
+  rest.push(...dop);
+  while(eg.length>=2) neu('doppel',2,eg.splice(0,2));
+  rest.push(...eg);
+  rest.forEach(u=>{ const e=en[u];
+    if(e==='einzel') neu('einzel',1,[u],{ez:true,ampel:'gelb',hinweis:'Einzelzimmer, Zuschlag möglich'});
+    else if(e==='allein') neu('doppel',2,[u],{ez:true,ampel:'gelb',hinweis:'Doppelzimmer alleine, Zuschlag möglich'});
+    else if(e==='dreier'){ const z=[...zim].reverse().find(x=>x.typ==='doppel'&&!x.ez&&x.belegt.length===2); if(z){ z.typ='mehr'; z.cap=3; z.belegt.push(u); z.ampel='gelb'; z.hinweis='Dreibettzimmer'; } else offen.push({u,gefragt:false}); }
+    else offen.push({u,gefragt:e==='gruppe'}); });
+  return {zim, offen, konfl}; }
+const zKatText = z => { const k=zKat(z.cap, z.belegt.length, z.ez); return k; };
+function zBedarfZeilen(zim){ const m={}; zim.forEach(z=>{ const k=zKatText(z); m[k]=(m[k]||0)+1; }); return Object.entries(m); }
+const zAmpelIc = a => a==='rot'?'🔴':a==='gelb'?'🟡':'🟢';
+function zVorschlagKarte(r,admin){ const v=zVorschlag(); if(!zPersonen().length) return '';
+  const zeilen=zBedarfZeilen(v.zim).map(([k,c])=>`${c} × ${k}`); if(v.offen.length) zeilen.push(`${v.offen.length} ${v.offen.length===1?'Person':'Personen'} offen`);
+  const hatZimmer=zRooms().length>0;
+  return `<div class="card hot"><span class="tag"><span class="dot"></span>ZIMMERBEDARF</span><div class="ttl">${esc(zeilen.join(', ')||'Noch keine Wünsche')}</div>
+    <span class="small mut">Vorschlag der App aus den Wünschen aller. Einen Einzelzimmerzuschlag kennt nur das Reisebüro, ihr seht ihn im Angebot.</span>
+    <div class="col" style="gap:6px">${v.zim.map(z=>`<div class="row" style="gap:8px;align-items:flex-start"><span>${zAmpelIc(z.ampel)}</span><span class="grow small"><b>${esc(zKatText(z))}</b>: ${esc(z.belegt.map(zVor).join(', '))}${z.hinweis?`<br><span class="tiny mut">${esc(z.hinweis)}</span>`:''}</span></div>`).join('')}</div>
+    ${v.konfl.map(k=>`<div class="warn small">🔴 ${esc(zVor(k.u))} möchte mit ${esc(zVor(k.v))}, aber ${esc(zVor(k.v))} wünscht ein Einzelzimmer. Einer von beiden sollte den Wunsch ändern.</div>`).join('')}
+    ${v.offen.map(o=>`<div class="card tight"><div class="row" style="gap:8px">${zAv(o.u,24)}<span class="grow small"><b>${esc(zVor(o.u))}</b> hat noch keinen Zimmerpartner ${o.gefragt?'<span class="tiny mut">· Gruppe wurde gefragt</span>':''}</span><span>🟡</span></div>
+      ${admin?`<div class="col" style="gap:6px">${ZE_OPT.map(([k,n,t])=>`<button type="button" class="pfopt" data-act="zEntsch" data-u="${o.u}" data-v="${k}"><b>${n}</b><span class="small mut">${t}</span></button>`).join('')}</div>`:'<span class="tiny mut">Der Admin entscheidet, wie es weitergeht.</span>'}</div>`).join('')}
+    ${admin&&v.zim.length?`<button class="btn block" data-act="zUebernehmen">${hatZimmer?'Vorschlag neu übernehmen':'Vorschlag übernehmen'}</button><span class="tiny mut">${hatZimmer?'Ersetzt die bisherigen Zimmer. ':''}Legt die Zimmer an und trägt alle ein. Danach kannst du alles von Hand ändern.</span>`:''}</div>`; }
+A.zEntsch = async el => { const u=el.dataset.u, w=el.dataset.v, r=cur(); const neu={...(r.zEntsch||{}), [u]:w};
+  try{ await S.db.doc(`reisen/${r.id}`).update({zEntsch:neu});
+    if(w==='gruppe') await S.db.collection('nachrichten').add({rid:r.id, typ:'system', text:`🛏 ${zName(u)} hat noch keinen Zimmerpartner. Wer möchte das Zimmer teilen oder tauschen? Bitte meldet euch beim Admin.`, by:S.uid, createdAt:now()}).catch(()=>{});
+    toast(w==='gruppe'?'Die Gruppe wurde im Chat gefragt':'Gespeichert'); }catch(e){ fail(e,'Speichern'); } };
+A.zUebernehmen = ()=>{ const alt=zRooms(); const go_=async ()=>{ const v=zVorschlag(); const t0=now();
+    for(const x of alt) await S.db.doc(`zimmer/${x.id}`).delete();
+    let i=0; for(const z of v.zim){ i++; const ref=await S.db.collection('zimmer').add({rid:S.rid, name:`Zimmer ${i}`, typ:z.typ, betten:z.cap, pos:t0+i, by:S.uid, createdAt:t0+i});
+      for(const u of z.belegt){ const e=zEntry(u); await S.db.doc(`zimmerwahl/${S.rid}_${u}`).set({rid:S.rid, uid:u, zimmerId:ref.id, einzel:!!z.ez, typ:e.typ||(z.typ==='einzel'?'einzel':'egal'), mit:e.mit||[], claimAt:z.ez?t0+i:0, by:e.by||S.uid, updatedAt:now()}); } }
+    for(const o of v.offen){ const e=zEntry(o.u); await S.db.doc(`zimmerwahl/${S.rid}_${o.u}`).set({rid:S.rid, uid:o.u, zimmerId:'', einzel:false, typ:e.typ||'egal', mit:e.mit||[], claimAt:0, by:e.by||S.uid, updatedAt:now()}); }
+    toast('Zimmer angelegt und alle eingetragen'); };
+  if(alt.length) openOv('confirm',{title:'Bisherige Zimmer ersetzen?', text:'Die bisherigen Zimmer werden gelöscht und alle nach dem Vorschlag neu eingetragen.', ok:'Ersetzen', fn:()=>W(go_,'Speichern')}); else W(go_,'Speichern'); };
 /* ===================== Buchungsstufe: Anfrage, Angebote, Abstimmung, Vorgemerkt =====================
    Nach der Abstimmung ist die Reise noch nicht aktiv. reisen/{id}.buchung:
      'offen'      Ergebnis steht, der Admin bereitet die Anfrage vor (Zimmer, Budget aller, Hotelvorschläge)
@@ -7198,7 +7357,7 @@ const anreiseArtFeld = f => `<div class="col" style="gap:6px"><span style="font-
 const anEintraege = () => S.rt.anreisen||[];
 const anEntry = u => anEintraege().find(x=>x.uid===u);
 const anArtVon = (u, r=cur()) => anEntry(u)?.art || '';
-const anDarf = u => canMod(cur()) || u===S.uid || (zIstGast(u) && zEntry(u).by===S.uid);
+const anDarf = u => canMod(cur()) || u===S.uid;
 const anFehlen = () => zPersonen().filter(u=>!anEntry(u));
 function anKurz(u){ const e=anEntry(u); if(!e) return 'noch nichts angegeben';
   if(e.art==='flug') return `Flug ab ${(e.abflug||[]).join(', ')||'?'}${e.zugZumFlug?' · Zug zum Flug':''}`;
@@ -7243,7 +7402,7 @@ OV.anreise = ()=>{ const f=S.form, r=cur(), u=f.an_u; const art=f.an_art; const 
   ${art?`<label class="f">Hinweis (freiwillig)<input class="in" id="f_an_hin" maxlength="120" placeholder="z. B. Handgepäck, früh am Morgen" value="${esc(f.an_hin||'')}"></label>`:''}
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="anSpeichern">Speichern</button></div></div>`; };
 A.anSpeichern = async el => { const f=S.form, u=f.an_u; const art=f.an_art; if(!art) return toast('Bitte wähle, wie du anreist.');
-  const d={rid:S.rid, uid:u, art, abflug:[], ziel:[], zugZumFlug:false, bahnhof:'', startort:'', hinweis:(f.an_hin||'').trim(), by:anEntry(u)?.by||S.uid, at:now(), ...(zIstGast(u)?{gast:true, name:zEntry(u).name||'Gast'}:{})};
+  const d={rid:S.rid, uid:u, art, abflug:[], ziel:[], zugZumFlug:false, bahnhof:'', startort:'', hinweis:(f.an_hin||'').trim(), by:anEntry(u)?.by||S.uid, at:now()};
   if(art==='flug'){ d.abflug=AN_ALLE.filter(n=>f.an_ab?.[n]); if(!d.abflug.length) return toast('Bitte wähle mindestens einen Abflughafen.'); d.zugZumFlug=!!f.an_zug; }
   if(art==='zug'){ d.bahnhof=(f.an_bhf||'').trim(); if(!d.bahnhof) return toast('Bitte gib den nächsten Bahnhof ein.'); }
   if(art==='auto'){ d.startort=(f.an_start||'').trim(); if(!d.startort) return toast('Bitte gib deinen Startort ein.'); }
@@ -7351,9 +7510,7 @@ function mwSeite(r, pager){ const f=S.form; if(!f.mw_s) Object.assign(f, mwInit(
     body=`<div class="card gold"><span class="tag"><span class="dot"></span>ERLEDIGT</span><div class="ttl" style="font-size:20px">Danke, das war’s! 🎉</div>
     <p class="small" style="color:var(--goldtx);margin:0">${ez?'Du organisierst deine Reise komplett selbst. Für das Reisebüro bist du nicht relevant.':f.mw_modus==='allein'?'Du reist alleine an. Dein Zimmerwunsch fließt in die Zimmerplanung ein.':'Deine Angaben sind gespeichert. Du kannst sie jederzeit ändern.'}</p></div>
     ${pager?`<p class="small mut" style="margin:0">Ort und Zeit stehen fest. ${adm?'Wenn du so weit bist, legst du die Reise jetzt fest.':`${esc(nm(r.admin))} legt die Reise jetzt fest.`}</p>`:''}`;
-    if(pager){ return `${hdrPlain('Koffer-Konferenz')}<h1>${esc(r.titel)}</h1>${body}
-      ${adm?`<button class="btn block yel" data-act="go" data-v="freigabe">${ic('suitcase',18)} Reise festlegen</button>`:`<button class="btn block" data-act="mwHome">Zu Meine Reisen</button>`}
-      <div class="row wrap" style="gap:14px;justify-content:center"><button class="link tiny" style="color:var(--mut)" data-act="mwNochmal">Meine Angaben ändern</button><button class="link tiny" style="color:var(--mut)" data-act="mwAlles">Gesamtübersicht der Konferenz</button></div>`; }
+    if(pager) return statusSeite(r);
     btn='Zurück zur Abstimmung'; }
   return `${hdrPlain(pager?'Koffer-Konferenz':'Meine Angaben')}${s==='fertig'?'':`<button class="back" data-act="mwZurueck">${ic('back',20)} Zurück</button>`}
   <h1>${esc(r.titel)}</h1>${body}<button class="btn block" data-act="mwWeiter">${btn}</button>${pager&&s!=='fertig'?`<button class="link tiny" style="align-self:center;color:var(--mut)" data-act="mwAlles">Gesamtübersicht der Konferenz</button>`:''}`; }
@@ -7365,7 +7522,7 @@ A.mwAlles = ()=>{ S.ui.konfAlles=cur()?.id; S.form={}; render(); try{ window.scr
 
 A.mwEgal = el => { S.form.zbegal=!!el.checked; render(); };
 A.mwMit = el => { S.form['zm_'+el.dataset.u]=!S.form['zm_'+el.dataset.u]; render(); };
-A.mwZurueck = ()=>{ const f=S.form; const l=mwSchritte(f); const i=l.indexOf(f.mw_s); if(i<=0){ S.form={}; if(S.route.v==='konferenz') go('home'); else { S.route={v:'konferenz'}; render(); } } else { f.mw_s=l[i-1]; render(); } try{ window.scrollTo({top:0}); }catch(e){} };
+A.mwZurueck = ()=>{ const f=S.form; const l=mwSchritte(f); const i=l.indexOf(f.mw_s); if(i<=0){ const edit=!!f.mw_edit; S.form={}; S.ui.aendAlt=null; if(edit) render(); else if(S.route.v==='konferenz') go('home'); else { S.route={v:'konferenz'}; render(); } } else { f.mw_s=l[i-1]; render(); } try{ window.scrollTo({top:0}); }catch(e){} };
 A.mwWeiter = async el => { const f=S.form, r=cur(); const s=f.mw_s; const l=mwSchritte(f);
   if(s==='fertig'){ S.route={v:'konferenz'}; S.form={}; render(); return; }
   el.disabled=true;
@@ -7383,9 +7540,65 @@ A.mwWeiter = async el => { const f=S.form, r=cur(); const s=f.mw_s; const l=mwSc
     else if(s==='zimmer'){ const t=f.mw_ztyp; if(!t){ el.disabled=false; return toast('Bitte wähle, wie du schlafen möchtest.'); }
       const alt=zEntry(S.uid); const neuEz=t==='einzel'; const mit=neuEz?[]:Object.keys(f).filter(k=>k.startsWith('zm_')&&f[k]).map(k=>k.slice(3)).filter(v=>v!==S.uid);
       await S.db.doc(`zimmerwahl/${S.rid}_${S.uid}`).set({rid:S.rid, uid:S.uid, zimmerId:alt.zimmerId||'', einzel:neuEz, typ:t, mit, claimAt:neuEz&&!alt.einzel?now():(alt.claimAt||0), by:alt.by||S.uid, updatedAt:now()});
+      { const ne={...alt, uid:S.uid, typ:t, einzel:neuEz, mit}; S.rt.zwahl=[...(S.rt.zwahl||[]).filter(w=>w.uid!==S.uid), ne]; }
       if(f.mw_modus==='allein') await S.db.doc(`anreisewunsch/${S.rid}_${S.uid}`).set({rid:S.rid, uid:S.uid, art:'selbst', selbstAlles:neuEz, abflug:[], ziel:[], zugZumFlug:false, bahnhof:'', startort:'', hinweis:'', by:S.uid, at:now()}); }
+    if(f.mw_edit){ await aendPruefen(); if(l[l.indexOf(s)+1]==='fertig'){ S.form={}; S.ui.aendAlt=null; toast('Deine Angaben sind aktualisiert.'); el.disabled=false; render(); try{ window.scrollTo({top:0}); }catch(e3){} return; } }
     f.mw_s=l[l.indexOf(s)+1]; el.disabled=false; render(); try{ window.scrollTo({top:0}); }catch(e2){}
   }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
+/* ===================== Gruppenstatus =====================
+   Sobald alle abgestimmt haben (oder die eigenen Angaben fertig sind), zeigt die Konferenz nur noch den Gesamtstatus der Gruppe.
+   Unten: „Meine Angaben ändern“. Das fragt deutlich nach, weil jede Änderung die Planung der ganzen Gruppe berührt.
+   Wer etwas ändert, löst eine Meldung an den Admin aus: aenderungen/{rid}_{uid}_{Stempel} = { rid, uid, text, themen:[…], at } */
+const meineFertig = r => { const m=schritteVon(r,S.uid); return m.selbst || m.st.filter(x=>x.k!=='abst').every(x=>x.done); };
+const alleAbgestimmt = r => { const ks=konfStand(r); return !!(ks.offen.length && ks.mem.length && ks.mem.every(m=>ks.fertig.has(m.uid))); };
+
+function gruppenStatus(r){ const RD=runden(r); const offen=RD.filter(x=>x.status==='offen'); const ks=konfStand(r); const b=r.buchung; const fest=r.status==='fest';
+  const ms=zMitgl().map(m=>m.uid).filter(u=>!selbstbucher(u)); const angDone=ms.filter(u=>schritteVon(r,u).st.filter(x=>x.k!=='abst').every(x=>x.done)).length;
+  const oS=siegerVon(r,'ort'), zS=siegerVon(r,'zeit'); const entschieden=!offen.length; const festgelegt=!!b||fest; const ang=(typeof angebote==='function'?angebote():[]);
+  const ph=[
+    {n:'Abstimmung', s:entschieden?'fertig':'aktuell', t:entschieden?`Entschieden${r.ort?`: ${r.ort}`:oS?`: ${oS.name}`:''}${r.von?`, ${fRange(r.von,r.bis)}`:zS?`, ${fRange(zS.von,zS.bis)}`:''}`:`${ks.fertig.size} von ${ks.mem.length} haben abgestimmt`},
+    {n:'Angaben der Gruppe', s:angDone>=ms.length&&ms.length?'fertig':(entschieden||offen.length?'aktuell':'offen'), t:`${angDone} von ${ms.length} haben Anreise, Budget und Zimmer angegeben`},
+    {n:'Reise festgelegt', s:festgelegt?'fertig':(entschieden?'aktuell':'offen'), t:festgelegt?'Ort und Zeitraum sind festgehalten':entschieden?`${esc(vorname(r.admin))} legt die Reise jetzt fest`:'Nach der Abstimmung'},
+    {n:'Anfrage beim Reisebüro', s:(b==='angefragt'||b==='vorgemerkt'||fest)?'fertig':b==='offen'?'aktuell':'offen', t:(b==='angefragt'||b==='vorgemerkt'||fest)?'Die Reise wurde beim Reisebüro angefragt':b==='offen'?'Die Anfrage wird vorbereitet':'Noch nicht gestellt'},
+    {n:'Angebot', s:(b==='vorgemerkt'||fest)?'fertig':b==='angefragt'?'aktuell':'offen', t:(b==='vorgemerkt'||fest)?'Angebot angenommen':b==='angefragt'?(ang.length?`${ang.length} ${ang.length===1?'Angebot liegt':'Angebote liegen'} vor, die Gruppe stimmt ab`:'Wir warten auf ein Angebot'):'Noch offen'},
+    {n:'Gebucht', s:fest?'fertig':b==='vorgemerkt'?'aktuell':'offen', t:fest?'Die Reise steht':b==='vorgemerkt'?'Wird jetzt gebucht':'Noch offen'} ];
+  const akt=ph.find(p=>p.s==='aktuell'); const kopf = fest?'Die Reise ist gebucht 🎉' : b==='vorgemerkt'?'Angebot angenommen, die Reise wird gebucht' : b==='angefragt'?'Die Reise wurde beim Reisebüro angefragt' : b==='offen'?'Die Anfrage ans Reisebüro wird vorbereitet' : entschieden?'Ort und Zeit stehen fest' : 'Die Gruppe hat abgestimmt';
+  return {ph, kopf, akt, offen, entschieden, festgelegt}; }
+
+function statusKarte(r){ const g=gruppenStatus(r);
+  return `<div class="card gold"><span class="tag"><span class="dot"></span>STATUS DER GRUPPE</span><div class="ttl" style="font-size:20px">${esc(g.kopf)}</div></div>
+  <div class="card tight"><div class="col" style="gap:0">${g.ph.map((p,i)=>`<div class="row" style="gap:12px;align-items:flex-start;padding:8px 0;${i?'border-top:1px solid var(--line)':''}"><span class="stepnr" style="flex-shrink:0;${p.s==='fertig'?'background:rgba(63,163,107,.25)':p.s==='aktuell'?'background:var(--red);border-color:var(--red);color:#fff':''}">${p.s==='fertig'?ic('check',14):i+1}</span><span class="col" style="gap:1px;min-width:0"><b class="${p.s==='offen'?'mut':''}">${esc(p.n)}${p.s==='aktuell'?' <span class="chip yel" style="height:20px;font-size:11px">jetzt</span>':''}</b><span class="small mut">${p.t}</span></span></div>`).join('')}</div></div>`; }
+
+function statusSeite(r){ const adm=isAdmin(r); const g=gruppenStatus(r); const fertig=meineFertig(r);
+  return `${hdrPlain('Koffer-Konferenz')}<h1>${esc(r.titel)}</h1>
+  ${aendKarte(r)}${statusKarte(r)}
+  ${!fertig?`<button class="btn block" data-act="mwStart" data-s="">Meine Angaben vervollständigen</button>`:''}
+  ${adm&&g.offen.length?`<button class="btn block yel" data-act="mwAlles">Abstimmung auswerten und abschließen</button>`:''}
+  ${adm&&g.entschieden&&!g.festgelegt?`<button class="btn block yel" data-act="go" data-v="freigabe">${ic('suitcase',18)} Reise festlegen</button>`:''}
+  <button class="link tiny" style="align-self:center;color:var(--mut)" data-act="mwAlles">Gesamtübersicht der Konferenz</button>
+  <button class="btn block sec" data-act="aendernAuf">Meine Angaben ändern</button>`; }
+
+/* ---------- Angaben ändern: erst deutlich nachfragen ---------- */
+A.aendernAuf = ()=>openOv('aendern',{});
+OV.aendern = ()=>`<div class="sheet" role="dialog" aria-modal="true" aria-label="Angaben ändern"><h2>⚠️ Angaben wirklich ändern?</h2>
+  <div class="warn"><b>Achtung: Deine Angaben sind Teil der Reiseplanung für die gesamte Gruppe.</b><br>Eine Änderung bei Anreise, Budget oder Zimmer kann die Zimmerplanung, das Budget, die Anfrage beim Reisebüro und damit die Reise aller verändern. Der Admin wird informiert, sobald du etwas änderst.</div>
+  <p style="margin:0"><b>Willst du deine Angaben wirklich ändern?</b></p>
+  <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Nein, nichts ändern</button><button class="btn grow" data-act="aendernJa">Ja, ändern</button></div></div>`;
+function aendSnap(f){ const modus=f.mw_modus; const ab=Object.keys(f.an_ab||{}).filter(k=>f.an_ab[k]).sort(); const mit=Object.keys(f).filter(k=>k.startsWith('zm_')&&f[k]).sort();
+  return { anreise: modus==='allein' ? 'allein' : [f.mw_art||'', ab.join(','), f.an_zug?'zug':'', (f.an_bhf||'').trim(), (f.an_start||'').trim()].join('|'),
+    budget: modus==='allein' ? '-' : (f.zbegal ? 'egal' : String(Math.round(+String(f.zbetrag||'').replace(',','.'))||'')), zimmer:(f.mw_ztyp||'')+'|'+(f.mw_ztyp==='einzel'?'':mit.join(',')) }; }
+A.aendernJa = ()=>{ closeOv(); const f=mwInit('', true); f.mw_s='q1'; f.mw_edit=true; S.ui.aendAlt=aendSnap(f); S.ui.aendId=`${S.rid}_${S.uid}_${now()}`; S.form=f; render(); try{ window.scrollTo({top:0}); }catch(e){} };
+/* Nach jedem gespeicherten Schritt: hat sich gegenüber vorher etwas geändert? Dann Meldung an den Admin (eine pro Änderungsvorgang) */
+async function aendPruefen(){ const r=cur(); const alt=S.ui.aendAlt; if(!alt||!r||isAdmin(r)) return; const neu=aendSnap(S.form);
+  const themen=[]; if(alt.anreise!==neu.anreise) themen.push('Anreise'); if(alt.budget!==neu.budget) themen.push('Budget'); if(alt.zimmer!==neu.zimmer) themen.push('Zimmer'); if(!themen.length) return;
+  const text=`${vorname(S.uid)} hat Angaben geändert: ${themen.join(', ')}`;
+  try{ await S.db.doc(`aenderungen/${S.ui.aendId}`).set({rid:r.id, uid:S.uid, text, themen, at:now()}); }catch(e){ console.warn('Änderungsmeldung', e); } }
+
+/* Karte für den Admin: wer hat was geändert */
+function aendKarte(r){ r=r||cur(); if(!r||!isAdmin(r)) return ''; const l=(S.rt.aend||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0)); if(!l.length) return '';
+  return `<div class="card hot"><span class="tag"><span class="dot"></span>ÄNDERUNG ANGEFRAGT</span>${l.map(x=>`<div class="row between" style="gap:8px"><span class="small"><b>${esc(nm(x.uid))}</b> hat Angaben geändert: ${esc((x.themen||[]).join(', '))}<br><span class="tiny mut">${fStamp(x.at)}</span></span><button class="btn xs" data-act="aendOk" data-id="${x.id}">Gesehen</button></div>`).join('')}
+    <span class="tiny mut">Prüfe, ob Zimmerplanung, Budget und Anfrage noch passen.</span></div>`; }
+A.aendOk = async el => { await W(()=>S.db.doc(`aenderungen/${el.dataset.id}`).delete(),'Entfernen'); };
 /* ===================== Notfallpass: gehört zum Profil, nicht zur Reise =====================
    Privat in den eigenen Einstellungen: settings.notfallpass = { blut, allergien, medis, versicherung, entsperr, angehoerige:[{name,bez,tel}], kontakt(alt) }.
    Teilen pro Reise: notfallpass/{rid}_{uid} = { rid, uid, an:['alle'] | [uids], daten:{…ohne Entsperrcode, außer mitCode}, mitCode, at }.
@@ -7781,6 +7994,12 @@ A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 2.28', t:'Tickets, Kiosk, Statusseite und Zimmerplan', p:[
+    'Neue Statusseite: Haben alle abgestimmt, siehst du nur den Gesamtstand der Gruppe, z. B. „beim Reisebüro angefragt“. Unten kannst du deine Angaben ändern, nach deutlicher Warnung und Rückfrage. Der Admin bekommt dann eine Meldung.',
+    'Neuer Zimmerplan: Die App berechnet den Zimmerbedarf aus den Wünschen, zum Beispiel „1 Doppelzimmer, 1 Einzelzimmer“, mit Ampel. Wer keinen Partner hat, wird vom Admin eingeordnet. Virtuelle Begleitpersonen gibt es nicht mehr.',
+    'Tickets: Tageskarte, Wochenkarte, Monatskarte, Jahreskarte bestimmen, wie lange ein Account bearbeiten darf. Neue Nutzer starten mit einer Tageskarte, danach kann man nur noch ansehen. Der Admin weist Tickets zu.',
+    'Neuer Kiosk: Hier siehst du Wochen-, Monats- und Jahreskarte als Schwimmbad-Tickets. Kaufen geht in der Beta noch nicht, die Preise folgen. Dein eigenes Ticket mit Restlaufzeit steht in deinem Profil.',
+  ] },
   { v:'Beta 2.27', t:'Koffer-Konferenz Schritt für Schritt', p:[
     'Neue Koffer-Konferenz in vier Schritten: Name, Ort, Zeit und Art der Reise. Weißt du Ort oder Zeit schon, steht das sofort fest, sonst wird abgestimmt. Der Ort läuft dann über den Ideen-Pool.',
     'Abstimmung Schritt für Schritt: immer eine Frage im Fokus, danach weiter zu „Meine Angaben“. Der Ideen-Pool ersetzt die Ortsrunde, die Einladung ist kleiner. Vorschläge anderer Mitglieder sind standardmäßig aus.',

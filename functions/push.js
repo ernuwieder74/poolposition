@@ -108,6 +108,14 @@ exports.pushRund = onDocumentCreated({ ...TRIG, document: 'rundnachrichten/{id}'
   return senden(aktiv, 'rund', { title: `📣 Ansage von ${vorname(n[x.by])} · ${reiseTitel(r)}`, body: x.text, tag: `rund_${ev.params.id}`, von: x.by });
 });
 
+/* ---------- Änderung von Angaben (aenderungen) → Meldung an den Admin der Reise ---------- */
+exports.pushAenderung = onDocumentCreated({ ...TRIG, document: 'aenderungen/{id}' }, async ev => {
+  const x = ev.data?.data(); if (!x || !x.rid || !x.uid) return;
+  const rs = await db.doc(`reisen/${x.rid}`).get(); if (!rs.exists) return; const r = rs.data(); if (!r.admin || r.admin === x.uid) return;
+  const n = await namen([x.uid]);
+  return senden([r.admin], 'aend', { title: `✏️ Änderung von ${vorname(n[x.uid])} · ${reiseTitel(r)}`, body: x.text || 'Angaben geändert', tag: `aend_${ev.params.id}`, von: x.uid });
+});
+
 /* ---------- Tägliche Erinnerungen (um 9 Uhr Ortszeit der Reise) ----------
    1) Am Tag vor der Abreise: „Morgen geht es los“ an alle, die dabei sind (einmal pro Reise, Marker reisen/{id}.erinnertAbreise).
    2) To-dos: zwei Tage vor der Frist und am Tag der Frist an die zuständige Person (Marker aufgaben/{id}.erinnert = Anzahl der Stufen 1|2). */
