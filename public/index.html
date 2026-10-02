@@ -756,7 +756,12 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .btn{white-space:normal;height:auto;min-height:50px;padding-top:8px;padding-bottom:8px;line-height:1.2;text-align:center;max-width:100%}
 .btn.sm{height:auto;min-height:38px;padding-top:6px;padding-bottom:6px}
 .btn.xs{height:auto;min-height:32px;padding-top:4px;padding-bottom:4px}
+/* „Ich bin dabei“ in der Herde: immer gleich groß, nie umbrechen */
+.btn.xs.dabeibtn{flex:none;white-space:nowrap;width:112px;height:34px;min-height:34px;padding:0 8px}
 .btn svg{flex:none}
+.packkopf{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;padding:4px 0;box-sizing:border-box}
+.packkopf:focus-visible{outline:2px solid var(--yel);outline-offset:2px;border-radius:8px}
+.packfertig{border-color:var(--grn)}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -769,7 +774,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.31";
+const APP_VERSION = "Beta 2.32";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -1630,11 +1635,15 @@ function entscheidungCard(x){ const e=x.ergebnis||{}; const g=e.gewaehlt||{};
 A.chatSend = ()=>sendMsg({});
 async function sendMsg(extra){ if(S.ui.edit) return editSpeichern(); const t=(S.form.msg||'').trim(); if(!t) return; S.form.msg=''; const el=document.getElementById('f_msg'); if(el) el.value='';
   const q=S.ui.antw; try{ await S.db.collection('nachrichten').add(mitGastFlag(mitAntwort({rid:S.rid, typ:'text', text:t, by:S.uid, createdAt:now(), ...extra}))); S.ui.emoji=false; render(); nachUnten(); }catch(e){ fail(e,'Senden'); S.form.msg=t; S.ui.antw=q; render(); } }
+/* Fotos vor dem Hochladen auf max. 1600 px verkleinern (spart Speicher und Datenvolumen). GIFs und Videos bleiben unverändert; wird das Ergebnis nicht kleiner, bleibt das Original. */
+async function fotoVerkleinern(file){ try{ if(!/^image\/(jpeg|png|webp)$/.test(file.type)) return file; const bmp=await createImageBitmap(file); const f=Math.min(1, 1600/Math.max(bmp.width,bmp.height)); if(f===1 && file.size<600*1024){ bmp.close&&bmp.close(); return file; }
+  const c=document.createElement('canvas'); c.width=Math.round(bmp.width*f); c.height=Math.round(bmp.height*f); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(bmp,0,0,c.width,c.height); bmp.close&&bmp.close();
+  const b=await new Promise(ok=>c.toBlob(ok,'image/jpeg',.86)); return (b && b.size<file.size) ? b : file; }catch(e){ return file; } }
 async function uploadFile(file){ if(!S.assets){ toast('Fotos hochladen geht nur mit Bearbeitungsrecht.'); return null; }
   if(file.size>20*1024*1024){ toast('Die Datei ist größer als 20 MB.'); return null; }
   const ok=/^(image\/(png|jpeg|gif|webp)|video\/(mp4|webm|quicktime))$/.test(file.type); if(!ok){ toast('Dieses Format geht leider nicht. Möglich sind JPG, PNG, GIF, WebP, MP4, MOV und WebM.'); return null; }
   toast('Wird hochgeladen …');
-  try{ const r=await S.assets.upload(file); return {id:r.id, mime:r.contentType}; }catch(e){ console.error(e); toast(e.code==='quota_or_state'?'Der Speicher für Fotos ist voll.':'Hochladen hat nicht geklappt.'); return null; } }
+  try{ const r=await S.assets.upload(await fotoVerkleinern(file)); return {id:r.id, mime:r.contentType}; }catch(e){ console.error(e); toast(e.code==='quota_or_state'?'Der Speicher für Fotos ist voll.':'Hochladen hat nicht geklappt.'); return null; } }
 A.upPhoto = async el => { const file=el.files?.[0]; el.value=''; if(S.ov?.v==='anhang') closeOv(); if(!file) return; const up=await uploadFile(file); if(!up) return; const ctx=el.dataset.ctx;
   const base={by:S.uid, typ:'bild', bild:up.id, mime:up.mime, aufnahme:file.lastModified||now(), createdAt:now(), text:(S.form.msg||'').trim()}; S.form.msg='';
   try{ await postMsg(ctx, base); toast('Gesendet'); render(); nachUnten(); }catch(e){ fail(e,'Senden'); } };
@@ -3921,7 +3930,7 @@ function herdeBody(){ const r=cur(), a=art(r); const h=herdePlaetze(); const m=m
   return `<p class="small mut">Wo die anderen heute sind. Tippe auf „Ich bin dabei“, wenn du dazukommst.</p>
   ${h.length?`<div class="list">${h.map(x=>{ const on=(x.platzDabei||{})[S.uid]===today(); const mit=Object.entries(x.platzDabei||{}).filter(([u,d])=>d===today()).map(([u])=>u);
     return `<div class="li" style="align-items:flex-start">${av(x.uid,40)}<span class="grow col" style="gap:3px;min-width:0"><b>${esc(nm(x.uid))}</b><span style="font-size:16px"><span style="color:var(--yelt)">${ic(a.platzIcon,16)}</span> ${esc(x.platz.text)}</span>${mit.length?`<span class="row" style="gap:6px"><span class="stack">${mit.slice(0,6).map(u=>av(u,22)).join('')}</span><span class="tiny mut">${mit.length} ${mit.length===1?'ist':'sind'} mit dabei</span></span>`:''}</span>
-      <button class="btn xs ${on?'on':'sec'}" data-act="platzDabei" data-uid="${x.uid}">${on?ic('check',14)+' Dabei':'Ich bin dabei'}</button></div>`; }).join('')}</div>`:'<div class="empty">Heute hat noch niemand seinen Platz geteilt.</div>'}
+      <button class="btn xs dabeibtn ${on?'on':'sec'}" data-act="platzDabei" data-uid="${x.uid}">${on?ic('check',14)+' Dabei':'Ich bin dabei'}</button></div>`; }).join('')}</div>`:'<div class="empty">Heute hat noch niemand seinen Platz geteilt.</div>'}
   <div class="card tight"><div class="row"><span style="color:var(--yelt)">${ic(a.platzIcon,20)}</span><span class="ttl">Mein Platz heute</span></div>${mein?`<span class="small">${esc(mein)}</span>`:`<span class="small mut">Noch nicht geteilt. Das geht auf „Mein Tag“.</span>`}</div>`; };
 V.herde = ()=>{ const g=tripGuard(); if(g) return g; S.ui.mitTab='herde'; S.route={v:'mitglieder'}; return V.mitglieder(); };
 /* ===================== Event-Kasse: Kosten eines Events, auch mit Gästen =====================
@@ -5285,49 +5294,77 @@ function pushHinweis(){ if(!FB || S.supportVon || !PUSH.geprueft || PUSH.an || !
    - Meine Liste: privat (in den eigenen Einstellungen je Reise), mit Vorschlägen passend zur Reiseart.
    - Wer bringt was mit?: für die ganze Gruppe (Sammlung mitbringen). Jeder kann etwas eintragen,
      jemand übernimmt es mit „Ich bring's mit“. So kommt der Lautsprecher nicht dreimal mit und der Adapter nicht gar nicht. */
-const PACK_KAT = { doku:'Papiere & Geld', kleid:'Kleidung', hyg:'Kulturbeutel', tech:'Technik', apo:'Reiseapotheke', sonst:'Sonstiges' };
-const PACK_BASIS = { doku:['Personalausweis / Reisepass','Krankenversicherungskarte','Bankkarte & etwas Bargeld','Buchungsbestätigungen','Führerschein'],
-  kleid:['Unterwäsche','Socken','T-Shirts','Lange Hose','Pullover / Jacke','Schlafsachen','Bequeme Schuhe'], hyg:['Zahnbürste & Zahnpasta','Duschgel & Shampoo','Deo','Haarbürste','Rasierer'],
-  tech:['Handy-Ladekabel','Powerbank','Kopfhörer','Reiseadapter'], apo:['Schmerztabletten','Pflaster','Persönliche Medikamente'], sonst:['Sonnenbrille','Wiederverwendbare Trinkflasche'] };
-const PACK_ART = { strand:{kleid:['Badesachen','Strandtuch','Flip-Flops','Sonnenhut'], hyg:['Sonnencreme','After-Sun'], sonst:['Strandtasche','Buch für die Liege']},
-  ski:{kleid:['Skijacke & Skihose','Funktionsunterwäsche','Skisocken','Handschuhe','Mütze / Buff'], hyg:['Lippenpflege mit LSF','Sonnencreme'], sonst:['Skibrille','Helm','Skipass-Halter']},
-  kreuzfahrt:{kleid:['Abendgarderobe','Badesachen','Leichte Jacke für Deck'], hyg:['Sonnencreme'], apo:['Mittel gegen Seekrankheit'], sonst:['Mehrfachsteckdose (ohne Überspannungsschutz)','Kleiner Rucksack für Landgänge']},
-  land:{kleid:['Wanderschuhe','Regenjacke'], sonst:['Tagesrucksack','Reiseführer']}, sonst:{} };
+const PACK_KAT = { doku:'Papiere & Geld', vorher:'Vorher erledigen', kleid:'Kleidung', hyg:'Kulturbeutel', tech:'Technik', apo:'Reiseapotheke', handg:'Handgepäck', zuhause:'Vor der Abreise (zu Hause)', kinder:'Kinder & Baby', auto:'Auto', tiere:'Haustier', sport:'Sport & Aktiv', haus:'Ferienhaus & Camping', sonst:'Sonstiges' };
+/* Rubriken, die nur auf Wunsch (einzeln) übernommen werden; „Kinder“ und „Auto“ nur, wenn die Reise dazu passt */
+const PACK_OPT = ['tiere','sport','haus'];
+const packRel = (r,k) => k==='kinder' ? !!(typeof pfKinder==='function' && pfKinder(r.profil)) : k==='auto' ? ['auto','gemischt'].includes(r.anreiseArt) : !PACK_OPT.includes(k);
+const PACK_BASIS = {
+  doku:['Personalausweis / Reisepass','Krankenversicherungskarte','Bank- und Kreditkarte, etwas Bargeld','Buchungsbestätigungen','Auslandskrankenversicherung (Nachweis)','Flug- bzw. Bahntickets','Impfpass','Ausweiskopien in der Cloud','Notfallnummern (z. B. Karte sperren)'],
+  vorher:['Ausweis noch lange genug gültig?','Einreisebestimmungen und Impfungen prüfen','Reiseversicherungen prüfen (Ausland, Rücktritt, Gepäck)','Geld wechseln, Kreditkarte fürs Ausland freischalten','Arzt- und Zahnarzttermin vor der Reise','Online-Check-in erledigen','Reservierungen und Gutscheine speichern','Wichtige Zahlungen erledigen','Post abbestellen oder Nachbarn bitten','Blumen gießen und Haustier versorgen organisieren','Wohnungsschlüssel bei Vertrauensperson hinterlegen','Abwesenheitsnotiz im E-Mail-Programm','Handy und Laptop laden'],
+  kleid:['Unterwäsche','Socken','T-Shirts','Lange Hose','Pullover / Jacke','Schlafsachen','Bequeme Schuhe','Kurze Hosen','Regenjacke','Hausschuhe','Gürtel','Wäschebeutel für Schmutzwäsche'],
+  hyg:['Zahnbürste & Zahnpasta','Duschgel & Shampoo','Deo','Haarbürste','Rasierer','Zahnseide & Mundwasser','Körper- und Gesichtscreme','Lippenpflege','Nagelschere & Feile','Taschentücher','Wattepads / Wattestäbchen','Hygieneartikel (Tampons / Binden)','Kontaktlinsenpflege / Ersatzbrille'],
+  tech:['Handy-Ladekabel','Powerbank (im Flugzeug nur im Handgepäck)','Kopfhörer','Reiseadapter','Mehrfachstecker / Verlängerungskabel','Laptop / Tablet mit Netzteil','Roaming bzw. Datentarif klären','Offline-Karten und Tickets laden','Speicherkarten / Fotoapparat'],
+  apo:['Schmerzen/Fieber: z. B. Ibuprofen 400 mg und/oder Paracetamol 500 mg','Durchfall: z. B. Loperamid (nur akut) und Elektrolytlösung','Übelkeit/Erbrechen: z. B. Dimenhydrinat (macht deutlich müde)','Sodbrennen: z. B. Pantoprazol 20 mg oder ein Antazidum','Allergische Reaktion: z. B. Cetirizin oder Loratadin','Insektenstiche/Juckreiz: z. B. Hydrocortison 0,5 % Creme','Wunden: Hautdesinfektion, sterile Kompressen, Pflaster, Blasenpflaster','Erkältung: abschwellendes Nasenspray, Halstabletten','Verstopfung: z. B. Macrogol','Insektenschutz: z. B. Repellent mit DEET oder Icaridin','Sonne: hoher UV-Schutz, idealerweise SPF 50+','Augen: Kochsalzlösung bzw. befeuchtende Augentropfen','Fieberthermometer','Pinzette / Zeckenzange','Elastische Binde','Einmalhandschuhe','Persönliche Medikamente (im Flugzeug ins Handgepäck)'],
+  handg:['Snacks für unterwegs','Lektüre, Hörbuch oder Filme laden','Nackenkissen / Schlafmaske','Kugelschreiber (für Formulare)','Wechselshirt','Flüssigkeiten bis 100 ml in Klarsichtbeutel'],
+  zuhause:['Herd, Bügeleisen und Kaffeemaschine aus','Fenster und Türen sichern, Rollläden','Heizung und Warmwasser herunterdrehen','Wasser abdrehen (Wasch- und Spülmaschine)','Kühlschrank leeren','Müll rausbringen','Stand-by-Geräte aus, Stecker ziehen','Licht aus oder Zeitschaltuhr an','Wertsachen sicher verwahren','Haus abschließen, Schlüssel dabei','Koffer markieren (Wiedererkennung am Band)'],
+  kinder:['Windeln und Pflegetücher','Wickeltasche','Flasche, Fertigmilch bzw. Brei','Schnuller','Kuscheltier','Kinderwagen / Tragetuch','Reisebett und Bettzeug','Nachtlicht','Kindersitz fürs Auto','Sonnenschutz für Kinder (Hut, SPF 50)','Wechselkleidung','Spielzeug, Bücher, Hörspiele','Kindermedikamente (nach Rücksprache mit dem Kinderarzt)','Wund- und Heilsalbe','Schwimmflügel / Schwimmhilfe','Steckdosensicherung'],
+  auto:['Fahrzeugschein','Verbandskasten, Warndreieck, Warnweste','Schutzbrief bzw. Clubkarte','Reifen, Öl und Beleuchtung prüfen','Navi bzw. Handyhalterung','Parkscheibe','Vignette / Mautnachweis','Zweiter Autoschlüssel','Ladekarte (E-Auto)','Scheibenwischwasser'],
+  tiere:['Heimtierausweis und Impfnachweis','Einreisebestimmungen prüfen','Futter und Näpfe','Leine, Halsband, Maulkorb','Decke / Körbchen','Kotbeutel','Spielzeug und Leckerlis','Wasser für unterwegs'],
+  sport:['Sportbekleidung und -schuhe','Wanderstock','Fahrradhelm und Schloss','Luftpumpe / Flickzeug','Action-Cam','Trinkblase'],
+  haus:['Küchenrolle und Müllbeutel','Spülmittel, Schwamm, Geschirrtücher','Salz, Gewürze, Kaffee','Flaschenöffner / Korkenzieher','Grillzubehör','Bettwäsche und Handtücher','Kühlakkus'],
+  sonst:['Sonnenbrille','Wiederverwendbare Trinkflasche','Taschenlampe / Stirnlampe','Regenschirm','Kleines Nähset','Sprach- bzw. Reiseführer','Gepäckschloss und Adressanhänger','Spielkarten / Würfel','Gastgeschenk','Müll- bzw. Plastikbeutel'] };
+const PACK_ART = { strand:{kleid:['Badesachen','Strandtuch','Flip-Flops','Sonnenhut','Badeschuhe'], hyg:['After-Sun'], sonst:['Strandtasche','Buch für die Liege','Wasserdichte Handyhülle','Windschutz / Strandmatte','Schnorchel und Taucherbrille']},
+  ski:{kleid:['Skijacke & Skihose','Funktionsunterwäsche','Skisocken','Handschuhe','Mütze / Buff'], sonst:['Skibrille','Helm','Skipass-Halter','Taschenwärmer','Müsliriegel für unterwegs']},
+  kreuzfahrt:{kleid:['Abendgarderobe','Badesachen','Leichte Jacke für Deck'], apo:['Mittel gegen Seekrankheit'], sonst:['Kleiner Rucksack für Landgänge','Tickets für Landausflüge']},
+  land:{kleid:['Wanderschuhe'], apo:['Zeckenschutz'], sonst:['Tagesrucksack','Wanderkarte oder Offline-Karte']}, sonst:{} };
 const MITBRING_IDEEN = { strand:['Bluetooth-Lautsprecher','Sonnenschirm','Kühltasche','Volleyball','Kartenspiel'], ski:['Bluetooth-Lautsprecher','Kartenspiel','Wachs & Skitool','Gesellschaftsspiel'],
-  kreuzfahrt:['Mehrfachsteckdose','Kartenspiel','Fernglas'], land:['Bluetooth-Lautsprecher','Kartenspiel','Erste-Hilfe-Set'], sonst:['Bluetooth-Lautsprecher','Kartenspiel','Reiseadapter'] };
+  kreuzfahrt:['Mehrfachsteckdose','Kartenspiel','Fernglas'], land:['Bluetooth-Lautsprecher','Kartenspiel','Campingkocher'], sonst:['Bluetooth-Lautsprecher','Kartenspiel','Gesellschaftsspiel'] };
+const packNorm = t => String(t||'').toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-zäöüß0-9]+/g,' ').trim();
 const packVon = rid => (S.settings.pack||{})[rid] || {items:{}};
 const packIds = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function packStand(rid){ const it=Object.values(packVon(rid).items||{}); return {n:it.length, ok:it.filter(x=>x.ok).length}; }
-function packSpeichern(rid, items){ saveSettings({pack:{...(S.settings.pack||{}), [rid]:{items}}}); }
+function packSpeichern(rid, items, alles){ saveSettings({pack:{...(S.settings.pack||{}), [rid]:{items, alles:alles!==undefined?alles:(packVon(rid).alles||{})}}}); }
+const packFertig = (rid,k) => { const v=packVon(rid); if((v.alles||{})[k]) return true; const g=Object.values(v.items||{}).filter(y=>(y.k||'sonst')===k); return g.length>0 && g.every(y=>y.ok); };
+A.packFalt = el => { const k=el.dataset.k; S.ui.packZu={...(S.ui.packZu||{}), [k]:!(S.ui.packZu||{})[k]}; render(); };
+A.packAlles = el => { const r=cur(); const k=el.dataset.k; const alles={...(packVon(r.id).alles||{})}; alles[k]=!alles[k]; packSpeichern(r.id, {...(packVon(r.id).items||{})}, alles); };
 
+/* Doppelte Einträge in gespeicherten Listen zusammenführen (abgehakt gewinnt) */
+function packBereinigen(rid){ const it=packVon(rid).items||{}; const seen={}, weg=[]; for(const [id,x] of Object.entries(it)){ const n=packNorm(x.t); if(seen[n]){ const a=seen[n]; if(x.ok && !it[a].ok) { weg.push(a); seen[n]=id; } else weg.push(id); } else seen[n]=id; }
+  if(!weg.length) return; S.ui.packBer=S.ui.packBer||{}; if(S.ui.packBer[rid]===weg.join()) return; S.ui.packBer[rid]=weg.join(); const neu={...it}; weg.forEach(i=>delete neu[i]); packSpeichern(rid, neu); }
 /* Karte auf „Mein Tag“ (bis zum Ende der Reise) */
 function packKarte(){ const r=cur(); const m=myM(); if(!r || r.status!=='fest' || !m) return ''; if(reisePhase(r,m)!=='vorfreude' || daysUntil(m.anreise||r.von)>14) return ''; // nur in den letzten 14 Tagen vor der eigenen Anreise
   const {n, ok}=packStand(r.id); const mb=S.rt.mitbringen||[]; const offen=mb.filter(x=>!x.wer).length, meins=mb.filter(x=>x.wer===S.uid).length; const vorher=(m.anreise||r.von)>today();
   return `<button class="card tight packkarte ${vorher?'vorfreude':''}" data-act="go" data-v="packliste"><span class="row" style="gap:10px;width:100%"><span class="admic">${ic('suitcase',20)}</span><span class="grow col" style="gap:2px;min-width:0"><b>Koffer packen</b>
-    <span class="tiny mut">${n?`${ok} von ${n} eingepackt`:'Noch keine Packliste'} · ${mb.length?`${meins?`du bringst ${meins} mit · `:''}${offen?`<span class="warnt">${offen} ${offen===1?'Sache sucht':'Sachen suchen'} noch jemanden</span>`:'alles verteilt'}`:'Wer bringt was mit?'}</span></span>${ic('right',16,'style="color:var(--mut)"')}</span>
-    ${n?`<span class="packbalken" aria-hidden="true"><span style="width:${Math.round(ok/n*100)}%"></span></span>`:''}</button>`; }
+    <span class="tiny mut">${n?'':'Noch keine Packliste · '}${mb.length?`${meins?`du bringst ${meins} mit · `:''}${offen?`<span class="warnt">${offen} ${offen===1?'Sache sucht':'Sachen suchen'} noch jemanden</span>`:'alles verteilt'}`:'Wer bringt was mit?'}</span></span>${ic('right',16,'style="color:var(--mut)"')}</span></button>`; }
 
-V.packliste = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const heimOk=['unterwegs','abreise','vorbei'].includes(reisePhase()); const tab=((S.ui.packTab==='heim'&&!heimOk)||S.ui.packTab==='gruppe')?'mein':(S.ui.packTab||'mein');
+V.packliste = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); packBereinigen(r.id); const heimOk=['unterwegs','abreise','vorbei'].includes(reisePhase()); const tab=((S.ui.packTab==='heim'&&!heimOk)||S.ui.packTab==='gruppe')?'mein':(S.ui.packTab||'mein');
   const tabs=`<div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='mein'}" data-act="ui" data-k="packTab" data-val="mein">Meine Liste</button>${heimOk?`<button role="tab" aria-selected="${tab==='heim'}" data-act="ui" data-k="packTab" data-val="heim">Heimreise</button>`:''}</div>`;
-  return `${hdrTrip('Packliste')}${backBtn()}<h1>${tab==='heim'?'Heimreise-Check':tab==='gruppe'?'Wer bringt was mit?':'Koffer packen'}</h1>${tabs}${tab==='heim'?heimView(r):packView(r)}`; };
+  return `${hdrTrip('Packliste')}${backBtn()}<h1>${tab==='heim'?'Heimreise-Check':tab==='gruppe'?'Wer bringt was mit?':'Koffer packen'}</h1>${heimOk?tabs:''}${tab==='heim'?heimView(r):packView(r)}`; };
 
+function packRubriken(r){ return `<div class="col" style="gap:6px">${Object.keys(PACK_KAT).filter(k=>packVorsch(r,k).length).map(k=>{ const o=packOffen(r,k).length; return `<div class="row between" style="gap:8px"><span class="small">${PACK_KAT[k]} <span class="tiny mut">${o?`${o} Vorschläge`:'schon drin'}</span></span>${o?`<button class="btn xs sec" data-act="packVorschlag" data-k="${k}">Übernehmen</button>`:`<span class="chip grn">${ic('check',12)}</span>`}</div>`; }).join('')}</div>`; }
+const PACK_APO_HINWEIS = 'Diese Liste ist nur eine Erinnerung und keine Handlungsempfehlung. Euer Arzt oder Apotheker berät euch gerne für die richtige Zusammenstellung eurer individuellen Reiseapotheke.';
 function packView(r){ const items=packVon(r.id).items||{}; const l=Object.entries(items); const {n, ok}=packStand(r.id);
   const nachKat={}; l.forEach(([id,x])=>{ (nachKat[x.k||'sonst']=nachKat[x.k||'sonst']||[]).push([id,x]); });
   return `<p class="small mut">Nur du siehst diese Liste. Abhaken, was im Koffer ist.</p>
-    ${n?`<div class="card tight"><div class="row between"><b>${ok} von ${n} eingepackt</b>${ok===n?'<span class="chip grn">Fertig! 🎉</span>':''}</div><span class="packbalken"><span style="width:${Math.round(ok/n*100)}%"></span></span></div>`:
-      `<div class="card"><b>Los geht's</b><span class="small mut">Übernimm Vorschläge passend zu „${esc(art(r).label)}“ und pass sie an, oder starte leer.</span><button class="btn block" data-act="packVorschlag">${ic('plus',18)} Vorschläge übernehmen</button></div>`}
+    ${n?'':
+      `<div class="card"><b>Los geht's</b><span class="small mut">Übernimm Vorschläge passend zu „${esc(art(r).label)}“ und pass sie an, oder starte leer. Du kannst auch nur einzelne Rubriken übernehmen.</span><button class="btn block" data-act="packVorschlag">${ic('plus',18)} Alle Vorschläge übernehmen</button>${packRubriken(r)}</div>`}
     <div class="col" style="gap:6px"><input class="in" id="f_packNeu" placeholder="Etwas hinzufügen, z. B. Kamera" maxlength="60" data-enter="packAdd"><div class="row" style="gap:8px"><select class="in grow" id="f_packKat" aria-label="Kategorie">${Object.entries(PACK_KAT).map(([k,t])=>`<option value="${k}" ${(S.form.packKat||'sonst')===k?'selected':''}>${t}</option>`).join('')}</select><button class="btn" data-act="packAdd">${ic('plus',18)} Hinzufügen</button></div></div>
-    ${Object.keys(PACK_KAT).filter(k=>nachKat[k]).map(k=>`<div class="card tight"><div class="row between"><b class="small">${PACK_KAT[k]}</b><span class="tiny mut">${nachKat[k].filter(([i,x])=>x.ok).length}/${nachKat[k].length}</span></div>
-      ${nachKat[k].sort((a,b)=>(a[1].ok?1:0)-(b[1].ok?1:0)||String(a[1].t).localeCompare(String(b[1].t))).map(([id,x])=>`<div class="packzeile ${x.ok?'ok':''}"><button class="packhaken" data-act="packTog" data-id="${id}" role="checkbox" aria-checked="${!!x.ok}"><span class="ausbox ${x.ok?'on':''}" aria-hidden="true">${x.ok?ic('check',16):''}</span><span class="grow">${esc(x.t)}</span></button><button class="icbtn sm0" data-act="packWeg" data-id="${id}" aria-label="${esc(x.t)} entfernen">${ic('x',14)}</button></div>`).join('')}</div>`).join('')}
-    ${n?`<div class="row wrap" style="gap:8px;justify-content:center"><button class="btn xs ghost" data-act="packVorschlag">Vorschläge ergänzen</button>${ok?'<button class="btn xs ghost" data-act="packReset">Alle Haken entfernen</button>':''}</div>`:''}`; }
-A.packVorschlag = ()=>{ const r=cur(); const items={...(packVon(r.id).items||{})}; const da=new Set(Object.values(items).map(x=>x.t.toLowerCase())); const ex=PACK_ART[r.reiseart]||{};
-  let neu=0; for(const k of Object.keys(PACK_KAT)) for(const t of [...(PACK_BASIS[k]||[]), ...(ex[k]||[])]) if(!da.has(t.toLowerCase())){ items[packIds()+neu]={t, k, ok:false}; neu++; }
-  packSpeichern(r.id, items); toast(neu?`${neu} Vorschläge übernommen`:'Alle Vorschläge sind schon drin'); };
-A.packAdd = ()=>{ const r=cur(); const el=document.getElementById('f_packNeu'); const t=(el?.value||S.form.packNeu||'').trim(); if(!t) return; const k=document.getElementById('f_packKat')?.value||'sonst'; S.form.packKat=k;
-  packSpeichern(r.id, {...(packVon(r.id).items||{}), [packIds()]:{t:t.slice(0,60), k, ok:false}}); S.form.packNeu=''; if(el) el.value=''; };
+    ${Object.keys(PACK_KAT).filter(k=>nachKat[k]).map(k=>{ const fertig=packFertig(r.id,k), manuell=!!(packVon(r.id).alles||{})[k], zu=!!(S.ui.packZu||{})[k], anz=nachKat[k].filter(([i,x])=>x.ok).length;
+      return `<div class="card tight ${fertig?'packfertig':''}"><button class="packkopf" data-act="packFalt" data-k="${k}" aria-expanded="${!zu}"><b class="small grow">${PACK_KAT[k]}</b><span class="tiny mut">${anz}/${nachKat[k].length}</span>${fertig?`<span class="chip grn" aria-label="Alles dabei" style="padding:0 7px;background:var(--grn);color:#fff">${ic('check',14)}</span>`:''}<span style="display:inline-flex;transition:transform .15s;transform:rotate(${zu?0:90}deg);color:var(--mut)">${ic('right',16)}</span></button>
+      ${zu?'':nachKat[k].sort((a,b)=>(a[1].ok?1:0)-(b[1].ok?1:0)||String(a[1].t).localeCompare(String(b[1].t))).map(([id,x])=>`<div class="packzeile ${x.ok?'ok':''}"><button class="packhaken" data-act="packTog" data-id="${id}" role="checkbox" aria-checked="${!!x.ok}"><span class="ausbox ${x.ok?'on':''}" aria-hidden="true">${x.ok?ic('check',16):''}</span><span class="grow">${esc(x.t)}</span></button><button class="icbtn sm0" data-act="packWeg" data-id="${id}" aria-label="${esc(x.t)} entfernen">${ic('x',14)}</button></div>`).join('')}${!zu&&k==='apo'?`<span class="tiny mut" style="opacity:.7">${PACK_APO_HINWEIS}</span>`:''}
+      ${zu?'':`<div class="packzeile" style="border-top:1px solid var(--line);margin-top:4px;padding-top:6px"><button class="packhaken" data-act="packAlles" data-k="${k}" role="checkbox" aria-checked="${manuell}"><span class="ausbox ${manuell?'on':''}" aria-hidden="true">${manuell?ic('check',16):''}</span><span class="grow"><b>Alles dabei</b></span></button></div>`}</div>`; }).join('')}
+    ${n&&Object.keys(PACK_KAT).some(k=>packOffen(r,k).length)?`<details class="card tight"><summary class="small" style="cursor:pointer;font-weight:700">Weitere Vorschläge übernehmen</summary>${packRubriken(r)}<button class="btn xs ghost" style="align-self:flex-start" data-act="packVorschlag">Alle ergänzen</button></details>`:''}
+    ${n?`<div class="row wrap" style="gap:8px;justify-content:center">${ok?'<button class="btn xs ghost" data-act="packReset">Alle Haken entfernen</button>':''}</div>`:''}`; }
+const packVorsch = (r,k) => [...(PACK_BASIS[k]||[]), ...((PACK_ART[r.reiseart]||{})[k]||[])];
+const packOffen = (r,k) => { const da=new Set(Object.values(packVon(r.id).items||{}).map(x=>packNorm(x.t))); return packVorsch(r,k).filter(x=>!da.has(packNorm(x))); };
+A.packVorschlag = el => { const r=cur(); const nur=el?.dataset?.k||''; const items={...(packVon(r.id).items||{})}; const alles={...(packVon(r.id).alles||{})}; const da=new Set(Object.values(items).map(x=>packNorm(x.t)));
+  let neu=0; for(const k of Object.keys(PACK_KAT)) { if(nur ? k!==nur : !packRel(r,k)) continue; for(const t of packVorsch(r,k)) if(!da.has(packNorm(t))){ da.add(packNorm(t)); items[packIds()+neu]={t, k, ok:false}; alles[k]=false; neu++; } }
+  packSpeichern(r.id, items, alles); toast(neu?`${neu} Vorschläge übernommen`:'Alle Vorschläge sind schon drin'); };
+A.packAdd = ()=>{ const r=cur(); const el=document.getElementById('f_packNeu'); const t=(el?.value||S.form.packNeu||'').trim(); if(!t) return; const k=document.getElementById('f_packKat')?.value||'sonst'; S.form.packKat=k; if(Object.values(packVon(r.id).items||{}).some(x=>packNorm(x.t)===packNorm(t))){ toast('Steht schon in deiner Liste'); return; }
+  packSpeichern(r.id, {...(packVon(r.id).items||{}), [packIds()]:{t:t.slice(0,60), k, ok:false}}, {...(packVon(r.id).alles||{}), [k]:false}); S.form.packNeu=''; if(el) el.value=''; };
 A.packTog = el => { const r=cur(); const items={...(packVon(r.id).items||{})}; const x=items[el.dataset.id]; if(!x) return; items[el.dataset.id]={...x, ok:!x.ok}; packSpeichern(r.id, items); };
 A.packWeg = el => { const r=cur(); const items={...(packVon(r.id).items||{})}; delete items[el.dataset.id]; packSpeichern(r.id, items); };
-A.packReset = ()=>{ const r=cur(); const items=Object.fromEntries(Object.entries(packVon(r.id).items||{}).map(([i,x])=>[i,{...x, ok:false}])); packSpeichern(r.id, items); };
+A.packReset = ()=>{ const r=cur(); const items=Object.fromEntries(Object.entries(packVon(r.id).items||{}).map(([i,x])=>[i,{...x, ok:false}])); packSpeichern(r.id, items, {}); };
 
 /* ---------- Wer bringt was mit? ---------- */
 function mitbringenView(r){ const l=[...(S.rt.mitbringen||[])].sort((a,b)=>(a.wer?1:0)-(b.wer?1:0) || (a.createdAt||0)-(b.createdAt||0)); const offen=l.filter(x=>!x.wer);
@@ -5508,7 +5545,7 @@ V.reise = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(), m=myM(); con
     mitglieder:{titel:'Mit&shy;glieder', ic:'mitglieder', farbe:'violett', zahl:dabei?String(dabei):'', zahlLang:`${dabei} dabei${herde&&modulAn('herde')?`, ${herde} teilen heute ihren Platz`:''}`, extra:'data-v="mitglieder" data-tab="mit"'},
     kasse:{titel:'Kassen&shy;buch', ic:'kasse', farbe:'gruen', zahl:mein?eurKurz(mein):'', zahlLang:mein>0?`du bekommst ${eur(mein)}`:`du zahlst ${eur(-mein)}`, warn:mein<0, extra:'data-v="mitglieder" data-tab="kasse"'},
     packliste: ph==='abreise' ? {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:`${hc.ok}/${hc.n}`, zahlLang:`Heimreise-Check ${hc.ok} von ${hc.n}`, warn:hc.ok<hc.n, extra:'data-v="packliste" data-tab="heim"'}
-      : {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:n?`${ok}/${n}`:'', zahlLang:`${ok} von ${n} eingepackt`, extra:'data-v="packliste" data-tab="mein"'},
+      : {titel:'Pack&shy;liste', ic:'koffer', farbe:'orange', zahl:'', zahlLang:'Koffer packen', extra:'data-v="packliste" data-tab="mein"'},
     aufgaben:{titel:'To-do', ic:'aufgaben', farbe:'tuerkis', zahl:aufStand().gesamt?`${aufStand().offen}/${aufStand().gesamt}`:'', zahlHtml:aufPills(aufStand()), zahlLang:`${aufStand().offen} von ${aufStand().gesamt} offen: ${aufStandText(aufStand())||'alles erledigt'}`, warn:aufOffen().some(aufUeberfaellig), extra:'data-v="aufgaben"'},
     termine:{titel:'Termine', ic:'termine', farbe:'blau', zahl:kommend?String(kommend):'', zahlLang:`${kommend} kommende`, extra:'data-v="termine"'},
     anreise:{titel:'Meine Reise', ic:'daten', farbe:'nacht', zahl:anFehlt&&['vorfreude','abreise'].includes(ph)?'fehlt':'', warn:true, extra:`data-v="anreise" data-tab="${ph==='abreise'?'rueck':'an'}"`},
@@ -7503,7 +7540,7 @@ function aufVorlagen(r){ const p=r.profil||{}; const fam=p.gruppe==='familie' ||
     ...(({strand:['Spiele und Strandsachen organisieren','Sonnencreme für alle klären'], ski:['Skipässe und Leihausrüstung klären','Skischule buchen'], kreuzfahrt:['Landausflüge abstimmen','Kabinen und Bordkonto klären'], land:['Sehenswürdigkeiten sammeln','Mietwagen oder Bahnpässe klären']})[r.reiseart]||[]).map(t=>[art(r).label,t,'aufgabe']),
     ...(modulAn('zimmer',r)?['Schlüsselübergabe klären','Müll- und Putzregeln besprechen','Grill und Spiele organisieren','Bettwäsche und Handtücher klären'].map(t=>['Ferienhaus',t,'aufgabe']):[]),
     ...(party?['Getränkeplanung','Shuttle oder Mietwagen klären'].map(t=>['Party',t,'aufgabe']):[]),
-    ...(fam?['Reiseapotheke zusammenstellen','Spiele für die Kinder'].map(t=>['Familie',t,'aufgabe']):[]) ];
+    ...(fam?['Spiele für die Kinder'].map(t=>['Familie',t,'aufgabe']):[]) ];
   const da=new Set(aufListe().map(a=>a.titel.toLowerCase())); return l.filter(x=>!da.has(x[1].toLowerCase())); }
 A.aufVorlagen = ()=>{ const l=aufVorlagen(cur()); const f=S.form; Object.keys(f).filter(k=>k.startsWith('avt_')).forEach(k=>delete f[k]); l.forEach((x,i)=>{ if(x[0]==='Für alle') f['avt_'+i]=true; }); openOv('aufVorlagen',{}); };
 A.aufVorTog = el => { S.form['avt_'+el.dataset.i]=!S.form['avt_'+el.dataset.i]; renderOv(); };
@@ -8321,6 +8358,14 @@ A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 2.32', t:'Packliste: Koffer packen aufgeräumt', p:[
+    'Neue Rubrik „Reiseapotheke“ mit konkreten Vorschlägen je Beschwerde (z. B. gegen Schmerzen, Durchfall, Allergie, Insektenstiche). Sie ist nur eine Erinnerung und keine Handlungsempfehlung.',
+    'Weitere Rubriken: Papiere & Geld, Vorher erledigen, Technik, Handgepäck, Vor der Abreise, Kinder & Baby, Auto sowie auf Wunsch Haustier, Sport und Ferienhaus.',
+    'Du kannst einzelne Rubriken übernehmen, ohne erst alle Vorschläge zu übernehmen.',
+    'Rubriken lassen sich einklappen. Ist alles gepackt oder „Alles dabei“ angetippt, zeigt ein grüner Haken: fertig.',
+    'Doppelte Einträge werden automatisch zusammengeführt.',
+    'Fotos im Chat werden beim Hochladen verkleinert. Das geht schneller und spart Datenvolumen.',
+  ] },
   { v:'Beta 2.31', t:'Koffer-Konferenz einfacher', p:[
     'Neue Reise: Nach dem Start-Assistenten kommt eine einzige Frage, ob schon feststeht, wann und wohin es geht. Den Namen der Reise gibst du nur noch einmal ein.',
     'Auf der Seite „wird gebucht“ steht oben jetzt immer „Dein nächster Schritt“. Die Seite ist deutlich kürzer, Details sind eingeklappt.',
