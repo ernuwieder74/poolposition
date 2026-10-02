@@ -5,13 +5,14 @@
      (die Rechte lassen sich nicht automatisch übergeben). Kassenbuch-Einträge bleiben für die Abrechnung der anderen erhalten, der Name verschwindet mit dem Profil.
    Sicherheit: kein Zugriff in der Support-Ansicht, Anmeldung höchstens 10 Minuten alt, Bestätigung per Tippen von LÖSCHEN. */
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
 const db = admin.firestore();
 let REGION = 'europe-west3'; try { REGION = require('./region.json').region || REGION; } catch (e) {}
 const CALL = { region: 'europe-west3', maxInstances: 2, timeoutSeconds: 300, memory: '512MiB' };
 
-const EIGENE = [['mitglied', 'uid'], ['stimmen', 'uid'], ['zimmerwahl', 'uid'], ['zimmerbudget', 'uid'], ['anreisewunsch', 'uid'], ['notfallpass', 'uid'], ['astimmen', 'uid'], ['angebotstimmen', 'uid'],
+const EIGENE = [['nutzung', 'uid'], ['mitglied', 'uid'], ['stimmen', 'uid'], ['zimmerwahl', 'uid'], ['zimmerbudget', 'uid'], ['anreisewunsch', 'uid'], ['notfallpass', 'uid'], ['astimmen', 'uid'], ['angebotstimmen', 'uid'],
   ['nachrichten', 'by'], ['aktivitaeten', 'by'], ['kasse', 'zahler'], ['aufgaben', 'by'], ['aufgaben', 'wer'], ['einkauf', 'by'], ['mitbringen', 'by'], ['mitbringen', 'wer'], ['musik', 'by'], ['vorschlaege', 'by']];
 async function hole(col, feld, uid) { const s = await db.collection(col).where(feld, '==', uid).limit(5000).get(); return s.docs.map(d => ({ id: d.id, ...d.data() })); }
 function pruefen(req, frisch) { const uid = req.auth?.uid; if (!uid) throw new HttpsError('unauthenticated', 'Bitte anmelden.'); if (req.auth.token.supportVon) throw new HttpsError('permission-denied', 'In der Support-Ansicht nicht möglich.');
@@ -40,8 +41,9 @@ exports.kontoLoeschen = onCall(CALL, async req => { const uid = pruefen(req, tru
   // Reisen ohne weitere Mitglieder werden mit gelöscht
   await batchUpdate(reisen.map(r => [r.ref, { status: 'geloescht', geloeschtAm: Date.now(), geloeschtVon: uid }]));
   // eigene Angaben löschen
-  for (const [col, feld] of [['stimmen', 'uid'], ['zimmerwahl', 'uid'], ['zimmerbudget', 'uid'], ['anreisewunsch', 'uid'], ['notfallpass', 'uid'], ['astimmen', 'uid'], ['angebotstimmen', 'uid']]) {
+  for (const [col, feld] of [['stimmen', 'uid'], ['zimmerwahl', 'uid'], ['zimmerbudget', 'uid'], ['anreisewunsch', 'uid'], ['notfallpass', 'uid'], ['astimmen', 'uid'], ['angebotstimmen', 'uid'], ['nutzung', 'uid']]) {
     try { const s = await db.collection(col).where(feld, '==', uid).get(); await batchLoeschen(s.docs.map(d => d.ref)); } catch (e) { logger.warn('Löschen', col, e.message); } }
+  await db.doc(`nutzungsumme/${uid}`).delete().catch(() => {});
   // Mitgliedschaften beenden, Nachrichten anonymisieren
   const ms = await db.collection('mitglied').where('uid', '==', uid).get(); await batchUpdate(ms.docs.map(d => [d.ref, { status: 'ausgetreten', geloeschtAm: Date.now() }]));
   const ns = await db.collection('nachrichten').where('by', '==', uid).get(); await batchUpdate(ns.docs.map(d => [d.ref, { by: 'geloescht', text: '', geloescht: true }]));
@@ -51,3 +53,19 @@ exports.kontoLoeschen = onCall(CALL, async req => { const uid = pruefen(req, tru
   await admin.auth().deleteUser(uid);
   logger.info('Konto gelöscht', { uid });
   return { ok: true }; });
+
+/* Nutzungsstatistik: Tagesdaten älter als 90 Tage werden zu Summen pro Person zusammengefasst und gelöscht (täglich 03:30) */
+exports.nutzungAufraeumen = onSchedule({ schedule: '30 3 * * *', timeZone: 'Europe/Berlin', region: 'europe-west3', timeoutSeconds: 300, maxInstances: 1 }, async () => {
+  const d = new Date(Date.now() - 90 * 864e5); const grenze = d.toISOString().slice(0, 10);
+  const snap = await db.collection('nutzung').where('tag', '<', grenze).limit(2000).get();
+  const proUser = {};
+  for (const x of snap.docs) { const v = x.data(); const p = (proUser[v.uid] = proUser[v.uid] || { s: {}, t: {}, a: {}, h: {}, starts: 0, sek: 0, tage: 0, refs: [] });
+    for (const k of ['s', 't', 'a', 'h']) for (const [n, z] of Object.entries(v[k] || {})) p[k][n] = (p[k][n] || 0) + z;
+    p.starts += v.starts || 0; p.sek += v.sek || 0; p.tage += 1; p.refs.push(x.ref); }
+  for (const [uid, p] of Object.entries(proUser)) {
+    const ref = db.doc(`nutzungsumme/${uid}`); const alt = (await ref.get()).data() || {};
+    const sum = (a, b) => { const r = { ...(a || {}) }; for (const [k, v] of Object.entries(b)) r[k] = (r[k] || 0) + v; return r; };
+    await ref.set({ s: sum(alt.s, p.s), t: sum(alt.t, p.t), a: sum(alt.a, p.a), h: sum(alt.h, p.h), starts: (alt.starts || 0) + p.starts, sek: (alt.sek || 0) + p.sek, tage: (alt.tage || 0) + p.tage, at: Date.now() });
+    for (let i = 0; i < p.refs.length; i += 400) { const b = db.batch(); p.refs.slice(i, i + 400).forEach(r => b.delete(r)); await b.commit(); } }
+  logger.info('Nutzung aufgeräumt', snap.size);
+});

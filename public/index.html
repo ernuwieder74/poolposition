@@ -724,7 +724,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .tkkopf2 .tktitel{font-size:7.2cqw;letter-spacing:0;white-space:nowrap}
 .tkkopf2 .tkwelle{height:3cqw}
 .tkkopf2 .tksub{font-size:4.8cqw}
-.tkkopf2 .tkdauer{font-size:5cqw}
+.tkkopf2 .tkdauer{font-size:4.3cqw;white-space:nowrap}
 .tkkopf2 .tkpreis{margin-top:1cqw;padding:0 4cqw;font-size:6.4cqw;border-radius:2.5cqw;border-width:.6cqw}
 .tkkopf2 .tkpreis i{filter:blur(2cqw)}
 .tkkopf2 .tkstub{width:22cqw;padding:3cqw 1.5cqw 3.2cqw;border-left-width:.9cqw;gap:1cqw}
@@ -733,6 +733,26 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .tkkopf2 .tksym{font-size:8cqw;line-height:1}
 .tkkopf2 .tknr{font-size:3.5cqw}.tkkopf2 .tknr b{font-size:4.2cqw;letter-spacing:0}
 .tkkopf2 .tkein{font-size:2.6cqw;letter-spacing:.12em;line-height:1}
+.mvnav{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+.mvgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mvgrid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mvz{background:var(--card);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;box-shadow:var(--sh,none)}
+.mvz b{font-size:24px;line-height:1.1}.mvz span{font-size:12.5px;color:var(--mut)}
+.mvgrid2 .mvz{background:var(--chip);box-shadow:none}
+.mvkurve{display:flex;align-items:flex-end;gap:4px;height:90px;padding-top:14px}
+.mvsp{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}
+.mvsp i{display:block;width:100%;background:var(--yelt);border-radius:4px 4px 0 0;min-height:2px}
+.mvsp em{position:absolute;top:-14px;font-size:10px;font-style:normal;color:var(--mut)}
+.mvzeile{display:grid;grid-template-columns:1fr auto 80px;align-items:center;gap:8px;font-size:14px}
+.mvbalk{height:8px;border-radius:4px;background:var(--chip);overflow:hidden;display:block}.mvbalk i{display:block;height:100%;border-radius:4px}
+.mvlink{background:none;border:0;padding:4px 0;font:inherit;color:inherit;text-align:left;cursor:pointer;text-decoration:underline dotted}
+.mvname{display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;font:inherit;color:inherit;min-width:0;cursor:pointer}
+.mvlabel{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 11px;border-radius:14px;border:1.5px solid var(--chip);background:var(--chip);color:var(--tx2);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.mvlabel.on{background:var(--yelbg);color:var(--yelt);border-color:var(--yelt)}
+.mvlabel.s{height:20px;padding:0 8px;font-size:11px;cursor:default}
+.wrap{flex-wrap:wrap}
+.mvbereich{display:flex;flex-direction:column;gap:3px;padding:3px 0}
+.mvsp{max-width:30px}
 </style>
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
@@ -745,7 +765,7 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.29";
+const APP_VERSION = "Beta 2.30";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
@@ -1999,6 +2019,7 @@ V.einstellungen = ()=>{ const bl=Object.keys(S.settings.blockiert||{}); if(bl.so
   return `${hdrPlain('Einstellungen')}${backBtn()}<h1>Einstellungen</h1>
   ${pushKarte()}
   ${tonCard()}
+  ${typeof nzKarte==='function'?nzKarte():''}
   <div class="card"><h2>Darstellung</h2>${themeSeg()}</div>
   <div class="card"><h2>Blockierte Personen</h2><p class="small mut">Blockierte Personen können dir nicht mehr flüstern. Sie erfahren nicht, dass du sie blockiert hast.</p>
   ${bl.length?`<div class="list">${bl.map(u=>`<div class="li">${av(u,36)}<span class="grow">${esc(nm(u))}</span><button class="btn xs sec" data-act="unblock" data-uid="${u}">Freigeben</button></div>`).join('')}</div>`:'<div class="empty small">Du hast niemanden blockiert.</div>'}</div>`; };
@@ -4715,7 +4736,7 @@ function ticketAbo(){ if(!S.db || !S.uid || S.supportVon) return;
       clearTimeout(ticketTimer); const rest=(S.ticket.bis||0)-now(); if(rest>0 && rest<2147e6) ticketTimer=setTimeout(()=>render(), rest+500);
       render(); }, e=>console.warn('Ticket', e))); }catch(e){ console.warn('Ticket', e); } }
 /* Wächter um die Datenbank: blockiert Schreibzugriffe, solange nurAnsehen() gilt */
-const TICKET_ERLAUBT = ['profile/','tickets/','konten/','pushtokens/','data/users/','meldungen/','feedback/','tippen/'];
+const TICKET_ERLAUBT = ['profile/','tickets/','konten/','pushtokens/','data/users/','meldungen/','feedback/','tippen/','nutzung/'];
 function ticketWaechter(db){ if(!db) return db;
   const ok = p => TICKET_ERLAUBT.some(x=>String(p||'').startsWith(x));
   const sperre = ()=>{ const e=new Error('Ticket abgelaufen'); e.ticket=true; e.code='ticket'; ticketHinweis(); return e; };
@@ -4730,10 +4751,10 @@ function ticketBanner(){ try{ if(!nurAnsehen()) return ''; }catch(e){ return '';
   return `<div class="supportbanner" role="status"><span class="grow small">${ic('lock',16)} <b>Nur ansehen</b><br><span style="opacity:.85">Deine ${esc(ticketName(S.ticket.art))} ist am ${fStamp(S.ticket.bis)} abgelaufen. Dein Account bleibt bestehen. Für ein neues Ticket melde dich beim Admin.</span></span></div>`; }
 /* Ticket neben dem Profilbild (antippen = Kiosk) */
 function ticketKopf(){ try{ if(!S.ticketDa || !S.ticket) return ''; const t=S.ticket; const ab=!ticketFrei() && ticketAbgelaufen(t);
-  return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), preis:true, gueltig:ticketFrei()?'Dauerhaft gültig':ab?'Abgelaufen':`Gültig ${TK_INFO[t.art]?.dauer||''}`})}</div>`; }catch(e){ return ''; } }
+  return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), preis:true, gueltig:ticketFrei()?'Dauerhaft gültig':ab?`Abgelaufen ${tkEnde(t.bis).replace(' Uhr','')}`:`Gültig bis ${tkEnde(t.bis).replace(' Uhr','')}`})}</div>`; }catch(e){ return ''; } }
 /* Karte „Kiosk“ unter dem Kopf */
 function ticketKarte(){ try{ const t=S.ticket; let info='Tickets ansehen';
-    if(S.ticketDa && t){ info = ticketFrei() ? 'Als Oberbademeister bist du von Tickets ausgenommen.' : ticketAbgelaufen(t) ? `Deine ${ticketName(t.art)} ist abgelaufen. Du kannst nur noch ansehen.` : `${ticketName(t.art)}: ${tkRest(t.bis)}, gültig bis ${fStamp(t.bis)}`; }
+    if(S.ticketDa && t){ info = ticketFrei() ? 'Als Oberbademeister bist du von Tickets ausgenommen.' : ticketAbgelaufen(t) ? `Deine ${ticketName(t.art)} ist abgelaufen. Du kannst nur noch ansehen.` : `${ticketName(t.art)}: ${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}`; }
     const ab = S.ticketDa && t && !ticketFrei() && ticketAbgelaufen(t);
     return `<button class="tkbtn" data-act="go" data-v="kiosk" aria-label="Zum Kiosk"><div class="card tight"><div class="row between"><b>${ic('star',14)} Kiosk</b><span class="tiny mut">Zum Kiosk ${ic('right',14)}</span></div><span class="tiny ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${esc(info)}</span></div></button>`; }catch(e){ return ''; } }
 
@@ -4749,7 +4770,7 @@ OV.ticketZuw = o => { const us=o.us; const eins=us.length===1; const a=S.form.tk
   <div class="col" style="gap:8px">${TICKETS.map(([k,n,d])=>`<button type="button" class="pfopt ${a===k?'on':''}" aria-pressed="${a===k}" data-act="tkArt" data-k="${k}"><b>${n}</b><span class="small mut">${d}${a===k?`, gültig bis ${fStamp(ticketBis(k))}`:''}</span></button>`).join('')}</div>
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ticketSpeichern" ${a?'':'disabled'}>Zuweisen</button></div></div>`; };
 A.ticketSpeichern = async el => { if(!istSuper()) return; const art=S.form.tkArt; if(!art) return; const us=S.ov?.us||[]; el.disabled=true; const von=now(); const bis=ticketBis(art,von);
-  try{ for(const u of us){ const d={art, von, bis, by:S.uid, at:von}; await S.db.doc(`tickets/${u}`).set(d); if(KONTO.tick) KONTO.tick[u]={id:u,...d};
+  try{ for(const u of us){ const d={art, von, bis, by:S.uid, at:von}; await S.db.doc(`tickets/${u}`).set(d); if(KONTO.tick) KONTO.tick[u]={id:u,...d}; if(typeof tkLog==='function') await tkLog(u,d,'zugewiesen');
       try{ await supportSend(u, `Dein Ticket wurde geändert: ${ticketName(art)}, gültig bis ${fStamp(bis)}. Viel Spaß mit Poolposition!`); }catch(e){} }
     closeOv(); toast(us.length===1?'Ticket zugewiesen':`${us.length} Tickets zugewiesen`); render(); }catch(e){ el.disabled=false; fail(e,'Zuweisen'); } };
 /* ===================== Kiosk: Tickets ansehen =====================
@@ -4760,6 +4781,8 @@ const TK_INFO = {
   woche: {n:'WOCHENKARTE', dauer:'7 Tage',     sub:'Für den Kurztrip',      sym:'🏊'},
   monat: {n:'MONATSKARTE', dauer:'1 Monat',    sub:'Für Dauerplaner',       sym:'🛟'},
   jahr:  {n:'JAHRESKARTE', dauer:'1 Jahr',     sub:'Für Stammgäste',        sym:'🏆'} };
+/* Enddatum mit Uhrzeit; ab einem halben Jahr Restlaufzeit mit Jahreszahl */
+const tkEnde = ms => { const d=new Date(ms); const jahr=(ms-now())>180*864e5 || d.getFullYear()!==new Date().getFullYear(); return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${jahr?d.getFullYear():''} ${fTime(ms)} Uhr`; };
 const tkNr = u => { let h=7; for(const c of String(u||'x')) h=(h*31+c.charCodeAt(0))%1000000; return String(h).padStart(6,'0'); };
 function tkRest(bis){ const ms=bis-now(); if(ms<=0) return 'abgelaufen'; const m=Math.round(ms/60000); if(m<60) return `noch ${m} Min.`; const h=Math.round(ms/3600000); if(h<48) return `noch ${h} Std.`; const d=Math.round(ms/864e5); return d<60?`noch ${d} Tage`:`noch ${Math.round(d/30)} Monate`; }
 const TK_WELLE = '<svg class="tkwelle" viewBox="0 0 120 10" preserveAspectRatio="none" aria-hidden="true"><path d="M0 5 Q5 0 10 5 T20 5 T30 5 T40 5 T50 5 T60 5 T70 5 T80 5 T90 5 T100 5 T110 5 T120 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
@@ -4769,7 +4792,7 @@ function ticketBild(art, opt={}){ const i=TK_INFO[art]||TK_INFO.tag; const nr=op
       <span class="tksub">${i.sub}</span><span class="tkdauer">${opt.gueltig||`Gültig ${i.dauer}`}</span>
       ${opt.preis?`<span class="tkpreis" aria-label="Preis folgt"><i>00,00 €</i></span>`:''}</div>
     <div class="tkstub"><span class="tksym">${i.sym}</span><span class="tknr">Nr.<br><b>${nr}</b></span><span class="tkein">EINTRITT</span></div></div>`; }
-V.kiosk = ()=>{ const t=S.ticket; const mein = t && S.ticketDa ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketAbgelaufen(t)?'Abgelaufen':`Gültig bis ${fStamp(t.bis)}`})}<span class="small ${ticketAbgelaufen(t)?'':'mut'}" ${ticketAbgelaufen(t)?'style="color:var(--pinktx)"':''}>${ticketAbgelaufen(t)?`Abgelaufen am ${fStamp(t.bis)}. Du kannst nur noch ansehen.`:`${tkRest(t.bis)}, gültig bis ${fStamp(t.bis)}.`}</span></div>` : '';
+V.kiosk = ()=>{ const t=S.ticket; const mein = t && S.ticketDa ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketAbgelaufen(t)?`Abgelaufen am ${tkEnde(t.bis)}`:`Gültig bis ${tkEnde(t.bis)}`})}<span class="small ${ticketAbgelaufen(t)?'':'mut'}" ${ticketAbgelaufen(t)?'style="color:var(--pinktx)"':''}>${ticketAbgelaufen(t)?`Abgelaufen am ${tkEnde(t.bis)}. Du kannst nur noch ansehen.`:`${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}.`}</span></div>` : '';
   return `${hdrPlain('Kiosk')}${backBtn()}
   <div class="kioskdach" aria-hidden="true"></div>
   <div class="col" style="gap:2px"><h1>Der Kiosk</h1><span class="mut">Hier gibt es bald deine Mitgliedschaft. Wähle dein Ticket für Poolposition.</span></div>
@@ -4778,6 +4801,242 @@ V.kiosk = ()=>{ const t=S.ticket; const mein = t && S.ticketDa ? `<div class="co
   <div class="col" style="gap:14px"><h3 style="margin:0">Das gibt es bald</h3>
     ${['woche','monat','jahr'].map(a=>`<div class="col" style="gap:8px">${ticketBild(a,{nr:'000'+({woche:'007',monat:'030',jahr:'365'})[a], preis:true})}<button class="btn sec block" disabled aria-disabled="true">Bald erhältlich</button></div>`).join('')}</div>
   <span class="tiny mut">Mit dem Ticket bestimmst du, wie lange du Reisen planen, abstimmen und mitmachen kannst. Danach kannst du weiter alles ansehen.</span>`; };
+/* ===================== Mitgliederverwaltung (nur Oberbademeister) =====================
+   Eigener Bereich im Adminbereich: Übersicht mit Zahlen, Mitgliederliste mit Labels/Notizen, Ticketprotokoll.
+   Daten: tickets/{uid} (aktuelles Ticket), ticketlog (jede Zuweisung), mverw/{uid} (Labels + private Notiz). */
+const MV = { d:null, log:null, laedt:false };
+const MV_LABELS = ['Tester','Familie','Freunde','Intern','VIP'];
+async function mvLaden(){ if(MV.laedt) return; MV.laedt=true; MV.d={}; MV.log=[];
+  try{ const s=await S.db.collection('mverw').get(); snapDocs(s).forEach(x=>MV.d[x.id]=x); }catch(e){ console.warn('mverw', e); }
+  try{ const s=await S.db.collection('ticketlog').get(); MV.log=snapDocs(s).sort((a,b)=>(b.at||0)-(a.at||0)); }catch(e){ console.warn('ticketlog', e); }
+  MV.laedt=false; render(); }
+async function tkLog(u, d, aktion){ const e={uid:u, art:d.art, von:d.von, bis:d.bis, by:S.uid, at:now(), aktion};
+  try{ const r=await S.db.collection('ticketlog').add(e); if(MV.log) MV.log.unshift({id:r?.id||('l'+now()),...e}); }catch(x){ console.warn('ticketlog', x); } }
+const mvTage = n => now()-n*864e5;
+const mvTeam = (D,u) => { const ro=D.rollen?.[u]; return !!ro && (ro.super || Object.values(rechteVon(ro)).some(Boolean) || !!rangVon(ro)); };
+/* Ticketstatus: kein | tag|woche|monat|jahr (gültig) | abg (abgelaufen) | team (ausgenommen) */
+function mvStatus(D,u){ if(mvTeam(D,u)) return 'team'; const t=KONTO.tick?.[u]; if(!t) return 'kein'; return ticketAbgelaufen(t)?'abg':t.art; }
+const mvLabelsVon = u => MV.d?.[u]?.labels||[];
+const mvAlleLabels = () => [...new Set([...MV_LABELS, ...Object.values(MV.d||{}).flatMap(x=>x.labels||[])])];
+const mvBalken = (n,max,farbe='var(--yelt)') => `<span class="mvbalk"><i style="width:${max?Math.max(n?4:0,Math.round(n/max*100)):0}%;background:${farbe}"></i></span>`;
+const mvZ = (z,t,extra='') => `<div class="mvz ${extra}"><b class="num">${z}</b><span>${t}</span></div>`;
+
+function mvTab(D){ if(!istSuper()) return '<div class="warn">Nur für den Oberbademeister.</div>';
+  if(!KONTO.daten) kontenLaden(); if(!MV.d) mvLaden(); if(!MV.nz && (S.ui.mvTab==='nutz'||S.ov?.v==='mvProfil')) nzLaden(); if(!RX.d) reiseDatenLaden();
+  const t=S.ui.mvTab||'ueb'; const nav=[['ueb','Übersicht'],['liste','Mitglieder'],['nutz','Nutzung'],['log','Ticketprotokoll']];
+  return `<div class="fchips mvnav">${nav.map(([k,n])=>`<button class="fchip ${t===k?'an':''}" data-act="mvTab" data-k="${k}" aria-pressed="${t===k}">${n}</button>`).join('')}</div>
+    ${!KONTO.daten||!MV.d?'<p class="mut small">Zahlen werden geladen …</p>':t==='liste'?mvListe(D):t==='log'?mvLog(D):t==='nutz'?mvNutz(D):mvUeb(D)}`; }
+A.mvTab = el => { S.ui.mvTab=el.dataset.k; render(); window.scrollTo(0,0); };
+
+/* ---------- Übersicht ---------- */
+function mvUeb(D){ const P=Object.keys(S.profile); const h=heuteStart();
+  const akt=n=>P.filter(u=>zuletzt(u)>=n).length, neu=n=>P.filter(u=>beigetreten(u)>=n).length;
+  /* Wachstum: neue Mitglieder pro Woche, letzte 12 Wochen */
+  const wo=[]; for(let i=11;i>=0;i--){ const bis=now()-i*7*864e5, von=bis-7*864e5; wo.push({von, n:P.filter(u=>{ const b=beigetreten(u); return b>=von && b<bis; }).length}); }
+  const wmax=Math.max(1,...wo.map(x=>x.n));
+  /* Tickets */
+  const st=Object.fromEntries(P.map(u=>[u,mvStatus(D,u)])); const z=k=>P.filter(u=>st[u]===k).length;
+  const ohneTeam=P.filter(u=>st[u]!=='team').length; const tmax=Math.max(1,z('tag'),z('woche'),z('monat'),z('jahr'),z('abg'),z('kein'));
+  const bald=(n)=>P.filter(u=>{ const t=KONTO.tick?.[u]; return st[u]!=='team' && t && t.bis>now() && t.bis<=now()+n; }).sort((a,b)=>KONTO.tick[a].bis-KONTO.tick[b].bis);
+  const b24=bald(864e5), b7=bald(7*864e5);
+  const log=(MV.log||[]).filter(x=>x.aktion!=='entzogen'); const l30=log.filter(x=>x.at>=mvTage(30));
+  const hoch=P.filter(u=>['woche','monat','jahr'].includes(KONTO.tick?.[u]?.art) && !KONTO.tick[u].auto).length;
+  const konv=ohneTeam?Math.round(100*P.filter(u=>st[u]!=='team' && (log.some(x=>x.uid===u && x.art!=='tag') )).length/ohneTeam):0;
+  /* Auffälligkeiten */
+  const gesp=Object.entries(D.sperren||{}).filter(([u,s])=>s.typ==='konto'||s.bis>now()).length; const offen=D.meld.filter(m=>m.status==='offen').length;
+  const alt=P.filter(u=>KONTO.daten?.[u]?.version && KONTO.daten[u].version!==APP_VERSION).length; const still=P.filter(u=>{ const a=zuletzt(u); return a && a<mvTage(30); }).length;
+  /* Reisen */
+  const rs=D.reisen.map(r=>reiseKat(r)); const rz=k=>rs.filter(x=>x===k).length;
+  const gr=RX.d?D.reisen.map(r=>(RX.d.mit[r.id]||[]).filter(m=>m.status==='zugesagt').length).filter(n=>n>0):[]; const gm=gr.length?(gr.reduce((a,b)=>a+b,0)/gr.length).toFixed(1).replace('.',','):'–';
+  const mitReise=RX.d?new Set(Object.values(RX.d.mit).flat().filter(m=>m.status==='zugesagt').map(m=>m.uid)).size:null;
+  const lab=mvAlleLabels().map(l=>[l,P.filter(u=>mvLabelsVon(u).includes(l)).length]).filter(x=>x[1]);
+  const link=(f,txt)=>`<button class="mvlink" data-act="mvFilter" data-k="${f}">${txt}</button>`;
+  const TK=[['tag','Tageskarte'],['woche','Wochenkarte'],['monat','Monatskarte'],['jahr','Jahreskarte']];
+  return `<div class="mvgrid">${mvZ(P.length,'Mitglieder')}${mvZ(akt(h),'heute aktiv')}${mvZ(akt(mvTage(7)),'aktiv in 7 Tagen')}${mvZ(akt(mvTage(30)),'aktiv in 30 Tagen')}${mvZ(neu(h),'neu heute')}${mvZ(neu(mvTage(7)),'neu in 7 Tagen')}${mvZ(neu(mvTage(30)),'neu in 30 Tagen')}${mvZ(mitReise??'…','auf Reisen dabei')}</div>
+  <div class="card"><b>${ic('mitgl',16)} Neue Mitglieder pro Woche</b><div class="mvkurve" role="img" aria-label="Neue Mitglieder pro Woche, letzte 12 Wochen">${wo.map(x=>`<span class="mvsp" title="${fD(isoDay(new Date(x.von)))}: ${x.n}"><i style="height:${Math.max(x.n?6:2,Math.round(x.n/wmax*100))}%"></i><em>${x.n}</em></span>`).join('')}</div><span class="tiny mut">Die letzten 12 Wochen, älteste links.</span></div>
+  <div class="card"><b>${ic('star',16)} Tickets (${ohneTeam} Mitglieder ohne Team)</b>
+    ${TK.map(([k,n])=>`<div class="mvzeile">${link(k,esc(n))}<span class="num">${z(k)}</span>${mvBalken(z(k),tmax)}</div>`).join('')}
+    <div class="mvzeile">${link('abg','Abgelaufen (nur ansehen)')}<span class="num">${z('abg')}</span>${mvBalken(z('abg'),tmax,'var(--pinktx)')}</div>
+    <div class="mvzeile">${link('kein','Noch ohne Ticket')}<span class="num">${z('kein')}</span>${mvBalken(z('kein'),tmax,'var(--mut)')}</div>
+    <span class="tiny mut">Team (Bademeister) ist von Tickets ausgenommen: ${z('team')}</span></div>
+  <div class="card"><b>${ic('baro',16)} Vergebene Tickets (Protokoll)</b>
+    <div class="mvgrid2">${TK.map(([k,n])=>`<div class="mvz"><b class="num">${log.filter(x=>x.art===k).length}</b><span>${n}<br><span class="tiny mut">${l30.filter(x=>x.art===k).length} in 30 Tagen</span></span></div>`).join('')}</div>
+    <span class="tiny">${hoch} Mitglieder haben aktuell ein höheres Ticket · ${konv} % haben schon einmal mehr als eine Tageskarte bekommen.</span>
+    <span class="tiny mut">Verkauf gibt es noch nicht, hier zählen alle Zuweisungen durch dich. Die automatische Tageskarte beim Start ist nicht enthalten. Ab dieser Version wird jede Zuweisung protokolliert.</span></div>
+  <div class="card ${b24.length?'hinweis':''}"><b>${ic('clock',16)} Läuft bald ab</b>
+    <span class="small">${b24.length} in den nächsten 24 Stunden · ${b7.length} in 7 Tagen</span>
+    ${b7.slice(0,8).map(u=>`<div class="row between" style="gap:8px"><button class="mvname" data-act="mvAuf" data-uid="${u}">${av(u,26)} <span class="ell">${esc(nm(u))}</span></button><span class="tiny mut">${esc(ticketName(KONTO.tick[u].art))} bis ${fStamp(KONTO.tick[u].bis)}</span><button class="btn xs sec" data-act="mvVerl" data-uid="${u}">Verlängern</button></div>`).join('')}
+    ${b7.length>8?link('bald',`alle ${b7.length} anzeigen`):''}${!b7.length?'<span class="tiny mut">Nichts läuft in den nächsten 7 Tagen ab.</span>':''}</div>
+  <div class="card"><b>${ic('suitcase',16)} Nutzung</b>
+    <div class="mvgrid2"><div class="mvz"><b class="num">${rz('laeuft')}</b><span>Reisen laufen</span></div><div class="mvz"><b class="num">${rz('geplant')}</b><span>geplant</span></div><div class="mvz"><b class="num">${rz('konferenz')}</b><span>Koffer-Konferenz</span></div><div class="mvz"><b class="num">${gm}</b><span>Ø Gruppengröße</span></div></div>
+    <span class="tiny mut">${rz('vorbei')} Reisen vorbei · ${D.reisen.length} insgesamt${mitReise!=null&&P.length?` · ${Math.round(100*mitReise/P.length)} % der Mitglieder sind in einer Reise dabei`:''}</span></div>
+  <div class="card"><b>${ic('flag',16)} Auffälligkeiten</b>
+    <div class="mvzeile">${link('gesperrt','Gesperrt')}<span class="num">${gesp}</span></div>
+    <div class="mvzeile"><span>Offene Meldungen</span><span class="num">${offen}</span></div>
+    <div class="mvzeile">${link('alt','Ältere App-Version')}<span class="num">${alt}</span></div>
+    <div class="mvzeile">${link('still','Seit über 30 Tagen nicht aktiv')}<span class="num">${still}</span></div></div>
+  ${lab.length?`<div class="card"><b>${ic('tag',16)} Labels</b><div class="row wrap" style="gap:6px">${lab.map(([l,n])=>`<button class="mvlabel" data-act="mvFilter" data-k="l:${esc(l)}">${esc(l)} <span class="mut">${n}</span></button>`).join('')}</div></div>`:''}`; }
+A.mvFilter = el => { S.ui.mvTab='liste'; S.ui.mvF=el.dataset.k; S.form.mvSuche=''; render(); window.scrollTo(0,0); };
+
+/* ---------- Liste ---------- */
+function mvFilterFn(D){ const gesp=u=>{ const sp=D.sperren?.[u]; return !!sp && (sp.typ==='konto'||sp.bis>now()); };
+  return { alle:()=>true, tag:u=>mvStatus(D,u)==='tag', woche:u=>mvStatus(D,u)==='woche', monat:u=>mvStatus(D,u)==='monat', jahr:u=>mvStatus(D,u)==='jahr', abg:u=>mvStatus(D,u)==='abg', kein:u=>mvStatus(D,u)==='kein',
+    bald:u=>{ const t=KONTO.tick?.[u]; return mvStatus(D,u)!=='team' && !!t && t.bis>now() && t.bis<=now()+7*864e5; }, gesperrt:gesp,
+    alt:u=>!!KONTO.daten?.[u]?.version && KONTO.daten[u].version!==APP_VERSION, still:u=>{ const a=zuletzt(u); return !!a && a<mvTage(30); }, neu:u=>beigetreten(u)>=mvTage(7), team:u=>mvStatus(D,u)==='team' }; }
+function mvListeVon(D){ const f=S.ui.mvF||'alle'; const q=(S.form.mvSuche||'').trim().toLowerCase(); const fn=mvFilterFn(D);
+  const test=f.startsWith('l:')?(u=>mvLabelsVon(u).includes(f.slice(2))):(fn[f]||fn.alle);
+  return Object.keys(S.profile).filter(test).filter(u=>!q||nm(u).toLowerCase().includes(q)||realName(u).toLowerCase().includes(q)||mvLabelsVon(u).some(l=>l.toLowerCase().includes(q)))
+    .sort((a,b)=>zuletzt(b)-zuletzt(a)||nm(a).localeCompare(nm(b))); }
+function mvListe(D){ const f=S.ui.mvF||'alle'; const fn=mvFilterFn(D); const P=Object.keys(S.profile); const l=mvListeVon(D); S.ui.ticketListe=l; S.ui.mvListe=l;
+  const chip=(k,t)=>`<button class="fchip ${f===k?'an':''}" data-act="mvFilterSet" data-k="${k}" aria-pressed="${f===k}">${t} <span class="mut">${P.filter(fn[k]).length}</span></button>`;
+  const lc=mvAlleLabels().filter(x=>P.some(u=>mvLabelsVon(u).includes(x)));
+  return `<input class="in" id="f_mvSuche" placeholder="Name oder Label suchen" data-live="1" autocomplete="off">
+  <div class="fchips">${chip('alle','Alle')}${chip('tag','Tageskarte')}${chip('woche','Woche')}${chip('monat','Monat')}${chip('jahr','Jahr')}${chip('bald','Läuft bald ab')}${chip('abg','Abgelaufen')}${chip('kein','Ohne Ticket')}${chip('neu','Neu (7 T.)')}${chip('still','Inaktiv 30 T.')}${chip('gesperrt','Gesperrt')}${chip('team','Team')}
+    ${lc.map(x=>`<button class="fchip ${f==='l:'+x?'an':''}" data-act="mvFilterSet" data-k="l:${esc(x)}" aria-pressed="${f==='l:'+x}">${ic('tag',12)} ${esc(x)} <span class="mut">${P.filter(u=>mvLabelsVon(u).includes(x)).length}</span></button>`).join('')}</div>
+  <div class="row wrap" style="gap:8px"><button class="btn sm sec" data-act="mvTicketAlle" ${l.filter(u=>u!==S.uid).length?'':'disabled'}>${ic('star',14)} Ticket für Auswahl (${l.filter(u=>u!==S.uid).length})</button><button class="btn sm sec" data-act="mvLabelAlle" ${l.length?'':'disabled'}>${ic('tag',14)} Label für Auswahl</button><button class="btn sm sec" data-act="mvCsv" ${l.length?'':'disabled'}>${ic('post',14)} CSV</button></div>
+  <span class="tiny mut">${l.length} ${l.length===1?'Mitglied':'Mitglieder'}, sortiert nach letzter Aktivität. Antippen für Profil, Labels und Notiz.</span>
+  <div class="list">${l.map(u=>{ const ls=mvLabelsVon(u); const n=MV.d?.[u]?.notiz;
+    return `<div class="li"><button class="nutzerauf" data-act="mvAuf" data-uid="${u}" aria-label="Verwaltung von ${esc(nm(u))}">${av(u,36)}<span class="grow col" style="gap:2px;min-width:0"><b class="ell">${esc(nm(u))}</b><span class="tiny mut ell">${esc(realName(u))} · zuletzt aktiv ${vorWann(zuletzt(u))}</span><span>${mvStatus(D,u)==='team'?'<span class="tiny" style="color:var(--yelt)">Team, ohne Ticket</span>':ticketChip(u)}</span>${ls.length||n?`<span class="row wrap" style="gap:4px">${ls.map(x=>`<span class="mvlabel s">${esc(x)}</span>`).join('')}${n?`<span class="tiny mut">${ic('post',11)} Notiz</span>`:''}</span>`:''}</span></button></div>`; }).join('')||'<div class="empty small">Niemand in dieser Auswahl.</div>'}</div>`; }
+A.mvFilterSet = el => { S.ui.mvF=el.dataset.k; render(); };
+A.mvTicketAlle = ()=>{ if(!istSuper()) return; S.ui.ticketUs=(S.ui.mvListe||[]).filter(u=>u!==S.uid); if(!S.ui.ticketUs.length) return toast('Niemand in dieser Auswahl.'); S.form.tkArt=''; openOv('ticketZuw',{us:S.ui.ticketUs}); };
+A.mvCsv = async ()=>{ const D=S.ui.sys||{}; const l=S.ui.mvListe||[]; const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+  const L=[['Name','Echter Name','Ticket','Gültig bis','Beigetreten','Zuletzt aktiv','App-Version','Labels','Notiz'].join(';')];
+  for(const u of l){ const t=KONTO.tick?.[u]; const s=mvStatus(D,u); L.push([nm(u),realName(u),s==='team'?'Team':t?ticketName(t.art)+(s==='abg'?' (abgelaufen)':''):'kein Ticket',t?fStamp(t.bis):'',beigetreten(u)?fStamp(beigetreten(u)):'',zuletzt(u)?fStamp(zuletzt(u)):'',KONTO.daten?.[u]?.version||'',mvLabelsVon(u).join(', '),MV.d?.[u]?.notiz||''].map(q).join(';')); }
+  const blob=new Blob(['﻿'+L.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  try{ await S.downloads.save({filename:`Poolposition_Mitglieder_${today()}.csv`, data:blob}); toast('Gespeichert'); }catch(e){ fail(e,'Speichern'); } };
+
+/* ---------- Ticketprotokoll ---------- */
+const AKT = { zugewiesen:'zugewiesen', verlaengert:'verlängert' };
+function mvLog(D){ const l=MV.log||[]; const f=S.ui.mvLogF||'alle';
+  const show=l.filter(x=>f==='alle'||x.art===f).slice(0,150);
+  return `<div class="fchips">${[['alle','Alle'],['tag','Tag'],['woche','Woche'],['monat','Monat'],['jahr','Jahr']].map(([k,n])=>`<button class="fchip ${f===k?'an':''}" data-act="mvLogF" data-k="${k}" aria-pressed="${f===k}">${n}</button>`).join('')}</div>
+  <span class="tiny mut">${l.length} Einträge. Jede Zuweisung und Verlängerung wird hier festgehalten (die automatische Tageskarte nicht).</span>
+  <div class="list">${show.map(x=>`<div class="li"><span class="grow col" style="gap:2px;min-width:0"><span class="small"><b>${esc(nm(x.uid))}</b> · ${esc(ticketName(x.art))} ${AKT[x.aktion]||''}</span><span class="tiny mut">gültig bis ${fStamp(x.bis)} · ${fStamp(x.at)} von ${esc(nm(x.by))}</span></span></div>`).join('')||'<div class="empty small">Noch keine Einträge. Sobald du ein Ticket vergibst, erscheint es hier.</div>'}</div>`; }
+A.mvLogF = el => { S.ui.mvLogF=el.dataset.k; render(); };
+
+/* ---------- Verlängern ---------- */
+A.mvVerl = async el => { if(!istSuper()) return; const u=el.dataset.uid; const t=KONTO.tick?.[u]; if(!t) return; el.disabled=true;
+  const von=t.von||now(); const bis=ticketBis(t.art, Math.max(now(), t.bis)); const d={art:t.art, von, bis, by:S.uid, at:now()};
+  try{ await S.db.doc(`tickets/${u}`).set(d); KONTO.tick[u]={id:u,...d}; await tkLog(u,d,'verlaengert');
+    try{ await supportSend(u, `Dein Ticket wurde verlängert: ${ticketName(t.art)}, gültig bis ${fStamp(bis)}.`); }catch(e){}
+    toast('Verlängert'); render(); if(S.ov?.v==='mvProfil') renderOv(); }catch(e){ el.disabled=false; fail(e,'Verlängern'); } };
+
+/* ---------- Profil in der Verwaltung ---------- */
+A.mvAuf = el => { const u=el.dataset.uid; S.form.mvNotiz=MV.d?.[u]?.notiz||''; S.form.mvNeu=''; openOv('mvProfil',{uid:u}); };
+OV.mvProfil = o => { const u=o.uid; const D=S.ui.sys||{}; const ls=mvLabelsVon(u); const t=KONTO.tick?.[u]; const s=mvStatus(D,u); const a=KONTO.auth[u]||{}; const ver=KONTO.daten?.[u]?.version;
+  const zeile=(k,v)=>`<div class="row between" style="gap:10px"><span class="mut small">${k}</span><span class="small" style="text-align:right">${v}</span></div>`;
+  const hist=(MV.log||[]).filter(x=>x.uid===u).slice(0,8);
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Verwaltung ${esc(nm(u))}"><div class="row between"><span class="row" style="gap:10px;min-width:0">${av(u,46)}<span class="col" style="gap:1px;min-width:0"><b class="ell">${esc(nm(u))}</b><span class="tiny mut ell">${esc(realName(u))}</span></span></span><button class="icbtn sm0" data-act="closeOv" aria-label="Schließen">${ic('x',18)}</button></div>
+    <div class="card tight">${zeile('Beigetreten', beigetreten(u)?fStamp(beigetreten(u)):'unbekannt')}${zeile('Zuletzt aktiv', zuletzt(u)?vorWann(zuletzt(u)):'unbekannt')}${ver?zeile('App-Version', esc(ver)):''}${a.email?zeile('E-Mail',`<span style="user-select:all">${esc(a.email)}</span>`):''}
+      ${zeile('Ticket', s==='team'?'Team, ausgenommen':ticketChip(u)||'kein Ticket')}${t&&s!=='team'&&(t.von||t.at)?zeile('Seit', fStamp(t.von||t.at)+(t.auto?' (automatisch)':'')):''}</div>
+    <div class="card tight"><b class="small">${ic('tag',14)} Labels</b><div class="row wrap" style="gap:6px">${mvAlleLabels().map(x=>`<button class="mvlabel ${ls.includes(x)?'on':''}" data-act="mvLabel" data-uid="${u}" data-l="${esc(x)}" aria-pressed="${ls.includes(x)}">${esc(x)}</button>`).join('')}</div>
+      <div class="row" style="gap:6px"><input class="in grow" id="f_mvNeu" maxlength="24" placeholder="Neues Label" data-live="1"><button class="btn sm sec" data-act="mvLabelNeu" data-uid="${u}">Hinzufügen</button></div></div>
+    <div class="card tight"><b class="small">${ic('post',14)} Private Notiz</b><textarea class="in" id="f_mvNotiz" rows="3" maxlength="1000" placeholder="Nur für dich sichtbar" data-live="1"></textarea><button class="btn sm sec" data-act="mvNotiz" data-uid="${u}">Notiz speichern</button></div>
+    ${nzProfil(u)}
+    ${hist.length?`<div class="card tight"><b class="small">Ticketverlauf</b>${hist.map(x=>`<span class="tiny">${esc(ticketName(x.art))} ${AKT[x.aktion]||''} · bis ${fStamp(x.bis)} · ${fStamp(x.at)}</span>`).join('')}</div>`:''}
+    <div class="col" style="gap:8px">${u!==S.uid&&s!=='team'?`<button class="btn block" data-act="ticketAuf" data-uid="${u}">${ic('star',18)} Ticket zuweisen</button>`:''}${t&&u!==S.uid&&s!=='team'?`<button class="btn sec block" data-act="mvVerl" data-uid="${u}">${ic('repeat',18)} ${esc(ticketName(t.art))} verlängern</button>`:''}
+      <button class="btn sec block" data-act="nutzerAuf" data-uid="${u}">${ic('mitgl',18)} Alle Details, Reisen und Support</button></div></div>`; };
+async function mvSet(u, patch){ const alt=MV.d[u]||{}; const neu={labels:alt.labels||[], notiz:alt.notiz||'', ...patch, by:S.uid, at:now()}; await S.db.doc(`mverw/${u}`).set(neu); MV.d[u]={id:u,...neu}; }
+A.mvLabel = async el => { const u=el.dataset.uid, l=el.dataset.l; const ls=mvLabelsVon(u); const n=ls.includes(l)?ls.filter(x=>x!==l):[...ls,l];
+  try{ await mvSet(u,{labels:n}); renderOv(); render(); }catch(e){ fail(e,'Speichern'); } };
+A.mvLabelNeu = async el => { const u=el.dataset.uid; const l=(document.getElementById('f_mvNeu')?.value||'').trim().slice(0,24); if(!l) return; const ls=mvLabelsVon(u); if(ls.includes(l)) return toast('Das Label gibt es schon.');
+  try{ await mvSet(u,{labels:[...ls,l]}); S.form.mvNeu=''; renderOv(); render(); }catch(e){ fail(e,'Speichern'); } };
+A.mvNotiz = async el => { const u=el.dataset.uid; const t=(document.getElementById('f_mvNotiz')?.value||'').trim().slice(0,1000);
+  try{ await mvSet(u,{notiz:t}); toast('Notiz gespeichert'); render(); }catch(e){ fail(e,'Speichern'); } };
+/* Label für alle in der Auswahl */
+A.mvLabelAlle = ()=>{ const us=S.ui.mvListe||[]; if(!us.length) return; S.form.mvNeu=''; openOv('mvLabelMass',{us}); };
+OV.mvLabelMass = o => `<div class="sheet" role="dialog" aria-modal="true" aria-label="Label vergeben"><h2>Label für ${o.us.length} ${o.us.length===1?'Mitglied':'Mitglieder'}</h2>
+  <p class="small mut">Das Label wird zu den bisherigen Labels hinzugefügt.</p>
+  <div class="row wrap" style="gap:6px">${mvAlleLabels().map(x=>`<button class="mvlabel" data-act="mvLabelMassSet" data-l="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+  <div class="row" style="gap:6px"><input class="in grow" id="f_mvNeu" maxlength="24" placeholder="Neues Label" data-live="1"><button class="btn sm" data-act="mvLabelMassSet">Vergeben</button></div>
+  <button class="btn sec block" data-act="closeOv">Abbrechen</button></div>`;
+A.mvLabelMassSet = async el => { const l=(el.dataset.l||document.getElementById('f_mvNeu')?.value||'').trim().slice(0,24); if(!l) return toast('Bitte ein Label wählen.'); const us=S.ov?.us||[]; el.disabled=true;
+  try{ for(const u of us){ const ls=mvLabelsVon(u); if(!ls.includes(l)) await mvSet(u,{labels:[...ls,l]}); } closeOv(); toast(`Label „${l}“ vergeben`); render(); }catch(e){ el.disabled=false; fail(e,'Speichern'); } };
+
+/* ---------- Nutzung (Zeit und Bereiche) ---------- */
+async function nzLaden(){ if(MV.nzLaedt) return; MV.nzLaedt=true; MV.nz=[]; MV.nzSum={};
+  try{ const s=await S.db.collection('nutzung').get(); MV.nz=snapDocs(s); }catch(e){ console.warn('nutzung', e); }
+  try{ const s=await S.db.collection('nutzungsumme').get(); snapDocs(s).forEach(x=>MV.nzSum[x.id]=x); }catch(e){}
+  MV.nzLaedt=false; render(); }
+const nzZeit = sek => { sek=Math.round(sek||0); if(sek<60) return `${sek} Sek.`; const m=Math.round(sek/60); if(m<60) return `${m} Min.`; const h=Math.floor(m/60); return `${h} Std. ${m%60} Min.`; };
+function nzDaten(tage){ const von=new Date(now()-tage*864e5); const grenze=`${von.getFullYear()}-${pad(von.getMonth()+1)}-${pad(von.getDate())}`; return (MV.nz||[]).filter(x=>x.tag>=grenze); }
+function nzAggr(l){ const s={}, t={}, a={}, h={}; const pro={}; let sek=0, starts=0;
+  for(const x of l){ for(const [k,v] of Object.entries(x.s||{})) s[k]=(s[k]||0)+v; for(const [k,v] of Object.entries(x.t||{})) t[k]=(t[k]||0)+v; for(const [k,v] of Object.entries(x.a||{})) a[k]=(a[k]||0)+v; for(const [k,v] of Object.entries(x.h||{})) h[k]=(h[k]||0)+v;
+    sek+=x.sek||0; starts+=x.starts||0; const p=(pro[x.uid]=pro[x.uid]||{sek:0,tage:0,starts:0,s:{}}); p.sek+=x.sek||0; p.tage++; p.starts+=x.starts||0; for(const [k,v] of Object.entries(x.s||{})) p.s[k]=(p.s[k]||0)+v; }
+  return {s,t,a,h,pro,sek,starts}; }
+const nzTop = (o,n=1) => Object.entries(o||{}).sort((a,b)=>b[1]-a[1]).slice(0,n);
+function mvNutz(D){ if(!MV.nz && !MV.nzLaedt) nzLaden(); if(!MV.nz) return '<p class="mut small">Nutzungsdaten werden geladen …</p>';
+  const tage=S.ui.nzT||30; const l=nzDaten(tage); const A=nzAggr(l); const users=Object.keys(A.pro); const P=Object.keys(S.profile).length;
+  const bs=nzTop(A.s,40); const bmax=bs[0]?.[1]||1; const gesamt=A.sek||1;
+  const nutzerPro=b=>users.filter(u=>(A.pro[u].s[b]||0)>0).length;
+  const fns=nzTop(A.a,12); const fmax=fns[0]?.[1]||1;
+  const hs=Array.from({length:24},(_,i)=>A.h['h'+pad(i)]||0); const hmax=Math.max(1,...hs);
+  const mitT=Object.values(A.pro).reduce((x,p)=>x+p.tage,0)||1;
+  const ticketGr={}; users.forEach(u=>{ const k=mvStatus(D,u); (ticketGr[k]=ticketGr[k]||{n:0,sek:0}); ticketGr[k].n++; ticketGr[k].sek+=A.pro[u].sek; });
+  const TN={tag:'Tageskarte',woche:'Wochenkarte',monat:'Monatskarte',jahr:'Jahreskarte',abg:'Abgelaufen',kein:'Ohne Ticket',team:'Team'};
+  const rk=users.map(u=>[u,A.pro[u]]).sort((a,b)=>b[1].sek-a[1].sek).slice(0,25);
+  const sum=Object.keys(MV.nzSum||{}).length;
+  return `<div class="fchips">${[7,30,90].map(n=>`<button class="fchip ${tage===n?'an':''}" data-act="nzTage" data-k="${n}" aria-pressed="${tage===n}">${n} Tage</button>`).join('')}</div>
+  ${!l.length?`<div class="card"><b>Noch keine Messdaten</b><span class="small mut">Die Messung startet mit dieser Version. Sobald Mitglieder die App benutzen, erscheinen hier Zahlen. Gemessen wird nur bei sichtbarer, bedienter App (nach 2 Minuten ohne Eingabe zählt nichts). Wer die Statistik in den Einstellungen ausschaltet, fehlt hier.</span></div>`:`
+  <div class="mvgrid">${mvZ(users.length,'Mitglieder mit Messdaten')}${mvZ(P?Math.round(100*users.length/P)+' %':'–','aller Mitglieder')}${mvZ(nzZeit(A.sek/mitT),'Ø pro Nutzer und Tag')}${mvZ(nzZeit(A.sek/(users.length||1)),`Ø pro Nutzer in ${tage} Tagen`)}${mvZ(A.starts,'App-Starts')}${mvZ(A.starts?nzZeit(A.sek/A.starts):'–','Ø pro Start')}</div>
+  <div class="card"><b>${ic('baro',16)} Meistgenutzte Bereiche</b><span class="tiny mut">Nach Gesamtzeit. Rechts: Anteil an der Zeit, Nutzer, Ø Zeit pro Nutzer, Taps.</span>
+    ${bs.map(([b,v])=>`<div class="mvbereich"><div class="row between"><b class="small">${esc(b)}</b><span class="small num">${Math.round(100*v/gesamt)} %</span></div>${mvBalken(v,bmax)}<span class="tiny mut">${nzZeit(v)} · ${nutzerPro(b)} ${nutzerPro(b)===1?'Nutzer':'Nutzer'} · Ø ${nzZeit(v/(nutzerPro(b)||1))} · ${A.t[b]||0} Taps</span></div>`).join('')}</div>
+  <div class="card"><b>${ic('star',16)} Meistgenutzte Funktionen</b><span class="tiny mut">Wie oft angetippt (interne Namen der Schaltflächen).</span>
+    ${fns.map(([k,v])=>`<div class="mvzeile"><span class="small ell">${esc(k)}</span><span class="num">${v}</span>${mvBalken(v,fmax)}</div>`).join('')||'<span class="tiny mut">Noch nichts.</span>'}</div>
+  <div class="card"><b>${ic('clock',16)} Tageszeiten</b><div class="mvkurve" role="img" aria-label="Nutzung nach Uhrzeit">${hs.map((v,i)=>`<span class="mvsp" title="${i} Uhr: ${nzZeit(v)}"><i style="height:${Math.max(v?6:2,Math.round(v/hmax*100))}%"></i></span>`).join('')}</div><div class="row between tiny mut"><span>0 Uhr</span><span>12 Uhr</span><span>23 Uhr</span></div></div>
+  <div class="card"><b>${ic('mitgl',16)} Nach Ticket</b>${Object.entries(ticketGr).map(([k,g])=>`<div class="mvzeile"><span class="small">${TN[k]||k}</span><span class="tiny mut">${g.n} Nutzer</span><span class="small num">Ø ${nzZeit(g.sek/g.n)}</span></div>`).join('')}</div>
+  <div class="card"><b>${ic('mitgl',16)} Aktivste Mitglieder</b>
+    ${rk.map(([u,p])=>{ const top=nzTop(p.s,2).map(x=>x[0]).join(', '); return `<div class="row between" style="gap:8px"><button class="mvname" data-act="mvAuf" data-uid="${u}">${av(u,26)} <span class="col" style="gap:0;min-width:0;text-align:left"><span class="small ell">${esc(nm(u))}</span><span class="tiny mut ell">${esc(top)}</span></span></button><span class="small num" style="text-align:right">${nzZeit(p.sek)}<br><span class="tiny mut">${p.tage} Tage · ${p.starts} Starts</span></span></div>`; }).join('')}</div>`}
+  ${sum?`<span class="tiny mut">Ältere Tage (über 90 Tage) sind für ${sum} Mitglieder zu Summen zusammengefasst und hier nicht enthalten.</span>`:''}`; }
+A.nzTage = el => { S.ui.nzT=+el.dataset.k; render(); };
+/* Nutzung im Profil eines Mitglieds */
+function nzProfil(u){ if(!MV.nz) return ''; const l=(MV.nz||[]).filter(x=>x.uid===u).sort((a,b)=>b.tag.localeCompare(a.tag)); if(!l.length) return '<div class="card tight"><b class="small">Nutzung</b><span class="tiny mut">Noch keine Messdaten.</span></div>';
+  const A=nzAggr(l); const p=A.pro[u]; const top=nzTop(p.s,5); const t14=l.slice(0,14).reverse(); const mx=Math.max(1,...t14.map(x=>x.sek||0));
+  return `<div class="card tight"><b class="small">${ic('baro',14)} Nutzung (bis 90 Tage)</b><span class="tiny">${nzZeit(p.sek)} an ${p.tage} Tagen · ${p.starts} Starts · Ø ${nzZeit(p.sek/p.tage)} pro Tag</span>
+    ${top.map(([b,v])=>`<div class="mvzeile"><span class="small">${esc(b)}</span><span class="tiny mut">${nzZeit(v)}</span>${mvBalken(v,top[0][1])}</div>`).join('')}
+    <div class="mvkurve" style="height:60px" role="img" aria-label="Zeit pro Tag">${t14.map(x=>`<span class="mvsp" title="${esc(x.tag)}: ${nzZeit(x.sek)}"><i style="height:${Math.max(4,Math.round((x.sek||0)/mx*100))}%"></i></span>`).join('')}</div><span class="tiny mut">Letzte Tage mit Nutzung, älteste links.</span></div>`; }
+/* ===================== Nutzungsmessung =====================
+   Misst nur Zahlen, nie Inhalte: Zeit im Vordergrund pro Bereich, Antippen von Funktionen, App-Starts.
+   Zählt nur, wenn die App sichtbar ist und innerhalb der letzten 2 Minuten bedient wurde (Hintergrund und Leerlauf zählen nicht).
+   Speicherung: nutzung/{uid}_{Tag} = {uid, tag, s:{bereich:Sek}, t:{bereich:Taps}, a:{funktion:Taps}, h:{hNN:Sek}, starts, sek, at}.
+   Lesen darf nur der Oberbademeister. Abschaltbar in den Einstellungen. In der Support-Ansicht wird nichts gezählt. */
+const NZ_BEREICH = { home:'Start', neu:'Neue Reise', konferenz:'Koffer-Konferenz', vorschlag:'Koffer-Konferenz', freigabe:'Koffer-Konferenz', dabei:'Start', tag:'Reisetag', reise:'Reise', chat:'Chat', fliste:'Flüstern', fluester:'Flüstern', fneu:'Flüstern', fcode:'Flüstern', person:'Flüstern',
+  kasseNeu:'Kasse', aufgaben:'Aufgaben', packliste:'Packliste', zimmer:'Zimmer', zanfrage:'Zimmer', anreise:'Anreise', heimreise:'Anreise', meinweg:'Mein Weg', infos:'Infos', notfall:'Notfall', notpass:'Notfallpass', termine:'Termine', album:'Album', rueckblick:'Rückblick',
+  herde:'Gruppe', gruppenprofil:'Gruppe', mitglieder:'Gruppe', mitglied:'Gruppe', barometer:'Gruppe', neueAkt:'Aktivitäten', aktivitaet:'Aktivitäten', ideen:'Ideen', einladen:'Einladen', beitreten:'Einladen', profil:'Profil', profilEdit:'Profil', einstellungen:'Einstellungen', datenschutz:'Einstellungen', konto:'Profil', reiseDaten:'Profil', herzen:'Profil', neues:'Was ist neu', kiosk:'Kiosk', reiseEinst:'Reise verwalten', papierkorb:'Papierkorb', assist:'Assistent', gastAkt:'Aktivitäten', status:'Gruppenstatus' };
+const nzBereich = () => { const v=S.route?.v; if(!v||v==='sysadmin') return null; return NZ_BEREICH[v]||'Sonstiges'; };
+const NZ = { sek:{}, t:{}, a:{}, h:{}, starts:0, dirty:false, tag:'', basis:null, geladen:false, last:0, input:0, aktiv:false, busy:false };
+const nzTag = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const nzAn = () => (FB || window.NZ_TEST) && S.uid && !S.supportVon && S.boot==='ok' && !S.settings?.nutzungAus;
+const nzEingabe = () => { NZ.input=Date.now(); };
+['pointerdown','keydown','scroll','touchstart','input'].forEach(e=>document.addEventListener(e, nzEingabe, {passive:true, capture:true}));
+setInterval(()=>{ try{ const t=Date.now(); const dt=NZ.last?Math.min(t-NZ.last, 7000):0; NZ.last=t;
+  if(!nzAn() || document.visibilityState!=='visible') return;
+  if(NZ.tag && NZ.tag!==nzTag()){ nzFlush(true); }
+  if(!NZ.starts && !NZ.gestartet){ NZ.gestartet=true; NZ.starts=1; NZ.dirty=true; }
+  const b=nzBereich(); if(!b || t-NZ.input>120000) return;
+  NZ.sek[b]=(NZ.sek[b]||0)+dt/1000; const hh='h'+pad(new Date().getHours()); NZ.h[hh]=(NZ.h[hh]||0)+dt/1000; NZ.dirty=true; }catch(e){} }, 5000);
+document.addEventListener('click', ev=>{ try{ if(!nzAn()) return; const el=ev.target.closest('[data-act]'); const b=nzBereich(); if(!el||!b) return; const a=String(el.dataset.act).replace(/[^A-Za-z0-9_]/g,'').slice(0,40); if(!a) return;
+  NZ.t[b]=(NZ.t[b]||0)+1; if(a in NZ.a || Object.keys(NZ.a).length<40) NZ.a[a]=(NZ.a[a]||0)+1; NZ.dirty=true; }catch(e){} }, true);
+const nzSumme = (o,p) => { const r={...(o||{})}; for(const [k,v] of Object.entries(p||{})) r[k]=(r[k]||0)+v; return r; };
+const nzRund = o => Object.fromEntries(Object.entries(o||{}).map(([k,v])=>[k,Math.round(v)]).filter(([k,v])=>v>0));
+async function nzFlush(neuerTag){ if(NZ.busy || !nzAn() || !NZ.dirty) return; NZ.busy=true;
+  try{ const tag=NZ.tag||nzTag(); NZ.tag=tag; const ref=S.db.doc(`nutzung/${S.uid}_${tag}`);
+    if(!NZ.geladen){ NZ.geladen=true; try{ const g=await ref.get(); NZ.basis=g.exists?g.data():null; }catch(e){ NZ.basis=null; } }
+    const b=NZ.basis||{}; const dS=nzRund(NZ.sek), dT=NZ.t, dA=NZ.a, dSt=NZ.starts;
+    const d={uid:S.uid, tag, s:nzSumme(b.s,dS), t:nzSumme(b.t,dT), a:nzSumme(b.a,dA), h:nzSumme(b.h,nzRund(NZ.h)), starts:(b.starts||0)+dSt, at:now()}; d.sek=Object.values(d.s).reduce((x,y)=>x+y,0);
+    NZ.sek={}; NZ.t={}; NZ.a={}; NZ.h={}; NZ.starts=0; NZ.dirty=false;   /* vor dem Schreiben leeren, damit nichts doppelt zählt */
+    NZ.basis=d; await ref.set(d);
+    if(neuerTag){ NZ.tag=nzTag(); NZ.geladen=false; NZ.basis=null; } }
+  catch(e){ console.warn('Nutzung', e); } NZ.busy=false; }
+setInterval(()=>nzFlush(), 60000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') nzFlush(); });
+window.addEventListener('pagehide', ()=>nzFlush());
+
+/* ---------- Einstellungen: Schalter ---------- */
+function nzKarte(){ const aus=!!S.settings?.nutzungAus;
+  return `<div class="card"><h2>Nutzungsstatistik</h2><p class="small mut">Poolposition zählt, wie lange und in welchen Bereichen die App genutzt wird, damit wir sie verbessern können. Gespeichert werden nur Zahlen, nie Inhalte wie Nachrichten oder Orte. Die Zahlen sieht nur der Oberbademeister.</p>
+  <button type="button" class="pfopt ${aus?'':'on'}" aria-pressed="${!aus}" data-act="nzSchalter"><b>${aus?'Aus':'An'}</b><span class="small mut">${aus?'Es wird nichts gezählt.':'Nutzung wird als Zahlen erfasst.'}</span></button></div>`; }
+A.nzSchalter = ()=>{ saveSettings({nutzungAus:!S.settings?.nutzungAus}); render(); };
 /* ===================== Adminbereich: Übersicht mit Kacheln, Reisen-Dashboard, Bademeister-Verwaltung =====================
    Startseite des Adminbereichs ist eine Übersicht mit Kacheln (nur die Bereiche, für die man Rechte hat).
    Jede Kachel öffnet ihren Bereich, „‹ Übersicht“ führt zurück. */
@@ -4787,11 +5046,12 @@ const ADMBEREICH = {
   fb:     {t:'Feedback',    i:'chat'},
   info:   {t:'Infoboard',   i:'post'},
   reisen: {t:'Reisen',      i:'suitcase'},
+  mv:     {t:'Mitgliederverwaltung', i:'mitgl'},
   nutzer: {t:'Mitglieder',  i:'mitgl'},
   rank:   {t:'Ranking',     i:'baro'},
   admins: {t:'Bademeister', i:'shield'},
 };
-const admErlaubt = () => ['info', ...(darf('meldungen')?['meld']:[]), ...(darf('feedback')?['fb']:[]), ...(darf('reisen')?['reisen']:[]), ...(darf('nutzer')||darf('sperren')?['nutzer']:[]), 'rank', ...(istSuper()?['admins']:[])];
+const admErlaubt = () => ['info', ...(darf('meldungen')?['meld']:[]), ...(darf('feedback')?['fb']:[]), ...(darf('reisen')?['reisen']:[]), ...(darf('nutzer')||darf('sperren')?['nutzer']:[]), 'rank', ...(istSuper()?['mv','admins']:[])];
 A.admGeh = el => { S.ui.sysTab=el.dataset.val; S.ui.meldWahl=null; if(el.dataset.filter!==undefined) S.form.nFilter=el.dataset.filter; if(el.dataset.rfilter!==undefined) S.ui.rFilter=el.dataset.rfilter; S.ui.sysReise=null; render(); window.scrollTo(0,0); };
 
 V.sysadmin = ()=>{ if(!istMod()) return `${hdrPlain()}${backBtn()}<div class="warn">Nur für Bademeister.</div>`;
@@ -4802,12 +5062,12 @@ V.sysadmin = ()=>{ if(!istMod()) return `${hdrPlain()}${backBtn()}<div class="wa
   if(tab==='home') return oben + admHome(D, erlaubt);
   const B=ADMBEREICH[tab]; let body='';
   if(tab==='info') body=infoTab(); if(tab==='fb') body=fbListe(D); if(tab==='meld') body=meldTab(D);
-  if(tab==='reisen') body=reisenTab(D); if(tab==='nutzer') body=nutzerTab(D); if(tab==='rank') body=rankingTab(D); if(tab==='admins') body=bmTab(D);
+  if(tab==='reisen') body=reisenTab(D); if(tab==='nutzer') body=nutzerTab(D); if(tab==='mv') body=mvTab(D); if(tab==='rank') body=rankingTab(D); if(tab==='admins') body=bmTab(D);
   const zaehler = tab==='meld' ? meldBadges(D.meld.filter(m=>m.status==='offen'&&!m.gelesenAm).length, D.meld.filter(m=>m.status==='offen'&&m.gelesenAm).length)
     : tab==='fb' && D.fb.filter(m=>m.status==='offen').length ? `<span class="badge">${D.fb.filter(m=>m.status==='offen').length}</span>` : tab==='info' && infoUngelesenFuerMich() ? `<span class="badge">${infoUngelesenFuerMich()}</span>` : '';
   return `${oben}<div class="admkopf"><button class="admzurueck" data-act="admGeh" data-val="home">${ic('back',18)} Übersicht</button><button class="icbtn sm0" data-act="sysReload" aria-label="Aktualisieren" title="Aktualisieren">${ic('repeat',16)}</button></div>
     <h1 class="admtitel"><span class="admic">${ic(B.i,22)}</span>${B.t}${zaehler}</h1>${body}`; };
-A.sysReload = ()=>{ S.ui.sys=null; KONTO.daten=null; KONTO.authLaedt=false; RX.d=null; STAT.daten=null; render(); };
+A.sysReload = ()=>{ S.ui.sys=null; KONTO.daten=null; KONTO.authLaedt=false; RX.d=null; STAT.daten=null; MV.d=null; MV.log=null; MV.nz=null; render(); };
 
 /* ---------- Übersicht ---------- */
 const heuteStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); };
@@ -4825,6 +5085,8 @@ function admHome(D, erlaubt){ const k=[];
     const unterwegs = RX.d ? D.reisen.filter(r=>reiseKat(r)==='laeuft').reduce((s,r)=>s+(RX.d.mit[r.id]||[]).filter(m=>m.status==='zugesagt').length,0) : null;
     const mitMeld = new Set(D.meld.filter(m=>m.status==='offen' && m.rid).map(m=>m.rid)).size;
     k.push(kachel('reisen','suitcase','Reisen', z('laeuft'), [`laufen gerade · ${z('geplant')} geplant · ${z('konferenz')} Konferenz`, unterwegs!=null?`${unterwegs} Mitglieder unterwegs`:'', mitMeld?`<span class="warnt">${mitMeld} ${mitMeld===1?'Reise':'Reisen'} mit offenen Meldungen</span>`:''], mitMeld?'hinweis':'')); }
+  if(erlaubt.includes('mv')){ if(!KONTO.daten) kontenLaden(); if(!MV.log) mvLaden(); const P=Object.keys(S.profile); const st=P.filter(u=>mvStatus(D,u)!=='team'); const abg=st.filter(u=>mvStatus(D,u)==='abg').length, bald=st.filter(u=>{ const t=KONTO.tick?.[u]; return t&&t.bis>now()&&t.bis<=now()+7*864e5; }).length, bez=st.filter(u=>['woche','monat','jahr'].includes(mvStatus(D,u))).length;
+    k.push(kachel('mv','mitgl','Mitgliederverwaltung', P.length, KONTO.tick?[`${bez} mit Wochen-, Monats- oder Jahreskarte`, `${abg} abgelaufen · ${bald} laufen in 7 Tagen ab`, 'Statistik, Tickets, Labels, Notizen']:['Wird geladen …'], abg||bald?'hinweis':'', 'data-filter="alle"')); }
   if(erlaubt.includes('nutzer')){ if(!KONTO.daten) kontenLaden(); const alle=Object.keys(S.profile); const h=heuteStart(), w=now()-7*864e5;
     const heute=alle.filter(u=>zuletzt(u)>=h).length, woche=alle.filter(u=>zuletzt(u)>=w).length, neu=alle.filter(u=>beigetreten(u)>=w).length;
     k.push(kachel('nutzer','mitgl','Mitglieder', alle.length, [KONTO.daten?`${heute} heute aktiv · ${woche} in 7 Tagen`:'Aktivität wird geladen …', KONTO.daten?`${neu} neu in den letzten 7 Tagen`:''], '', 'data-filter="alle"'));
@@ -7731,6 +7993,7 @@ V.datenschutz = ()=>{ const adm=S.meineM.filter(m=>m.status!=='ausgetreten'&&S.r
   return `${hdrPlain('Meine Daten')}${backBtn()}<h1>Meine Daten</h1>
   <div class="card"><h3 style="margin:0">Daten herunterladen</h3><p class="small mut" style="margin:0">Du bekommst eine Datei mit allem, was Poolposition über dich gespeichert hat: Profil, Einstellungen, Reisen, deine Beiträge und Angaben.</p>
     <button class="btn block" data-act="datenExport" ${S.ui.dsBusy?'disabled':''}>${ic('dl',16)} ${S.ui.dsBusy==='exp'?'Wird erstellt …':'Meine Daten herunterladen'}</button></div>
+  <div class="card"><h3 style="margin:0">Nutzungsstatistik</h3><p class="small mut" style="margin:0">Poolposition zählt, wie lange und in welchen Bereichen du die App nutzt (nur bei sichtbarer, bedienter App) und welche Funktionen du antippst. Es werden nur Zahlen gespeichert, keine Inhalte. Einsehen kann das nur der Oberbademeister. Tagesdaten werden nach 90 Tagen zu Summen zusammengefasst. Du kannst das in den Einstellungen ausschalten.</p></div>
   <div class="card" style="border-color:var(--pinktx)"><h3 style="margin:0;color:var(--pinktx)">Konto löschen</h3>
     <p class="small" style="margin:0">Dein Profil, deine Einstellungen, dein Notfallpass, deine Zimmer-, Budget- und Anreiseangaben und dein Zugang werden endgültig gelöscht. Deine Chatnachrichten werden anonymisiert. Das lässt sich nicht rückgängig machen.</p>
     <p class="tiny mut" style="margin:0">Kassenbuch-Einträge bleiben für die Abrechnung der anderen erhalten, ohne deinen Namen.</p>
@@ -8018,6 +8281,10 @@ A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 2.30', t:'Gültigkeit mit Uhrzeit und Nutzungsstatistik', p:[
+    'Bei jedem Ticket steht jetzt das Enddatum mit Uhrzeit.',
+    'Neu: Poolposition zählt anonym als Zahlen, welche Bereiche der App wie lange genutzt werden. Inhalte werden nie erfasst. Du kannst das in den Einstellungen ausschalten.',
+  ] },
   { v:'Beta 2.29', t:'Ticket im Profil und Schreibschutz', p:[
     'Dein Ticket sitzt jetzt als kleines Schwimmbad-Ticket neben deinem Profilbild. Ein Tipp öffnet den Kiosk.',
     'Läuft ein Ticket ab, schützt jetzt auch die Datenbank: Du kannst weiter alles ansehen, aber nichts mehr ändern.',

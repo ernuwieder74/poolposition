@@ -50,6 +50,26 @@ service cloud.firestore {
       allow create, update, delete: if isSuper();
     }
 
+    // Mitgliederverwaltung: Ticketprotokoll und Labels/Notizen, nur der Oberbademeister
+    match /ticketlog/{id} {
+      allow read, create: if isSuper();
+      allow update, delete: if false;
+    }
+    match /mverw/{uid} {
+      allow read, write: if isSuper();
+    }
+
+    // Nutzungsstatistik: jede Person schreibt nur ihr eigenes Tagesdokument (nur Zahlen), lesen nur der Oberbademeister
+    match /nutzung/{id} {
+      allow read, delete: if isSuper();
+      allow create, update: if signedIn() && request.resource.data.uid == me() && id == me() + '_' + request.resource.data.tag
+        && request.resource.data.keys().hasOnly(['uid', 'tag', 's', 't', 'a', 'h', 'starts', 'sek', 'at'])
+        && request.auth.token.get('supportVon', null) == null;
+    }
+    match /nutzungsumme/{uid} {
+      allow read: if isSuper();
+    }
+
     // Reisen: lesbar für Angemeldete
     match /reisen/{rid} {
       allow read: if signedIn();
