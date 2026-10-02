@@ -5034,9 +5034,30 @@ window.addEventListener('pagehide', ()=>nzFlush());
 
 /* ---------- Einstellungen: Schalter ---------- */
 function nzKarte(){ const aus=!!S.settings?.nutzungAus;
-  return `<div class="card"><h2>Nutzungsstatistik</h2><p class="small mut">Poolposition zählt, wie lange und in welchen Bereichen die App genutzt wird, damit wir sie verbessern können. Gespeichert werden nur Zahlen, nie Inhalte wie Nachrichten oder Orte. Die Zahlen sieht nur der Oberbademeister.</p>
+  return `<div class="card"><h2>Nutzungsstatistik</h2><p class="small mut">Poolposition zählt, wie lange und in welchen Bereichen die App genutzt wird, damit wir sie verbessern können. Gespeichert werden nur Zahlen, nie Inhalte wie Nachrichten oder Orte.</p>
   <button type="button" class="pfopt ${aus?'':'on'}" aria-pressed="${!aus}" data-act="nzSchalter"><b>${aus?'Aus':'An'}</b><span class="small mut">${aus?'Es wird nichts gezählt.':'Nutzung wird als Zahlen erfasst.'}</span></button></div>`; }
 A.nzSchalter = ()=>{ saveSettings({nutzungAus:!S.settings?.nutzungAus}); render(); };
+/* ===================== Änderungsprotokoll für den Adminbereich =====================
+   NUR für den Oberbademeister (istSuper) im Admin-Dashboard. Änderungen am Adminsystem dürfen nie in „Was ist neu?“ (neues.js) oder
+   in Nutzer-Texten auftauchen. Neue Einträge hier oben anfügen; je Version: kurz (t) und im Detail (d). */
+const ADMLOG = [
+  { v:'Beta 2.30', t:'Mitgliederverwaltung und Nutzungsstatistik', d:[
+    'Neuer Bereich „Mitgliederverwaltung“: Übersicht (Nutzerzahlen, Wachstum, Ticketverteilung, läuft bald ab, Auffälligkeiten), Mitgliederliste mit Filtern, Labels, privater Notiz, CSV-Export und Massenaktionen (Ticket, Label).',
+    'Ticketprotokoll (Sammlung ticketlog): jede Zuweisung und Verlängerung wird festgehalten. Verlängern mit einem Tipp.',
+    'Labels und Notizen (Sammlung mverw): nur für den Oberbademeister les- und schreibbar.',
+    'Nutzungsstatistik (Sammlung nutzung, Summen in nutzungsumme): Zeit pro Bereich nur bei sichtbarer, bedienter App (2 Minuten Leerlauf zählen nicht), Taps pro Funktion, Tageszeiten, Starts. Reiter „Nutzung“ mit Bereichsranking, Funktionen, Ticketvergleich, aktivsten Mitgliedern und Nutzung im Mitgliedsprofil. Server-Job fasst Tage über 90 Tage nachts zusammen. Berücksichtigt in Datenexport und Konto löschen. Mitglieder können die Messung in den Einstellungen ausschalten.',
+    'Ticket-Enddatum mit Uhrzeit für alle Ticketarten (sichtbar auch für Mitglieder).' ] },
+  { v:'Beta 2.29', t:'Ticket-Schreibschutz', d:[
+    'Server-Regeln (ticketOk): Schreiben nur mit gültigem Ticket. Oberbademeister und Bademeister mit Dienstrang sind ausgenommen. Ausnahmen für Profil, Tickets, Konten, Push, Einstellungen, Meldungen, Feedback.',
+    'Mitgliederliste: Filter „Ticket abgelaufen“ und „Ohne Ticket“, Ticket für alle in der Auswahl.' ] },
+  { v:'Beta 2.28', t:'Tickets, Statusmeldung, Zimmerplan', d:[
+    'Ticketsystem: Tageskarte (automatisch beim ersten Start), Wochen-, Monats-, Jahreskarte nur durch den Oberbademeister. Zuweisung einzeln oder für eine Auswahl.',
+    'Reise-Admins bekommen eine Meldung, wenn jemand nach der Gruppenabstimmung seine Angaben ändert (Sammlung aenderungen, Push-Funktion).',
+    'Zimmerplan mit automatischem Bedarf und Ampel, Entscheidung durch den Reise-Admin. „Begleitperson ohne App“ entfernt.' ] },
+];
+function alogTab(){ if(!istSuper()) return '<div class="warn">Nur für den Oberbademeister.</div>';
+  return `<p class="small mut">Änderungen am Adminsystem. Mitglieder sehen davon nichts, in „Was ist neu?“ stehen nur Neuerungen für sie.</p>
+  ${ADMLOG.map((e,i)=>`<details class="card" ${i===0?'open':''}><summary><b>${esc(e.v)}</b> · ${esc(e.t)}</summary><ul class="small" style="margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px">${e.d.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`).join('')}`; }
 /* ===================== Adminbereich: Übersicht mit Kacheln, Reisen-Dashboard, Bademeister-Verwaltung =====================
    Startseite des Adminbereichs ist eine Übersicht mit Kacheln (nur die Bereiche, für die man Rechte hat).
    Jede Kachel öffnet ihren Bereich, „‹ Übersicht“ führt zurück. */
@@ -5047,11 +5068,12 @@ const ADMBEREICH = {
   info:   {t:'Infoboard',   i:'post'},
   reisen: {t:'Reisen',      i:'suitcase'},
   mv:     {t:'Mitgliederverwaltung', i:'mitgl'},
+  alog:   {t:'Änderungen',  i:'repeat'},
   nutzer: {t:'Mitglieder',  i:'mitgl'},
   rank:   {t:'Ranking',     i:'baro'},
   admins: {t:'Bademeister', i:'shield'},
 };
-const admErlaubt = () => ['info', ...(darf('meldungen')?['meld']:[]), ...(darf('feedback')?['fb']:[]), ...(darf('reisen')?['reisen']:[]), ...(darf('nutzer')||darf('sperren')?['nutzer']:[]), 'rank', ...(istSuper()?['mv','admins']:[])];
+const admErlaubt = () => ['info', ...(darf('meldungen')?['meld']:[]), ...(darf('feedback')?['fb']:[]), ...(darf('reisen')?['reisen']:[]), ...(darf('nutzer')||darf('sperren')?['nutzer']:[]), 'rank', ...(istSuper()?['mv','alog','admins']:[])];
 A.admGeh = el => { S.ui.sysTab=el.dataset.val; S.ui.meldWahl=null; if(el.dataset.filter!==undefined) S.form.nFilter=el.dataset.filter; if(el.dataset.rfilter!==undefined) S.ui.rFilter=el.dataset.rfilter; S.ui.sysReise=null; render(); window.scrollTo(0,0); };
 
 V.sysadmin = ()=>{ if(!istMod()) return `${hdrPlain()}${backBtn()}<div class="warn">Nur für Bademeister.</div>`;
@@ -5062,7 +5084,7 @@ V.sysadmin = ()=>{ if(!istMod()) return `${hdrPlain()}${backBtn()}<div class="wa
   if(tab==='home') return oben + admHome(D, erlaubt);
   const B=ADMBEREICH[tab]; let body='';
   if(tab==='info') body=infoTab(); if(tab==='fb') body=fbListe(D); if(tab==='meld') body=meldTab(D);
-  if(tab==='reisen') body=reisenTab(D); if(tab==='nutzer') body=nutzerTab(D); if(tab==='mv') body=mvTab(D); if(tab==='rank') body=rankingTab(D); if(tab==='admins') body=bmTab(D);
+  if(tab==='reisen') body=reisenTab(D); if(tab==='nutzer') body=nutzerTab(D); if(tab==='mv') body=mvTab(D); if(tab==='alog') body=alogTab(); if(tab==='rank') body=rankingTab(D); if(tab==='admins') body=bmTab(D);
   const zaehler = tab==='meld' ? meldBadges(D.meld.filter(m=>m.status==='offen'&&!m.gelesenAm).length, D.meld.filter(m=>m.status==='offen'&&m.gelesenAm).length)
     : tab==='fb' && D.fb.filter(m=>m.status==='offen').length ? `<span class="badge">${D.fb.filter(m=>m.status==='offen').length}</span>` : tab==='info' && infoUngelesenFuerMich() ? `<span class="badge">${infoUngelesenFuerMich()}</span>` : '';
   return `${oben}<div class="admkopf"><button class="admzurueck" data-act="admGeh" data-val="home">${ic('back',18)} Übersicht</button><button class="icbtn sm0" data-act="sysReload" aria-label="Aktualisieren" title="Aktualisieren">${ic('repeat',16)}</button></div>
@@ -5085,6 +5107,7 @@ function admHome(D, erlaubt){ const k=[];
     const unterwegs = RX.d ? D.reisen.filter(r=>reiseKat(r)==='laeuft').reduce((s,r)=>s+(RX.d.mit[r.id]||[]).filter(m=>m.status==='zugesagt').length,0) : null;
     const mitMeld = new Set(D.meld.filter(m=>m.status==='offen' && m.rid).map(m=>m.rid)).size;
     k.push(kachel('reisen','suitcase','Reisen', z('laeuft'), [`laufen gerade · ${z('geplant')} geplant · ${z('konferenz')} Konferenz`, unterwegs!=null?`${unterwegs} Mitglieder unterwegs`:'', mitMeld?`<span class="warnt">${mitMeld} ${mitMeld===1?'Reise':'Reisen'} mit offenen Meldungen</span>`:''], mitMeld?'hinweis':'')); }
+  if(erlaubt.includes('alog')){ const e=ADMLOG[0]; k.push(kachel('alog','repeat','Änderungen', esc(e.v), [esc(e.t), `${ADMLOG.length} Versionen dokumentiert`, 'nur für dich sichtbar'])); }
   if(erlaubt.includes('mv')){ if(!KONTO.daten) kontenLaden(); if(!MV.log) mvLaden(); const P=Object.keys(S.profile); const st=P.filter(u=>mvStatus(D,u)!=='team'); const abg=st.filter(u=>mvStatus(D,u)==='abg').length, bald=st.filter(u=>{ const t=KONTO.tick?.[u]; return t&&t.bis>now()&&t.bis<=now()+7*864e5; }).length, bez=st.filter(u=>['woche','monat','jahr'].includes(mvStatus(D,u))).length;
     k.push(kachel('mv','mitgl','Mitgliederverwaltung', P.length, KONTO.tick?[`${bez} mit Wochen-, Monats- oder Jahreskarte`, `${abg} abgelaufen · ${bald} laufen in 7 Tagen ab`, 'Statistik, Tickets, Labels, Notizen']:['Wird geladen …'], abg||bald?'hinweis':'', 'data-filter="alle"')); }
   if(erlaubt.includes('nutzer')){ if(!KONTO.daten) kontenLaden(); const alle=Object.keys(S.profile); const h=heuteStart(), w=now()-7*864e5;
@@ -7993,7 +8016,7 @@ V.datenschutz = ()=>{ const adm=S.meineM.filter(m=>m.status!=='ausgetreten'&&S.r
   return `${hdrPlain('Meine Daten')}${backBtn()}<h1>Meine Daten</h1>
   <div class="card"><h3 style="margin:0">Daten herunterladen</h3><p class="small mut" style="margin:0">Du bekommst eine Datei mit allem, was Poolposition über dich gespeichert hat: Profil, Einstellungen, Reisen, deine Beiträge und Angaben.</p>
     <button class="btn block" data-act="datenExport" ${S.ui.dsBusy?'disabled':''}>${ic('dl',16)} ${S.ui.dsBusy==='exp'?'Wird erstellt …':'Meine Daten herunterladen'}</button></div>
-  <div class="card"><h3 style="margin:0">Nutzungsstatistik</h3><p class="small mut" style="margin:0">Poolposition zählt, wie lange und in welchen Bereichen du die App nutzt (nur bei sichtbarer, bedienter App) und welche Funktionen du antippst. Es werden nur Zahlen gespeichert, keine Inhalte. Einsehen kann das nur der Oberbademeister. Tagesdaten werden nach 90 Tagen zu Summen zusammengefasst. Du kannst das in den Einstellungen ausschalten.</p></div>
+  <div class="card"><h3 style="margin:0">Nutzungsstatistik</h3><p class="small mut" style="margin:0">Poolposition zählt, wie lange und in welchen Bereichen du die App nutzt (nur bei sichtbarer, bedienter App) und welche Funktionen du antippst. Es werden nur Zahlen gespeichert, keine Inhalte. Zugriff darauf haben nur dafür berechtigte Personen. Tagesdaten werden nach 90 Tagen zu Summen zusammengefasst. Du kannst das in den Einstellungen ausschalten.</p></div>
   <div class="card" style="border-color:var(--pinktx)"><h3 style="margin:0;color:var(--pinktx)">Konto löschen</h3>
     <p class="small" style="margin:0">Dein Profil, deine Einstellungen, dein Notfallpass, deine Zimmer-, Budget- und Anreiseangaben und dein Zugang werden endgültig gelöscht. Deine Chatnachrichten werden anonymisiert. Das lässt sich nicht rückgängig machen.</p>
     <p class="tiny mut" style="margin:0">Kassenbuch-Einträge bleiben für die Abrechnung der anderen erhalten, ohne deinen Namen.</p>
@@ -8281,9 +8304,8 @@ A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
-  { v:'Beta 2.30', t:'Gültigkeit mit Uhrzeit und Nutzungsstatistik', p:[
+  { v:'Beta 2.30', t:'Ticket mit Enddatum und Uhrzeit', p:[
     'Bei jedem Ticket steht jetzt das Enddatum mit Uhrzeit.',
-    'Neu: Poolposition zählt anonym als Zahlen, welche Bereiche der App wie lange genutzt werden. Inhalte werden nie erfasst. Du kannst das in den Einstellungen ausschalten.',
   ] },
   { v:'Beta 2.29', t:'Ticket im Profil und Schreibschutz', p:[
     'Dein Ticket sitzt jetzt als kleines Schwimmbad-Ticket neben deinem Profilbild. Ein Tipp öffnet den Kiosk.',
@@ -8292,7 +8314,7 @@ const NEUES = [
   { v:'Beta 2.28', t:'Tickets, Kiosk, Statusseite und Zimmerplan', p:[
     'Neue Statusseite: Haben alle abgestimmt, siehst du nur den Gesamtstand der Gruppe, z. B. „beim Reisebüro angefragt“. Unten kannst du deine Angaben ändern, nach deutlicher Warnung und Rückfrage. Der Admin bekommt dann eine Meldung.',
     'Neuer Zimmerplan: Die App berechnet den Zimmerbedarf aus den Wünschen, zum Beispiel „1 Doppelzimmer, 1 Einzelzimmer“, mit Ampel. Wer keinen Partner hat, wird vom Admin eingeordnet. Virtuelle Begleitpersonen gibt es nicht mehr.',
-    'Tickets: Tageskarte, Wochenkarte, Monatskarte, Jahreskarte bestimmen, wie lange ein Account bearbeiten darf. Neue Nutzer starten mit einer Tageskarte, danach kann man nur noch ansehen. Der Admin weist Tickets zu.',
+    'Tickets: Tageskarte, Wochenkarte, Monatskarte, Jahreskarte bestimmen, wie lange ein Account bearbeiten darf. Neue Nutzer starten mit einer Tageskarte, danach kann man nur noch ansehen.',
     'Neuer Kiosk: Hier siehst du Wochen-, Monats- und Jahreskarte als Schwimmbad-Tickets. Kaufen geht in der Beta noch nicht, die Preise folgen. Dein eigenes Ticket mit Restlaufzeit steht in deinem Profil.',
   ] },
   { v:'Beta 2.27', t:'Koffer-Konferenz Schritt für Schritt', p:[
