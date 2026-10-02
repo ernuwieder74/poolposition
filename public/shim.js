@@ -24,6 +24,7 @@
     changeEmail: async (pw, neu) => { await reauth(pw); await auth.currentUser.verifyBeforeUpdateEmail(neu); },
     changePw: async (pw, neu) => { await reauth(pw); await auth.currentUser.updatePassword(neu); },
     // Badeaufsicht: Server-Funktionen und Support-Ansicht (Anmeldung per Einmal-Token vom Server)
+    refresh: () => auth.currentUser.getIdToken(true),
     call: async (name, data) => (await firebase.app().functions('europe-west3').httpsCallable(name)(data)).data,
     supportVon: async () => { const u = auth.currentUser; if (!u) return null; try { return (await u.getIdTokenResult()).claims.supportVon || null; } catch (e) { return null; } },
     mitToken: async (token, nurSitzung) => { await auth.setPersistence(nurSitzung ? P.SESSION : P.LOCAL); await auth.signInWithCustomToken(token); },
@@ -118,12 +119,14 @@
   const assets = {
     upload: async (blob, opt = {}) => {
       const type = opt.type || blob.type; const uid = auth.currentUser.uid;
-      const ref = st.ref(`uploads/${uid}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}.${EXT[type] || 'bin'}`);
+      const sub = opt.orig ? 'o/' : opt.vor ? 'v/' : ''; const path = `uploads/${uid}/${sub}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}.${EXT[type] || 'bin'}`; const ref = st.ref(path);
       try { await ref.put(blob, { contentType: type }); } catch (e) { const x = new Error(e.message); x.code = e.code === 'storage/quota-exceeded' ? 'quota_or_state' : 'upstream_error'; throw x; }
       const url = await ref.getDownloadURL();
-      return { id: url, url, contentType: type, sizeBytes: blob.size };
+      /* Originale: nur der Pfad wird gespeichert, die Adresse holt die App beim Anzeigen (die Speicherregeln prüfen dabei das Ticket) */
+      return { id: opt.orig ? 'p:' + path : url, url, contentType: type, sizeBytes: blob.size };
     },
-    delete: async ref => { try { await st.refFromURL(ref).delete(); return { deleted: true }; } catch (e) { return { deleted: false }; } },
+    url: path => st.ref(path).getDownloadURL(),
+    delete: async ref => { try { await (/^p:/.test(ref) ? st.ref(ref.slice(2)) : st.refFromURL(ref)).delete(); return { deleted: true }; } catch (e) { return { deleted: false }; } },
   };
 
   /* ---------- Downloads ---------- */

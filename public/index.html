@@ -310,7 +310,7 @@ select.in:disabled{opacity:.55}
 .ausbox{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ausbox.on{background:var(--red);border-color:var(--red);color:#fff}
 .lesebox{display:flex;flex-direction:column;gap:6px;background:var(--chip);border-radius:14px;padding:10px 12px}
-.bildzu{display:flex;align-items:center;gap:8px;padding:14px 12px;border-radius:12px;background:rgba(127,127,127,.14);color:var(--mut);font-size:13px}
+.bildzu{border:0;font:inherit;text-align:left;width:100%;display:flex;align-items:center;gap:8px;padding:14px 12px;border-radius:12px;background:rgba(127,127,127,.14);color:var(--mut);font-size:13px}
 /* Koffer-Konferenz in Runden */
 .stepper{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
 .step{display:flex;align-items:center;gap:6px;flex-shrink:0;max-width:130px;color:var(--mut)}
@@ -696,6 +696,8 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .tkt.k-tag{--c1:#f2c84b;--c2:#fff3c4;--ink:#4a3606}
 .tkt.k-woche{--c1:#33b6c9;--c2:#d7f5f8;--ink:#073a44}
 .tkt.k-monat{--c1:#e8654f;--c2:#ffe0d6;--ink:#4a1308}
+.tkt.k-pauschal{--c1:#7a5cd6;--c2:#e7defa;--ink:#1e1148}
+.tkt.k-frei{--c1:#3fb07a;--c2:#d8f5e6;--ink:#093b24}
 .tkt.k-jahr{--c1:#c9962b;--c2:#fff0c8;--ink:#2e1d02}
 .tkt.k-jahr .tkmain::after{content:"";position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;border:2px dashed var(--ink);opacity:.35}
 .tkmain{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:3px;position:relative}
@@ -762,7 +764,11 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 .packkopf{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;padding:4px 0;box-sizing:border-box}
 .packkopf:focus-visible{outline:2px solid var(--yel);outline-offset:2px;border-radius:8px}
 .packfertig{border-color:var(--grn)}
+.bildzu.klein{flex-direction:column;justify-content:center;width:100%;height:100%;min-height:70px;padding:6px;gap:4px;font-size:11px;text-align:center}
+.tkkopf2.breit{flex:none;width:min(260px,100%);margin:0 auto}
+.tkkopf2:not([role]){cursor:default}
 </style>
+
 <style>html,body{margin:0;min-height:100%}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
 </head><body><div id="app" aria-live="polite"></div><div id="ov" hidden></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -774,11 +780,15 @@ a.izeile,button.izeile{cursor:pointer} .izeile:first-child{border-top:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script><script src="shim.js"></script>
 <script>
-const APP_VERSION = "Beta 2.33";
+const APP_VERSION = "Beta 3.1";
 /* ===================== Poolposition – Kern ===================== */
 const FB = !!window.PP_FB;
 const APP_LINK = FB ? location.origin : 'https://claude.ai/artifact/L4y6ymjiCsPVQms9kQ36Kf';
-const blob = id => !id ? '' : /^https?:/.test(id) ? id : '/_blob/'+id;
+/* Medien-IDs: Adresse (http…), Altbestand ('/_blob/…') oder 'p:Pfad' (Original im Speicher, wird erst beim Anzeigen geholt; die Speicherregeln prüfen dabei das Ticket) */
+const URLC = {}, URLP = {}; let urlT = 0;
+function urlLaden(id){ if(URLP[id]) return; URLP[id]=1; (S.assets?.url ? S.assets.url(id.slice(2)) : Promise.reject(new Error('keine Adresse'))).then(u=>{ URLC[id]=u; }).catch(e=>{ URLC[id]=''; console.warn('Medium', e?.code||e); }).finally(()=>{ delete URLP[id]; clearTimeout(urlT); urlT=setTimeout(()=>{ try{ render(); }catch(e){} },200); }); }
+const blob = id => !id ? '' : /^https?:/.test(id) ? id : /^p:/.test(id) ? (URLC[id]!==undefined ? URLC[id] : (urlLaden(id), '')) : '/_blob/'+id;
+const blobA = async id => { if(!id) return ''; if(/^p:/.test(id)){ if(URLC[id]) return URLC[id]; const u=await S.assets.url(id.slice(2)); return (URLC[id]=u); } return blob(id); };
 const $app = document.getElementById('app');
 const $ov = document.getElementById('ov');
 
@@ -1215,9 +1225,10 @@ V.home = ()=>{
   const alt = list.filter(x=>x.m.status!=='eingeladen' && reiseStatus(x.r, x.m).k==='vorbei').sort((a,b)=>(b.r.bis||'').localeCompare(a.r.bis||''));
   const loading = S.meineM.length && !list.length && S.meineM.some(m=>!S.reisen[m.rid]);
   return `${hdrPlain()}
-  <div class="row between"><h1>Meine Reisen</h1><button class="btn sm" data-act="go" data-v="neu">${ic('plus',18)} Urlaub anlegen</button></div>
+  <div class="row between"><h1>Meine Reisen</h1><button class="btn sm" data-act="neuAnlegen">${ic('plus',18)} Urlaub anlegen</button></div>
   <!--pushhinweis-->
   ${neuesKarte()}
+  ${typeof kaufKarte==='function'?kaufKarte(list):''}
   ${S.canWrite===false?`<div class="warn">Du kannst hier im Moment nur mitlesen. Bitte die Person, die dir den Link geschickt hat, dich zum Bearbeiten einzuladen.</div>`:''}
   ${inv.map(({m,r})=>`<button class="card hot" style="text-align:left;color:var(--tx)" data-act="openTrip" data-rid="${r.id}"><div class="row">${av(m.eingeladenVon||r.admin,36)}<div class="grow"><div class="ttl">${esc(nm(m.eingeladenVon||r.admin))} lädt dich ein</div><div class="small" style="color:var(--redtx)">${r.status==='abstimmung'?'zur Koffer-Konferenz':'zur Reise'} „${esc(r.titel)}“</div></div>${ic('right',20)}</div></button>`).join('')}
   ${gastHome()}
@@ -1231,7 +1242,7 @@ function emptyHome(){ return `<div class="card"><h2>Deine erste Reise</h2>
   <div class="col small"><div class="row"><span class="pos p1">1</span><span>Leg einen Urlaub an. Steht er schon fest, trägst du Ort und Datum ein. Sonst startest du eine Koffer-Konferenz.</span></div>
   <div class="row"><span class="pos">2</span><span>Schick den 6-stelligen Code per WhatsApp an deine Herde.</span></div>
   <div class="row"><span class="pos">3</span><span>Abstimmen, zusagen, und im Urlaub: Mein Tag, Chat, Album, Barometer und Herzen.</span></div></div>
-  <button class="btn block" data-act="go" data-v="neu">Urlaub anlegen</button></div>`; }
+  <button class="btn block" data-act="neuAnlegen">Urlaub anlegen</button></div>`; }
 function tripCard(r,m){ const st=reiseStatus(r,m); const a=art(r); const md=meineDaten(r,m); const eigen=r.von && (md.von!==r.von||md.bis!==r.bis);
   const vt=r.naechstesVortreffen&&r.naechstesVortreffen.datum>=today()&&r.naechstesVortreffen.datum<r.von?r.naechstesVortreffen:null;
   const chips=`${vt?`<span class="chip red">${daysUntil(vt.datum)===0?'Heute':`Noch ${daysUntil(vt.datum)} Tage bis`} „${esc(vt.titel)}“</span>`:''}${m.status==='abgesagt'?'<span class="chip">Du bist nicht dabei</span>':''}${r.status==='fest'&&m.status==='teilnehmer'?'<span class="chip red">Bist du dabei?</span>':''}`;
@@ -1639,19 +1650,30 @@ async function sendMsg(extra){ if(S.ui.edit) return editSpeichern(); const t=(S.
 async function fotoVerkleinern(file){ try{ if(!/^image\/(jpeg|png|webp)$/.test(file.type)) return file; const bmp=await createImageBitmap(file); const f=Math.min(1, 1600/Math.max(bmp.width,bmp.height)); if(f===1 && file.size<600*1024){ bmp.close&&bmp.close(); return file; }
   const c=document.createElement('canvas'); c.width=Math.round(bmp.width*f); c.height=Math.round(bmp.height*f); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(bmp,0,0,c.width,c.height); bmp.close&&bmp.close();
   const b=await new Promise(ok=>c.toBlob(ok,'image/jpeg',.86)); return (b && b.size<file.size) ? b : file; }catch(e){ return file; } }
-async function uploadFile(file){ if(!S.assets){ toast('Fotos hochladen geht nur mit Bearbeitungsrecht.'); return null; }
+async function uploadFile(file, opt={}){ if(!S.assets){ toast('Fotos hochladen geht nur mit Bearbeitungsrecht.'); return null; }
   if(file.size>20*1024*1024){ toast('Die Datei ist größer als 20 MB.'); return null; }
   const ok=/^(image\/(png|jpeg|gif|webp)|video\/(mp4|webm|quicktime))$/.test(file.type); if(!ok){ toast('Dieses Format geht leider nicht. Möglich sind JPG, PNG, GIF, WebP, MP4, MOV und WebM.'); return null; }
   toast('Wird hochgeladen …');
-  try{ const r=await S.assets.upload(await fotoVerkleinern(file)); return {id:r.id, mime:r.contentType}; }catch(e){ console.error(e); toast(e.code==='quota_or_state'?'Der Speicher für Fotos ist voll.':'Hochladen hat nicht geklappt.'); return null; } }
-A.upPhoto = async el => { const file=el.files?.[0]; el.value=''; if(S.ov?.v==='anhang') closeOv(); if(!file) return; const up=await uploadFile(file); if(!up) return; const ctx=el.dataset.ctx;
-  const base={by:S.uid, typ:'bild', bild:up.id, mime:up.mime, aufnahme:file.lastModified||now(), createdAt:now(), text:(S.form.msg||'').trim()}; S.form.msg='';
+  try{ const r=await S.assets.upload(await fotoVerkleinern(file), opt.orig?{orig:true}:undefined); return {id:r.id, mime:r.contentType}; }catch(e){ console.error(e); toast(e.code==='quota_or_state'?'Der Speicher für Fotos ist voll.':'Hochladen hat nicht geklappt.'); return null; } }
+/* Vorschaubild (480 px, JPEG) für Tageskarten-Nutzer */
+async function vorschauBlob(file){ try{ const bmp=await createImageBitmap(file); const f=Math.min(1, 480/Math.max(bmp.width,bmp.height)); const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(bmp.width*f)); c.height=Math.max(1,Math.round(bmp.height*f)); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(bmp,0,0,c.width,c.height); bmp.close&&bmp.close(); return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.7)); }catch(e){ return null; } }
+/* Foto oder Video für Chat und Album: Recht, Planungsphase und Limit prüfen, Vorschau erzeugen, Original ablegen, Zähler erhöhen */
+async function uploadMedium(file){ const vid=/^video\//.test(file.type); const art=vid?'video':'foto';
+  if(S.route.v==='gastAkt'){ return await uploadFile(file); } /* Gäste einer Tagesaktivität: ohne Ticket, Altpfad */
+  if(tkSperre(vid?'video':'foto_hoch')) return null;
+  const r=S.rid?cur():null; if(!ticketFrei() && r?.von && isoDay(new Date())<r.von){ toast(`${vid?'Videos':'Fotos'} gibt es ab Reisebeginn (${fD(r.von)}). Angebote und Unterlagen lädst du unter Reiseinfos hoch.`); return null; }
+  if(!kontPruef(art)) return null;
+  const up=await uploadFile(file,{orig:true}); if(!up) return null;
+  if(!vid){ const vb=await vorschauBlob(await fotoVerkleinern(file)); if(vb){ try{ const v=await S.assets.upload(vb,{type:'image/jpeg', vor:true}); up.vor=v.url||v.id; }catch(e){ console.warn('Vorschau', e); } } }
+  kontPlus(art); return up; }
+A.upPhoto = async el => { const file=el.files?.[0]; el.value=''; if(S.ov?.v==='anhang') closeOv(); if(!file) return; const up=await uploadMedium(file); if(!up) return; const ctx=el.dataset.ctx;
+  const base={by:S.uid, typ:'bild', bild:up.id, mime:up.mime, ...(up.vor?{vor:up.vor}:{}), aufnahme:file.lastModified||now(), createdAt:now(), text:(S.form.msg||'').trim()}; S.form.msg='';
   try{ await postMsg(ctx, base); toast('Gesendet'); render(); nachUnten(); }catch(e){ fail(e,'Senden'); } };
 A.like = async el => { const col=el.dataset.col; const list=col==='nachrichten'?S.rt.msgs:S.fmsgs; const x=list.find(m=>m.id===el.dataset.id); if(!x) return; const on=!!(x.likes||{})[S.uid];
   await W(()=>S.db.doc(`${col}/${x.id}`).update({likes:{[S.uid]:!on}}),'Speichern'); };
 A.msgMenu = el => openOv('msgmenu',{id:el.dataset.id, col:el.dataset.col});
 /* Großansicht: alle Bilder der aktuellen Ansicht in Reihenfolge merken, damit man blättern kann */
-A.openBild = el => { const seen=new Set(); const liste=[...document.querySelectorAll('#app [data-act=openBild]')].map(b=>({id:b.dataset.id, col:b.dataset.col||'nachrichten'})).filter(x=>!seen.has(x.id) && seen.add(x.id));
+A.openBild = el => { const m0=findMsg(el.dataset.id, el.dataset.col||'nachrichten'); if(m0 && !m0.vor && !tkDarf('foto_gross')) return void tkSperre('foto_gross'); const seen=new Set(); const liste=[...document.querySelectorAll('#app [data-act=openBild]')].map(b=>({id:b.dataset.id, col:b.dataset.col||'nachrichten'})).filter(x=>!seen.has(x.id) && seen.add(x.id));
   openOv('bild',{id:el.dataset.id, col:el.dataset.col||'nachrichten', liste}); };
 function bildNav(d){ const o=S.ov; if(!o || o.v!=='bild' || !(o.liste||[]).length) return; const i=o.liste.findIndex(x=>x.id===o.id); const j=i+d; if(i<0 || j<0 || j>=o.liste.length) return;
   S.ov={...o, id:o.liste[j].id, col:o.liste[j].col}; renderOv(); }
@@ -1742,31 +1764,33 @@ V.album = ()=>{ const g=tripGuard(); if(g) return g; const tab=S.ui.albumTab||'r
   return `${hdrTrip('Album')}${geschlossenBanner()}
   <div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='reise'}" data-act="ui" data-k="albumTab" data-val="reise">Reise</button><button role="tab" aria-selected="${tab==='akt'}" data-act="ui" data-k="albumTab" data-val="akt">Aktivitäten</button></div>
   <div class="row between wrap" style="row-gap:8px"><span class="small mut" style="white-space:nowrap">${all.length} ${all.length===1?'Foto oder Video':'Fotos und Videos'}</span><div class="row wrap" style="gap:8px">${all.length&&S.downloads?`<button class="btn xs sec" data-act="zipAlle">${ic('dl',14)} Alle herunterladen</button>`:''}${isAdmin()?`<button class="btn xs ghost" data-act="go" data-v="papierkorb">${ic('trash',14)} Papierkorb${trash?` (${trash})`:''}</button>`:''}${S.assets&&!r.geschlossen&&tab==='reise'?`<label class="btn xs" style="cursor:pointer">${ic('plus',14)} Hinzufügen<input type="file" accept="image/*,video/mp4,video/webm" multiple hidden data-file="upAlbum"></label>`:''}</div></div>
-  ${keys.length?keys.map(k=>{ const a=tab==='akt'?S.rt.akt.find(y=>y.id===k):null; return `${tab==='reise'?`<h3>${dayLabel(k)+' · '+fDY(k)}</h3>`:`<div class="row between" style="gap:10px;align-items:baseline"><h3 class="ell" style="min-width:0">${esc(a?a.titel:'Termin')}</h3><span class="small mut" style="white-space:nowrap">${a?.datum?`${WD[parseDay(a.datum).getDay()]} ${fDY(a.datum)}${a.zeit?` · ${esc(aktZeit(a))}`:''}`:''}</span></div>`}<div class="grid3">${groups[k].map(x=>`<button data-act="openBild" data-id="${x.id}" aria-label="Foto von ${esc(nm(x.by))} öffnen">${x.mime?.startsWith('video')?`<video src="${esc(blob(x.bild))}" preload="metadata" muted playsinline></video><span class="vid">Video</span>`:`<img src="${esc(blob(x.bild))}" alt="" loading="lazy">`}</button>`).join('')}</div>`; }).join('')
+  ${keys.length?keys.map(k=>{ const a=tab==='akt'?S.rt.akt.find(y=>y.id===k):null; return `${tab==='reise'?`<h3>${dayLabel(k)+' · '+fDY(k)}</h3>`:`<div class="row between" style="gap:10px;align-items:baseline"><h3 class="ell" style="min-width:0">${esc(a?a.titel:'Termin')}</h3><span class="small mut" style="white-space:nowrap">${a?.datum?`${WD[parseDay(a.datum).getDay()]} ${fDY(a.datum)}${a.zeit?` · ${esc(aktZeit(a))}`:''}`:''}</span></div>`}<div class="grid3">${groups[k].map(x=>`<button data-act="openBild" data-id="${x.id}" aria-label="Foto von ${esc(nm(x.by))} öffnen">${albumKachel(x)}</button>`).join('')}</div>`; }).join('')
     :`<div class="empty">${ic('album',30)}<span>${tab==='reise'?'Alle Fotos und Videos aus dem Gruppenchat landen automatisch hier. Du kannst auch direkt Fotos hinzufügen, gern auch nach der Reise.':'Fotos aus den Chats zu einzelnen Terminen erscheinen hier. Du siehst die Fotos der Termine, bei denen du dabei warst.'}</span></div>`}
   ${navBar()}`; };
-A.upAlbum = async el => { const files=[...(el.files||[])]; el.value=''; let n=0;
-  for(const f of files){ const up=await uploadFile(f); if(!up) continue; try{ await S.db.collection('nachrichten').add({rid:S.rid, typ:'bild', bild:up.id, mime:up.mime, aufnahme:f.lastModified||now(), createdAt:now(), by:S.uid, nurAlbum:true}); n++; }catch(e){ fail(e,'Speichern'); } }
+function albumKachel(x){ if(x.mime?.startsWith('video')) return tkDarf('video') ? `<video src="${esc(blob(x.bild))}" preload="metadata" muted playsinline></video><span class="vid">Video</span>` : `<span class="bildzu klein">${ic('lock',16)}<span>Video</span></span>`;
+  const q=bildQuelle(x); return q ? `<img src="${esc(q)}" alt="" loading="lazy">` : `<span class="bildzu klein">${ic('lock',16)}<span>Foto</span></span>`; }
+A.upAlbum = async el => { const files=[...(el.files||[])]; el.value=''; if(!files.length) return; let n=0;
+  for(const f of files){ const up=await uploadMedium(f); if(!up) break; try{ await S.db.collection('nachrichten').add({rid:S.rid, typ:'bild', bild:up.id, mime:up.mime, ...(up.vor?{vor:up.vor}:{}), aufnahme:f.lastModified||now(), createdAt:now(), by:S.uid, nurAlbum:true}); n++; }catch(e){ fail(e,'Speichern'); } }
   if(n) toast(`${n} ${n===1?'Datei':'Dateien'} hinzugefügt`); };
 V.papierkorb = ()=>{ const g=tripGuard(); if(g) return g; const items=S.rt.msgs.filter(x=>x.geloescht && x.bild && !x.geloescht.endgueltig).sort((a,b)=>b.geloescht.at-a.geloescht.at);
   return `${hdrTrip('Papierkorb')}${backBtn()}<h1>Papierkorb</h1><p class="small mut">Nur du als Reiseleitung siehst den Papierkorb. Bilder, die du selbst gelöscht hast, kannst du wiederherstellen. Von Mitgliedern selbst gelöschte Bilder kannst du nur endgültig löschen. Nach 30 Tagen gilt ein Bild als abgelaufen.</p>
-  ${items.length?items.map(x=>{ const age=Math.floor((now()-x.geloescht.at)/864e5); const mayRestore=x.geloescht.by===S.uid; return `<div class="card tight" style="flex-direction:row;align-items:center"><img src="${esc(blob(x.bild))}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0"><div class="grow small"><div>von ${esc(nm(x.by))}</div><div class="mut">gelöscht von ${esc(x.geloescht.by==='system'?'Badeaufsicht':nm(x.geloescht.by))} · ${fStamp(x.geloescht.at)}</div>${age>=30?'<div style="color:var(--pinktx)">abgelaufen</div>':`<div class="mut">noch ${30-age} Tage</div>`}</div><div class="col" style="gap:6px">${mayRestore&&age<30?`<button class="btn xs sec" data-act="restore" data-id="${x.id}">Wiederherstellen</button>`:''}<button class="btn xs ghost" data-act="purge" data-id="${x.id}">Endgültig löschen</button></div></div>`; }).join(''):'<div class="empty">Der Papierkorb ist leer.</div>'}`; };
+  ${items.length?items.map(x=>{ const age=Math.floor((now()-x.geloescht.at)/864e5); const mayRestore=x.geloescht.by===S.uid; return `<div class="card tight" style="flex-direction:row;align-items:center"><img src="${esc(x.vor||blob(x.bild))}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0"><div class="grow small"><div>von ${esc(nm(x.by))}</div><div class="mut">gelöscht von ${esc(x.geloescht.by==='system'?'Badeaufsicht':nm(x.geloescht.by))} · ${fStamp(x.geloescht.at)}</div>${age>=30?'<div style="color:var(--pinktx)">abgelaufen</div>':`<div class="mut">noch ${30-age} Tage</div>`}</div><div class="col" style="gap:6px">${mayRestore&&age<30?`<button class="btn xs sec" data-act="restore" data-id="${x.id}">Wiederherstellen</button>`:''}<button class="btn xs ghost" data-act="purge" data-id="${x.id}">Endgültig löschen</button></div></div>`; }).join(''):'<div class="empty">Der Papierkorb ist leer.</div>'}`; };
 A.restore = async el => { await W(()=>S.db.doc(`nachrichten/${el.dataset.id}`).update({geloescht:null}),'Wiederherstellen'); toast('Wiederhergestellt'); };
 A.purge = el => openOv('confirm',{title:'Endgültig löschen?', text:'Das Bild ist danach für immer weg.', ok:'Endgültig löschen', fn: async ()=>{ const x=S.rt.msgs.find(m=>m.id===el.dataset.id); if(!x) return;
-  try{ if(S.assets) await S.assets.delete(x.bild); await S.db.doc(`nachrichten/${x.id}`).update({geloescht:{...x.geloescht, endgueltig:true}}); toast('Endgültig gelöscht'); }catch(e){ fail(e,'Löschen'); } }});
+  try{ if(S.assets){ await S.assets.delete(x.bild); if(x.vor) await S.assets.delete(x.vor).catch(()=>{}); } await S.db.doc(`nachrichten/${x.id}`).update({geloescht:{...x.geloescht, endgueltig:true}}); toast('Endgültig gelöscht'); }catch(e){ fail(e,'Löschen'); } }});
 
 /* ---------- Alle Bilder als ZIP ---------- */
 let zipBusy=false;
 const safeName = t => String(t||'').replace(/[^\wäöüÄÖÜß -]/g,'').trim().replace(/\s+/g,'_').slice(0,40) || 'Termin';
-A.zipAlle = async ()=>{ if(zipBusy) return; if(!window.JSZip) return toast('Das Packen ist gerade nicht verfügbar. Bitte Seite neu laden.');
+A.zipAlle = async ()=>{ if(zipBusy) return; if(tkSperre('foto_laden')) return; if(!window.JSZip) return toast('Das Packen ist gerade nicht verfügbar. Bitte Seite neu laden.');
   const r=cur(); const all=S.rt.msgs.filter(x=>x.typ==='bild' && x.bild && !x.geloescht && !x.ausgeblendet && darfAktBild(x)); if(!all.length) return;
   zipBusy=true; const zip=new JSZip(); const EXT={'image/jpeg':'jpg','image/png':'png','image/gif':'gif','image/webp':'webp','video/mp4':'mp4','video/webm':'webm'};
   let ok=0, bad=0;
   for(const x of all){ toast(`Wird gepackt … ${ok+bad+1} von ${all.length}`);
-    try{ const res=await fetch(blob(x.bild)); if(!res.ok) throw new Error(res.status); const blob=await res.blob();
+    try{ const res=await fetch(await blobA(x.bild)); if(!res.ok) throw new Error(res.status); const bl=await res.blob();
       const d=new Date(x.aufnahme||x.createdAt); const stamp=`${isoDay(d)}_${pad(d.getHours())}${pad(d.getMinutes())}`;
       const a=x.aktId?S.rt.akt.find(y=>y.id===x.aktId):null; const folder = x.aktId ? `Aktivitaeten/${safeName(a?.titel)}` : 'Reise';
-      zip.file(`${folder}/${stamp}_${safeName(nm(x.by))}_${x.id.slice(0,5)}.${EXT[x.mime]||'jpg'}`, blob, {date:d}); ok++;
+      zip.file(`${folder}/${stamp}_${safeName(nm(x.by))}_${x.id.slice(0,5)}.${EXT[x.mime]||'jpg'}`, bl, {date:d}); ok++;
     }catch(e){ console.warn(e); bad++; } }
   try{ toast('ZIP-Datei wird erstellt …'); const out=await zip.generateAsync({type:'blob', compression:'STORE'});
     await S.downloads.save({filename:`Poolposition_${safeName(r.titel)}_Album.zip`, data:out});
@@ -1778,7 +1802,7 @@ A.zipAlle = async ()=>{ if(zipBusy) return; if(!window.JSZip) return toast('Das 
 V.person = ()=>{ const uid=S.route.uid; const p=pr(uid); const z=zodiac(p.geb); const tel=p.telSichtbar && p.tel;
   if(!S.names[uid]){ S.ui.extraIds=[...new Set([...(S.ui.extraIds||[]),uid])]; refreshProfiles(); }
   return `${hdrPlain('Profil')}${backBtn()}
-  <div class="row" style="gap:16px">${pbAuf(uid, avAw(uid,84))}<div class="grow col" style="gap:4px"><h1 class="ell">${esc(nm(uid))}</h1>${vollName(p)&&vollName(p)!==nm(uid)?`<div class="mut">${esc(vollName(p))}</div>`:''}</div></div>
+  <div class="row" style="gap:16px">${pbAuf(uid, avAw(uid,84))}<div class="grow col" style="gap:4px"><h1 class="ell">${esc(nm(uid))}</h1>${vollName(p)&&vollName(p)!==nm(uid)?`<div class="mut">${esc(vollName(p))}</div>`:''}</div>${ticketNeben(uid)}</div>
   <div class="card">${p.geb?`<div class="row between"><span class="mut">Geburtstag</span><b>${esc(p.geb)}${p.jahr?esc(p.jahr):''} ${z?`<span style="color:var(--yelt)">${z.sym} ${esc(z.name)}</span>`:''}</b></div>`:''}
   ${p.wohnort?`<div class="row between"><span class="mut">Wohnort</span><b>${esc(p.wohnort)}</b></div>`:''}
   ${tel?`<div class="row between"><span class="mut">Telefon</span><span class="row"><a href="tel:${esc(p.tel.replace(/[^\d+]/g,''))}" style="font-weight:700;user-select:all">${esc(p.tel)}</a><button class="icbtn" style="width:32px;height:32px" data-act="copy" data-text="${esc(p.tel)}" aria-label="Nummer kopieren">${ic('copy',14)}</button></span></div>`:''}
@@ -1826,7 +1850,7 @@ V.mitglieder = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const a
 V.mitglied = ()=>{ const g=tripGuard(); if(g) return g; const r=cur(); const uid=S.route.uid; const m=rtM(uid)||{}; const p=pr(uid); const z=zodiac(p.geb); const self=uid===S.uid;
   const tel = (p.telSichtbar||self) && p.tel; const a=art(r);
   return `${hdrTrip('Mitglied')}${backBtn('Mitglieder')}
-  <div class="row" style="gap:16px">${pbAuf(uid, avAw(uid,84,m.status==='entfernt'?'gray':''))}<div class="grow col" style="gap:4px"><div class="row" style="gap:8px"><h1 class="ell">${esc(nm(uid))}</h1>${awards(uid,24)}</div>${vollName(p)&&vollName(p)!==nm(uid)?`<div class="mut">${esc(vollName(p))}</div>`:''}${m.status==='entfernt'?`<span class="chip" style="align-self:flex-start;color:var(--pinktx)">${AW.rote(14)} Entfernt</span>`:''}${uid===r.admin?'<span class="chip yel" style="align-self:flex-start">Reiseleitung</span>':''}</div></div>
+  <div class="row" style="gap:16px">${pbAuf(uid, avAw(uid,84,m.status==='entfernt'?'gray':''))}<div class="grow col" style="gap:4px"><div class="row" style="gap:8px"><h1 class="ell">${esc(nm(uid))}</h1>${awards(uid,24)}</div>${vollName(p)&&vollName(p)!==nm(uid)?`<div class="mut">${esc(vollName(p))}</div>`:''}${m.status==='entfernt'?`<span class="chip" style="align-self:flex-start;color:var(--pinktx)">${AW.rote(14)} Entfernt</span>`:''}${uid===r.admin?'<span class="chip yel" style="align-self:flex-start">Reiseleitung</span>':''}</div>${ticketNeben(uid)}</div>
   <div class="card"><h3>Profil</h3>
   ${p.geb?`<div class="row between"><span class="mut">Geburtstag</span><b>${esc(p.geb)}${p.jahr?esc(p.jahr):''} ${z?`<span style="color:var(--yelt)">${z.sym} ${esc(z.name)}</span>`:''}</b></div>`:''}
   ${p.wohnort?`<div class="row between"><span class="mut">Wohnort</span><b>${esc(p.wohnort)}</b></div>`:''}
@@ -2239,16 +2263,20 @@ A.switchTrip = el => { closeOv(); A.openTrip(el); };
 A.ovHome = ()=>{ closeOv(); A.home(); };
 A.ovNeu = ()=>{ closeOv(); go('neu'); };
 function findMsg(id,col){ return col==='fluesternachrichten' ? S.fmsgs.find(m=>m.id===id) : (S.rt.msgs.find(m=>m.id===id) || gastMsgs().find(m=>m.id===id)); }
+/* Großansicht: mit Ticket das Original, sonst nur die Vorschau */
+const grossQuelle = x => tkDarf('foto_gross') ? blob(x.bild) : (x.vor||'');
 OV.bild = o => { const x=findMsg(o.id,o.col); if(!x) return ''; const vid=x.mime?.startsWith('video'); const own=x.by===S.uid; const mayDel=!x.geloescht && (own || (o.col==='nachrichten' && canMod()));
   const L=o.liste||[]; const i=L.findIndex(y=>y.id===o.id); const hatV=i>0, hatN=i>=0 && i<L.length-1;
   return `<button class="icbtn" style="align-self:flex-end" data-act="closeOv" aria-label="Schließen">${ic('x',20)}</button>
-  <div class="bildbox">${vid?`<video src="${esc(blob(x.bild))}" controls playsinline></video>`:`<img src="${esc(blob(x.bild))}" alt="Foto von ${esc(nm(x.by))}" draggable="false">`}
+  <div class="bildbox">${vid?`<video src="${esc(blob(x.bild))}" controls playsinline></video>`:`<img src="${esc(grossQuelle(x))}" alt="Foto von ${esc(nm(x.by))}" draggable="false">`}
     ${hatV?`<button class="bildpfeil links" data-act="bildNav" data-d="-1" aria-label="Vorheriges Bild">${ic('back',26)}</button>`:''}${hatN?`<button class="bildpfeil rechts" data-act="bildNav" data-d="1" aria-label="Nächstes Bild">${ic('right',26)}</button>`:''}</div>
   <div class="small" style="text-align:center">${esc(nm(x.by))} · ${fStamp(x.createdAt||x.aufnahme)}${x.aufnahme && x.createdAt && isoDay(new Date(x.aufnahme))!==isoDay(new Date(x.createdAt)) && x.aufnahme<x.createdAt ? `<span class="tiny" style="opacity:.7"> · aufgenommen ${fD(isoDay(new Date(x.aufnahme)))}</span>`:''}${L.length>1&&i>=0?` · <span class="num">${i+1} / ${L.length}</span>`:''}</div>
-  <div class="row wrap" style="justify-content:center"><button class="btn sm sec" data-act="saveOrig" data-id="${x.id}" data-col="${o.col}">${ic('dl',16)} Original</button>${mayDel?`<button class="btn sm sec" data-act="delBild" data-id="${x.id}" data-col="${o.col}">${ic('trash',16)} Löschen</button>`:''}${!own?`<button class="btn sm sec" data-act="meldenMsg" data-id="${x.id}" data-col="${o.col}">${ic('flag',16)} Melden</button>`:''}</div>`; };
-A.saveOrig = async el => { const x=findMsg(el.dataset.id, el.dataset.col); if(!x) return; if(!S.downloads) return toast('Speichern ist in dieser Ansicht nicht möglich.');
-  try{ const res=await fetch(blob(x.bild)); const blob=await res.blob(); const ext={'image/jpeg':'jpg','image/png':'png','image/gif':'gif','image/webp':'webp','video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov'}[x.mime]||'jpg';
-    await S.downloads.save({filename:`poolposition-${fDY(isoDay(new Date(x.aufnahme||x.createdAt))).replace(/\./g,'-')}-${x.id.slice(0,5)}.${ext}`, data:blob}); toast('Gespeichert'); }
+  ${tkDarf('foto_gross')?'':`<div class="info small" style="text-align:center">${ic('lock',16)} Vergrößern und Herunterladen ist in der Gratisversion nicht verfügbar.<br><button class="btn xs" data-act="ovKiosk">Tickets ansehen</button></div>`}
+  <div class="row wrap" style="justify-content:center">${tkDarf('foto_laden')?`<button class="btn sm sec" data-act="saveOrig" data-id="${x.id}" data-col="${o.col}">${ic('dl',16)} Original</button>`:''}${mayDel?`<button class="btn sm sec" data-act="delBild" data-id="${x.id}" data-col="${o.col}">${ic('trash',16)} Löschen</button>`:''}${!own?`<button class="btn sm sec" data-act="meldenMsg" data-id="${x.id}" data-col="${o.col}">${ic('flag',16)} Melden</button>`:''}</div>`; };
+A.ovKiosk = ()=>{ closeOv(); go('kiosk'); };
+A.saveOrig = async el => { const x=findMsg(el.dataset.id, el.dataset.col); if(!x) return; if(tkSperre('foto_laden')) return; if(!S.downloads) return toast('Speichern ist in dieser Ansicht nicht möglich.');
+  try{ const res=await fetch(await blobA(x.bild)); const bl=await res.blob(); const ext={'image/jpeg':'jpg','image/png':'png','image/gif':'gif','image/webp':'webp','video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov'}[x.mime]||'jpg';
+    await S.downloads.save({filename:`poolposition-${fDY(isoDay(new Date(x.aufnahme||x.createdAt))).replace(/\./g,'-')}-${x.id.slice(0,5)}.${ext}`, data:bl}); toast('Gespeichert'); }
   catch(e){ if(e?.code==='declined') return; console.error(e); toast('Speichern hat nicht geklappt.'); } };
 A.delBild = el => { const x=findMsg(el.dataset.id, el.dataset.col); if(!x) return; const col=el.dataset.col;
   openOv('confirm',{title:`${x.mime?.startsWith('video')?'Video':'Bild'} löschen?`, text: col==='nachrichten'?'Es verschwindet für alle aus Chat und Album. Im Chat bleibt ein Hinweis, wer es gelöscht hat.':'Es verschwindet aus dem Flüsterchat.', ok:'Löschen', fn: async ()=>{
@@ -2490,8 +2518,14 @@ const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)"'])/g, u=>`
 const fDauer = s => { s=Math.max(0,Math.round(s||0)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
 function reaktionen(x){ const r={}; for(const [u,v] of Object.entries(x.likes||{})) if(v===true) r[u]='❤️'; for(const [u,e] of Object.entries(x.reakt||{})){ if(e) r[u]=e; else delete r[u]; } return r; }
 function reaktGruppen(x){ const g={}; for(const [u,e] of Object.entries(reaktionen(x))){ if(u!==S.uid && (S.settings.blockiert||{})[u]) continue; (g[e]=g[e]||[]).push(u); } return Object.entries(g).sort((a,b)=>b[1].length-a[1].length); }
+/* Bild oder Video in der Nachricht. Listen zeigen die Vorschau (vor), Originale nur mit Ticket. */
+const bildQuelle = x => x.vor || (tkDarf('foto_gross') || x.gastSichtbar ? blob(x.bild) : '');
+function mediaHtml(x,col){ const vid=x.mime?.startsWith('video');
+  if(vid) return tkDarf('video') ? `<video src="${esc(blob(x.bild))}" controls preload="metadata" playsinline></video>` : `<div class="bildzu">${ic('lock',18)}<span>Video<br><span class="tiny">In der Gratisversion nicht verfügbar</span></span></div>`;
+  const q=bildQuelle(x); if(!q) return `<button class="bildzu" data-act="openBild" data-id="${x.id}" data-col="${col}">${ic('lock',18)}<span>Foto<br><span class="tiny">Mit einem Ticket sichtbar</span></span></button>`;
+  return `<button style="all:unset;cursor:zoom-in" data-act="openBild" data-id="${x.id}" data-col="${col}"><img src="${esc(q)}" alt="Foto von ${esc(nm(x.by))}" loading="lazy"></button>`; }
 function msgArt(x){ return x.audio?'audio':x.bild?(x.mime?.startsWith('video')?'video':'bild'):'text'; }
-function zitatVon(x){ const a=msgArt(x); return {id:x.id, by:x.by, art:a, text:(x.text||'').slice(0,160), ...(a==='bild'?{bild:x.bild}:{}), ...(x.aktId?{aktId:x.aktId}:{}), ...(a==='audio'?{dauer:x.dauer||0}:{})}; }
+function zitatVon(x){ const a=msgArt(x); return {id:x.id, by:x.by, art:a, text:(x.text||'').slice(0,160), ...(a==='bild'?{bild:x.vor||x.bild}:{}), ...(x.aktId?{aktId:x.aktId}:{}), ...(a==='audio'?{dauer:x.dauer||0}:{})}; }
 function zitatLabel(q){ return q.art==='audio'?`🎤 Sprachnachricht${q.dauer?` (${fDauer(q.dauer)})`:''}`:q.art==='bild'?'📷 Foto':q.art==='video'?'🎬 Video':''; }
 function zitatHtml(q, im){ const txt=[zitatLabel(q), q.text].filter(Boolean).join(' · ');
   return `<${im?'div':'button'} class="quote" ${im?'':`data-act="zumZitat" data-id="${esc(q.id)}"`} style="--qc:${nameColor(q.by)}"><span class="col" style="gap:1px;min-width:0;flex:1"><b class="ell">${q.by===S.uid?'Du':esc(nm(q.by))}</b><span class="qt">${esc(txt)||'Nachricht'}</span></span>${q.bild && (S.route.v==='gastAkt' || darfAktBild({aktId:q.aktId, by:q.by, typ:'bild'}))?`<img src="${esc(blob(q.bild))}" alt="" loading="lazy">`:''}</${im?'div':'button'}>`; }
@@ -2504,8 +2538,8 @@ function blase(x){
   const me=x.by===S.uid || (x.by==='support' && S.route.v==='fluester' && supportSide(S.route.pair||''));
   const entf=rtM(x.by)?.status==='entfernt'; const herz=x.typ==='herz';
   const gesperrt = x.bild && S.route.v!=='gastAkt' && !darfAktBild(x);
-  const media = gesperrt ? `<div class="bildzu">${ic('lock',18)}<span>${x.mime?.startsWith('video')?'Video':'Foto'} nur für Teilnehmer der Aktivität</span></div>` : x.bild ? (x.mime?.startsWith('video')?`<video src="${esc(blob(x.bild))}" controls preload="metadata" playsinline></video>`:`<button style="all:unset;cursor:zoom-in" data-act="openBild" data-id="${x.id}" data-col="${col}"><img src="${esc(blob(x.bild))}" alt="Foto von ${esc(nm(x.by))}" loading="lazy"></button>`) : '';
-  const voice = x.audio ? voiceHtml(x) : '';
+  const media = gesperrt ? `<div class="bildzu">${ic('lock',18)}<span>${x.mime?.startsWith('video')?'Video':'Foto'} nur für Teilnehmer der Aktivität</span></div>` : x.bild ? mediaHtml(x,col) : '';
+  const voice = x.audio ? (tkDarf('sprache') || x.gastSichtbar ? voiceHtml(x) : `<div class="bildzu">${ic('lock',18)}<span>Sprachnachricht${x.dauer?` (${fDauer(x.dauer)})`:''}<br><span class="tiny">In der Gratisversion nicht verfügbar</span></span></div>`) : '';
   const rg=reaktGruppen(x);
   const chips = rg.length?`<div class="reakts">${rg.map(([e,us])=>`<button class="reakt ${us.includes(S.uid)?'mine':''}" data-act="reagier" data-id="${x.id}" data-col="${col}" data-e="${e}" aria-label="${e} von ${esc(us.map(u=>u===S.uid?'dir':nm(u)).join(', '))}">${e}${us.length>1?`<span>${us.length}</span>`:''}</button>`).join('')}</div>`:'';
   const avBtn = me?'':(x.by==='support'?av(x.by,30):`<button class="avlink ${entf?'gray':''}" data-act="openPerson" data-uid="${x.by}" aria-label="${esc(nm(x.by))}: Profil oder flüstern">${avAw(x.by,30)}</button>`);
@@ -2644,6 +2678,7 @@ A.openPerson = el => { const u=el.dataset.uid; if(!u || u==='support') return; i
 function personProfil(u){ if(tripActive() && rtM(u)) go('mitglied',{uid:u}); else go('person',{uid:u}); }
 OV.person = o => { const u=o.uid; const p=pr(u); const m=rtM(u); const bl=(S.settings.blockiert||{})[u];
   return `<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(nm(u))}"><div class="row" style="gap:14px">${avAw(u,64)}<div class="grow" style="min-width:0"><h2 class="ell">${esc(nm(u))}</h2>${vollName(p)&&vollName(p)!==nm(u)?`<div class="small mut ell">${esc(vollName(p))}</div>`:''}${m?.unterkunft && m.unterkunftSichtbar===true?`<div class="small" style="margin-top:2px">${esc(art(cur()).unterkunft)}: <b>${esc(m.unterkunft)}</b></div>`:''}</div></div>
+  ${ticketNeben(u,true)}
   ${bl?`<div class="warn small">Du hast ${esc(nm(u))} blockiert.</div>`:''}
   <button class="btn block" data-act="anfluestern" data-uid="${u}">${ic('chat',18)} ${esc(nm(u))} anflüstern</button>
   <button class="btn sec block" data-act="personProfil" data-uid="${u}">Profil ansehen</button>
@@ -2654,7 +2689,7 @@ A.anfluestern = async el => { const u=el.dataset.uid; closeOv(); try{ const id=a
 /* ---------- Sprachnachrichten: aufnehmen ---------- */
 let REC=null;
 function audioTyp(){ for(const t of ['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus']) try{ if(MediaRecorder.isTypeSupported(t)) return t; }catch(e){} return ''; }
-A.recStart = async el => { if(REC) return; const ctx=el.dataset.ctx; if(!kannAudio()) return toast('Sprachnachrichten gehen in diesem Browser leider nicht.');
+A.recStart = async el => { if(REC) return; const gastM=S.route.v==='gastAkt'; if(!gastM && (tkSperre('sprache') || !kontPruef('sprache'))) return; const ctx=el.dataset.ctx; if(!kannAudio()) return toast('Sprachnachrichten gehen in diesem Browser leider nicht.');
   let stream; try{ stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}}); }
   catch(e){ console.warn(e); return toast(e?.name==='NotAllowedError'?'Kein Zugriff aufs Mikrofon. Bitte erlaube es in den Einstellungen deines Browsers.':'Das Mikrofon lässt sich gerade nicht starten.'); }
   const typ=audioTyp(); let mr; try{ mr=typ?new MediaRecorder(stream,{mimeType:typ, audioBitsPerSecond:48000}):new MediaRecorder(stream); }catch(e){ stream.getTracks().forEach(t=>t.stop()); return toast('Aufnehmen geht in diesem Browser leider nicht.'); }
@@ -2670,8 +2705,8 @@ async function recFertig(){ const r=REC; if(!r) return; REC=null; clearInterval(
   if(!r.senden) return toast('Aufnahme verworfen');
   const dauer=(Date.now()-r.start)/1000; if(dauer<1) return toast('Zu kurz. Tippe auf das Mikrofon, sprich und tippe dann auf Senden.');
   const typ=(r.mr.mimeType||r.chunks[0]?.type||'audio/webm').split(';')[0]; const b=new Blob(r.chunks,{type:typ});
-  try{ toast('Sprachnachricht wird gesendet …'); const up=await S.assets.upload(b,{type:typ});
-    await postMsg(r.ctx, {by:S.uid, typ:'audio', audio:up.id, mime:typ, dauer:Math.round(dauer), createdAt:now()}); toast('Gesendet'); nachUnten(); }
+  try{ toast('Sprachnachricht wird gesendet …'); const gastM=r.ctx && S.route.v==='gastAkt'; const up=await S.assets.upload(b, gastM?{type:typ}:{type:typ, orig:true});
+    await postMsg(r.ctx, {by:S.uid, typ:'audio', audio:up.id, mime:typ, dauer:Math.round(dauer), createdAt:now()}); toast('Gesendet'); nachUnten(); if(!gastM) kontPlus('sprache'); }
   catch(e){ console.error(e); toast(e?.code==='quota_or_state'?'Der Speicher ist voll.':'Die Sprachnachricht ließ sich nicht senden.'); } }
 
 /* ---------- Sprachnachrichten: abspielen ---------- */
@@ -2683,9 +2718,9 @@ function voiceHtml(x){ const on=PLAY.id===x.id; const a=on?PLAY.a:null; const d=
 function vUpdate(){ if(!PLAY.id) return; const el=document.getElementById('v-'+PLAY.id); const x=findMsg(PLAY.id,PLAY.col); if(!el||!x) return; const d=x.dauer||PLAY.a.duration||1; const t=PLAY.a.currentTime; const p=Math.min(100,t/d*100);
   const s=el.querySelector('.vbar span'), k=el.querySelector('.vbar i'), vt=el.querySelector('.vt'); if(s) s.style.width=p+'%'; if(k) k.style.left=p+'%'; if(vt) vt.textContent=fDauer(t); }
 function vStop(){ if(PLAY.a){ PLAY.a.pause(); PLAY.a.src=''; } PLAY.id=null; PLAY.a=null; }
-A.vPlay = el => { const x=findMsg(el.dataset.id, el.dataset.col); if(!x) return;
+A.vPlay = async el => { const x=findMsg(el.dataset.id, el.dataset.col); if(!x) return;
   if(PLAY.id===x.id){ if(PLAY.a.paused) PLAY.a.play().catch(()=>{}); else PLAY.a.pause(); render(); return; }
-  vStop(); const a=new Audio(blob(x.audio)); a.preload='auto'; a.playbackRate=PLAY.rate; PLAY.id=x.id; PLAY.col=el.dataset.col; PLAY.a=a;
+  vStop(); const u=await blobA(x.audio).catch(()=>''); if(!u){ toast('Die Sprachnachricht lässt sich nicht laden.'); return; } const a=new Audio(u); a.preload='auto'; a.playbackRate=PLAY.rate; PLAY.id=x.id; PLAY.col=el.dataset.col; PLAY.a=a;
   a.ontimeupdate=vUpdate; a.onpause=()=>render(); a.onplay=()=>render();
   a.onended=()=>{ const id=PLAY.id; vStop(); render(); naechsteSprach(id); };
   a.onerror=()=>{ toast('Die Sprachnachricht lässt sich auf diesem Gerät nicht abspielen.'); vStop(); render(); };
@@ -3283,7 +3318,7 @@ V.gastAkt = ()=>{ const aid=S.route.id; const a=S.gast.akt[aid];
   ${eventKasseWarn(a,true)}
   ${r?wetterKarteGast(r,a):''}
   <div class="tabs" role="tablist"><button role="tab" aria-selected="${tab==='chat'}" data-act="ui" data-k="gastTab" data-val="chat">Chat${gastUnread(aid)?`<span class="badge">${gastUnread(aid)}</span>`:''}</button><button role="tab" aria-selected="${tab==='bilder'}" data-act="ui" data-k="gastTab" data-val="bilder">Bilder${bilder.length?` (${bilder.length})`:''}</button><button role="tab" aria-selected="${tab==='kasse'}" data-act="ui" data-k="gastTab" data-val="kasse">Kasse${gastOffenMein(aid)?'<span class="badge">!</span>':''}</button></div>
-  ${tab==='kasse' ? eventKasseKarte(a,true) : tab==='bilder' ? (bilder.length?`<div class="grid3">${bilder.map(m=>`<button data-act="openBild" data-id="${m.id}" data-col="nachrichten" aria-label="Foto von ${esc(nm(m.by))}"><img src="${esc(blob(m.bild))}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover"></button>`).join('')}</div>`:'<div class="empty small">Noch keine Bilder. Fotos aus dem Chat erscheinen hier.</div>')
+  ${tab==='kasse' ? eventKasseKarte(a,true) : tab==='bilder' ? (bilder.length?`<div class="grid3">${bilder.map(m=>`<button data-act="openBild" data-id="${m.id}" data-col="nachrichten" aria-label="Foto von ${esc(nm(m.by))}">${bildQuelle(m)?`<img src="${esc(bildQuelle(m))}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover">`:`<span class="bildzu klein">${ic('lock',16)}<span>Foto</span></span>`}</button>`).join('')}</div>`:'<div class="empty small">Noch keine Bilder. Fotos aus dem Chat erscheinen hier.</div>')
    : `${!nach && f && t<f.von?`<div class="info small">Der Chat ist schon offen. Hier könnt ihr euch bis zum Start um ${esc(a.zeit)} Uhr abstimmen, zum Beispiel über den Treffpunkt.</div>`:''}
       ${nach?`<div class="info small">Die Aktivität ist vorbei. ${fotoOffen?`Fotos kannst du noch bis ${fStamp(gastEnde(a)+NACH_FOTOS_H*3600e3)} ergänzen.`:'Chat und Bilder bleiben für dich sichtbar.'}</div>`:''}
       <div class="msgs">${msgs.map(msgHtml).join('')||'<div class="sysnote">Noch keine Nachrichten.</div>'}</div>
@@ -4615,7 +4650,7 @@ function supportWechsel(als){ const echt=S.echteUid;
   setTrip(null); Object.values(S.gast?.unsub||{}).forEach(l=>(l||[]).forEach?.(u=>{ try{ u(); }catch(e){} }));
   ADM.unsub.forEach(u=>{ try{ u(); }catch(e){} }); Object.assign(ADM,{key:'', unsub:[], meld:{}, fb:{}, info:[], bereit:false, cache:null});
   Object.assign(S, {uid: als||echt, supportVon: als?echt:null, isOwner: als?false:!!S.me?.isOwner, db: als?nurLesen(S.dbEcht):S.dbEcht, assets: als?null:S.assetsEcht,
-    reisen:{}, meineM:[], pairs:[], settings:{}, fmsgs:[], sperre:null, rechte:{}, rang:'', rolle:'', post:{n:0}, route:{v:'home'}, hist:[], form:{}, ui:{}, ov:null});
+    ticket:null, ticketDa:false, kont:null, reisen:{}, meineM:[], pairs:[], settings:{}, fmsgs:[], sperre:null, rechte:{}, rang:'', rolle:'', post:{n:0}, route:{v:'home'}, hist:[], form:{}, ui:{}, ov:null});
   if(S.gast) Object.assign(S.gast, {meine:[], aus:[], akt:{}, msgs:{}, kasse:{}, unsub:{}, liste:{}});
   KONTO.daten=null; KONTO.auth={}; KONTO.authLaedt=false; STAT.daten=null;
   subGlobal(); gastSub(); render(); window.scrollTo(0,0); }
@@ -4731,67 +4766,122 @@ P.star='<path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9-4.3-
    Nur der Oberbademeister (Admin) weist höhere Tickets zu. Läuft das Ticket ab, bleibt der Account gültig, der Nutzer kann aber nur noch ansehen.
    Die Sperre gilt doppelt: im Client („Wächter“ um die Datenbank, nur in der echten App) und in den Firestore-Regeln (ticketOk(): Schreiben nur mit gültigem Ticket, Oberbademeister und Badeaufsicht ausgenommen). Erlaubt bleiben Profil, Ticket, Konto, Push, Einstellungen, Meldungen und Feedback. Die genauen Regeln folgen später.
    Oberbademeister und Badeaufsicht (mit Dienstrang) sind ausgenommen. */
-const TICKETS = [['tag','Tageskarte','24 Stunden'],['woche','Wochenkarte','7 Tage'],['monat','Monatskarte','1 Monat'],['jahr','Jahreskarte','1 Jahr']];
+const TICKETS = [['tag','Tageskarte','gratis'],['pauschal','Pauschalreise','für eine Reise'],['woche','Wochenkarte','7 Tage'],['monat','Monatskarte','1 Monat'],['jahr','Jahreskarte','1 Jahr'],['frei','Freikarte','Tester, ohne Limits']];
+/* Beta 3.1: Rechte je Ticket. Die Tageskarte ist gratis und läuft nie ab, sie kann ansehen, lesen, chatten, abstimmen und planen. Bezahlte Tickets (und die Freikarte) dürfen zusätzlich Fotos, Videos, Sprachnachrichten und Reisen anlegen.
+   Läuft ein bezahltes Ticket ab, gilt wieder die Tageskarte. */
+const TK_BEZAHLT = ['pauschal','woche','monat','jahr','frei'];
+const TK_PLUS = ['foto_hoch','foto_gross','foto_laden','video','sprache','reise_anlegen','admin'];
+const TK_LIMIT = { pauschal:{foto:200}, woche:{foto:100}, monat:{foto:150}, jahr:{foto:300}, frei:{} };
+const TK_SPERRTEXT = { foto_hoch:'Fotos hochladen', foto_gross:'Fotos vergrößern', foto_laden:'Fotos herunterladen', video:'Videos', sprache:'Sprachnachrichten', reise_anlegen:'Reisen anlegen', admin:'Reisen verwalten' };
 const ticketName = a => TICKETS.find(t=>t[0]===a)?.[1] || 'Ticket';
-function ticketBis(art, von=now()){ const d=new Date(von); if(art==='tag') return von+864e5; if(art==='woche') return von+7*864e5; if(art==='monat'){ d.setMonth(d.getMonth()+1); return d.getTime(); } if(art==='jahr'){ d.setFullYear(d.getFullYear()+1); return d.getTime(); } return von+864e5; }
+function ticketBis(art, von=now()){ const d=new Date(von); if(art==='tag') return von+864e5; if(art==='pauschal') return von+90*864e5; if(art==='frei'){ d.setFullYear(d.getFullYear()+1); return d.getTime(); } if(art==='woche') return von+7*864e5; if(art==='monat'){ d.setMonth(d.getMonth()+1); return d.getTime(); } if(art==='jahr'){ d.setFullYear(d.getFullYear()+1); return d.getTime(); } return von+864e5; }
 S.ticket = null; S.ticketDa = false;
-const ticketFrei = () => !!S.isOwner || !!S.rang || !!S.supportVon;
+const ticketFrei = () => !!S.isOwner || !!S.rang; /* Support-Ansicht: gilt das Ticket des angesehenen Mitglieds */
 const ticketAbgelaufen = t => !!t && now() >= (t.bis||0);
-/* Nur ansehen? */
-const nurAnsehen = () => { try{ return nurAnsehen_(); }catch(e){ return false; } };
-const nurAnsehen_ = () => !ticketFrei() && S.ticketDa && !!S.ticket && ticketAbgelaufen(S.ticket);
+/* Wirksame Ticketart: Oberbademeister/Badeaufsicht = frei, abgelaufenes bezahltes Ticket = Tageskarte */
+function ticketArt(){ try{ if(ticketFrei()) return 'frei'; if(!S.ticketDa) return 'frei'; const t=S.ticket; if(!t) return 'tag'; if(t.art==='tag') return 'tag'; return ticketAbgelaufen(t)?'tag':t.art; }catch(e){ return 'frei'; } }
+const tkBezahlt = () => TK_BEZAHLT.includes(ticketArt());
+const tkDarf = r => { try{ if(!TK_PLUS.includes(r)) return true; return tkBezahlt(); }catch(e){ return true; } };
+/* Hinweis, wenn eine Funktion fehlt. Rückgabe true = gesperrt. */
+function tkSperre(r){ if(tkDarf(r)) return false; toast(`${TK_SPERRTEXT[r]||'Das'} gibt es mit einem Ticket. In der Gratisversion nicht verfügbar.`); return true; }
+const nurAnsehen = () => false;
+
+/* Kontingente: Zähler je Ticket (kontingent/{uid}: foto, video, sprache, tv = Beginn des Tickets). Fotos je Ticket begrenzt, Videos und Sprachnachrichten 20 Stück. Das Limit für Videos und Sprachnachrichten wird erst bei 19 von 20 genannt. */
+S.kont = null;
+function kontWerte(){ const k=S.kont||{}; if(!S.ticket || k.tv!==(S.ticket.von||0)) return {foto:0,video:0,sprache:0}; return {foto:k.foto||0, video:k.video||0, sprache:k.sprache||0}; }
+function kontLimit(art){ if(ticketFrei() || ticketArt()==='frei') return Infinity; if(art==='foto') return TK_LIMIT[ticketArt()]?.foto ?? Infinity; return 20; }
+const KONT_NAME = {foto:['Fotos','Foto'], video:['Videos','Video'], sprache:['Sprachnachrichten','Sprachnachricht']};
+function kontPruef(art){ const l=kontLimit(art); if(kontWerte()[art]<l) return true;
+  toast(art==='foto' ? `Das Fotolimit deines Tickets (${l} Fotos) ist erreicht.` : `Das Limit von ${l} ${KONT_NAME[art][0]} ist erreicht.`); return false; }
+/* Die Zähler führt der Server (Funktion medienZaehlen beim Hochladen), die App liest nur. Nur in der Vorschau ohne Server zählt die App selbst mit. */
+async function kontPlus(art){ if(FB) return; const w=kontWerte(); w[art]++; S.kont={...w, tv:S.ticket?.von||0}; kontHinweis(art, w[art]); }
+function kontHinweis(art, n){ const l=kontLimit(art); const rest=l-n; const hint = art==='foto' ? (rest===10 ? 'Noch 10 Fotos mit deinem Ticket möglich.' : '') : (n===19 && l===20 ? `Hinweis: Du hast ${KONT_NAME[art][0]} 19 von 20 genutzt.` : ''); if(hint) setTimeout(()=>toast(hint), 1800); }
+/* Berechtigung für die Originale im Speicher: der Server trägt sie nach jeder Ticketänderung in die Anmeldung ein (Claims); hier holt die App sie ab */
+let abgleichLaeuft=false;
+async function rechteAbgleich(){ try{ if(typeof FB==='undefined' || !FB || S.supportVon || abgleichLaeuft) return; abgleichLaeuft=true; await PPAuth.call('claimsSelf',{}); await PPAuth.refresh?.(); }catch(e){ console.warn('Rechte', e); } finally{ abgleichLaeuft=false; } }
 let ticketTimer=null;
-function ticketAbo(){ if(!S.db || !S.uid || S.supportVon) return;
-  try{ unsubs.global.push(S.db.doc(`tickets/${S.uid}`).onSnapshot(async s=>{ S.ticketDa=true; S.ticket=s.exists?{id:s.id,...s.data()}:null;
+function ticketAbo(){ if(!S.db || !S.uid) return;
+  try{ unsubs.global.push(S.db.doc(`kontingent/${S.uid}`).onSnapshot(s=>{ const vor=kontWerte(); S.kont=s.exists?s.data():null; const nach=kontWerte(); for(const k of ['foto','video','sprache']) if(nach[k]>vor[k]) kontHinweis(k, nach[k]); }, e=>console.warn('Kontingent', e))); }catch(e){}
+  try{ unsubs.global.push(S.db.doc(`tickets/${S.uid}`).onSnapshot(async s=>{ S.ticketDa=true; const vorher=(S.ticket?.art||'')+(S.ticket?.bis||''); S.ticket=s.exists?{id:s.id,...s.data()}:null; if(!FB && S.ticket && !S.supportVon){ const sig=S.ticket.art+'|'+(S.ticket.bis||0); if(S.tkSig!==sig){ S.tkSig=sig; try{ S.db.doc(`ticketart/${S.uid}`).set({art:S.ticket.art, bis:S.ticket.bis||0}); }catch(e){} } } if(vorher!==((S.ticket?.art||'')+(S.ticket?.bis||''))) rechteAbgleich();
+      if(!S.ticket && S.supportVon){ S.ticket=KONTO.tick?.[S.uid]||null; render(); return; }
       if(!S.ticket){ const von=now(); const d={art:'tag', von, bis:ticketBis('tag',von), by:S.uid, at:von, auto:true}; S.ticket={id:S.uid,...d}; render(); try{ await S.db.doc(`tickets/${S.uid}`).set(d); }catch(e){ console.warn('Ticket', e); } }
       clearTimeout(ticketTimer); const rest=(S.ticket.bis||0)-now(); if(rest>0 && rest<2147e6) ticketTimer=setTimeout(()=>render(), rest+500);
-      render(); }, e=>console.warn('Ticket', e))); }catch(e){ console.warn('Ticket', e); } }
-/* Wächter um die Datenbank: blockiert Schreibzugriffe, solange nurAnsehen() gilt */
-const TICKET_ERLAUBT = ['profile/','tickets/','konten/','pushtokens/','data/users/','meldungen/','feedback/','tippen/','nutzung/'];
+      render(); }, e=>{ console.warn('Ticket', e); ticketErsatz(); })); }catch(e){ console.warn('Ticket', e); ticketErsatz(); }
+  /* Support-Ansicht: ist das Ticket nicht lesbar, gilt der Stand aus der Mitgliederverwaltung */
+  if(S.supportVon) setTimeout(()=>{ if(!S.ticketDa) ticketErsatz(); }, 2500); }
+function ticketErsatz(){ try{ const x=KONTO.tick?.[S.uid]; if(x && !S.ticketDa){ S.ticketDa=true; S.ticket=x; render(); } }catch(e){} }
+/* Wächter um die Datenbank: blockiert nur noch, was die Tageskarte nicht darf (Reise anlegen, Reise verwalten). Alles andere bleibt offen, Medien prüfen die Upload-Stellen selbst. */
 function ticketWaechter(db){ if(!db) return db;
-  const ok = p => TICKET_ERLAUBT.some(x=>String(p||'').startsWith(x));
-  const sperre = ()=>{ const e=new Error('Ticket abgelaufen'); e.ticket=true; e.code='ticket'; ticketHinweis(); return e; };
-  const doc = d => new Proxy(d, {get(t,k){ if(['set','update','delete'].includes(k)) return (...a)=>{ if(nurAnsehen() && !ok(t.path)) return Promise.reject(sperre()); return t[k](...a); }; const v=t[k]; return typeof v==='function'?v.bind(t):v; }});
-  const col = c => new Proxy(c, {get(t,k){ if(k==='add') return (...a)=>{ if(nurAnsehen() && !ok(t.path+'/')) return Promise.reject(sperre()); return t.add(...a); }; if(k==='doc') return (...a)=>doc(t.doc(...a)); const v=t[k]; return typeof v==='function'?v.bind(t):v; }});
+  const pruef = (p,op) => { p=String(p||''); const t=p.split('/'); if(t[0]!=='reisen' || tkDarf('reise_anlegen')) return null;
+    if(t.length<=2 && (op==='add' || op==='set' && !(S.reisen||{})[t[1]])) return 'reise_anlegen';
+    if(t.length===2 && (op==='update'||op==='delete') && (S.reisen||{})[t[1]]?.admin===S.uid && !tkDarf('admin')) return 'admin';
+    return null; };
+  const sperre = r=>{ const e=new Error('Ticket'); e.ticket=true; e.code='ticket'; ticketHinweis(r); return e; };
+  const doc = d => new Proxy(d, {get(t,k){ if(['set','update','delete'].includes(k)) return (...a)=>{ const r=pruef(t.path,k); if(r) return Promise.reject(sperre(r)); return t[k](...a); }; const v=t[k]; return typeof v==='function'?v.bind(t):v; }});
+  const col = c => new Proxy(c, {get(t,k){ if(k==='add') return (...a)=>{ const r=pruef(t.path,'add'); if(r) return Promise.reject(sperre(r)); return t.add(...a); }; if(k==='doc') return (...a)=>doc(t.doc(...a)); const v=t[k]; return typeof v==='function'?v.bind(t):v; }});
   return new Proxy(db, {get(t,k){ if(k==='doc') return p=>doc(t.doc(p)); if(k==='collection') return p=>col(t.collection(p));
-    if(k==='batch') return (...a)=>{ if(nurAnsehen() && Array.isArray(a[0]) && a[0].some(o=>!ok(o.path))) return Promise.reject(sperre()); return t.batch(...a); };
+    if(k==='batch') return (...a)=>{ if(Array.isArray(a[0])){ const o=a[0].find(o=>pruef(o.path,o.op||o.type||'set')); if(o) return Promise.reject(sperre(pruef(o.path,o.op||o.type||'set'))); } return t.batch(...a); };
     const v=t[k]; return typeof v==='function'?v.bind(t):v; }}); }
 let ticketHinweisT=0;
-function ticketHinweis(){ if(Date.now()-nutzerAktion>1500) return; if(Date.now()-ticketHinweisT>4000){ ticketHinweisT=Date.now(); toast('Dein Ticket ist abgelaufen. Du kannst alles ansehen, aber nichts ändern.'); } }
-function ticketBanner(){ try{ if(!nurAnsehen()) return ''; }catch(e){ return ''; }
-  return `<div class="supportbanner" role="status"><span class="grow small">${ic('lock',16)} <b>Nur ansehen</b><br><span style="opacity:.85">Deine ${esc(ticketName(S.ticket.art))} ist am ${fStamp(S.ticket.bis)} abgelaufen. Dein Account bleibt bestehen. Für ein neues Ticket melde dich bei der Badeaufsicht.</span></span></div>`; }
+function ticketHinweis(r){ if(Date.now()-nutzerAktion>1500) return; if(Date.now()-ticketHinweisT>4000){ ticketHinweisT=Date.now(); tkSperre(r||'reise_anlegen'); } }
+function ticketBanner(){ return ''; }
+/* Kaufangebot: eine Woche vor Reisebeginn und während der Reise, solange kein bezahltes Ticket gilt (Empfehlung nach Reisedauer: bis 7 Tage Wochenkarte, sonst Pauschalreise) */
+function kaufKarte(list){ try{ if(!S.ticketDa || tkBezahlt() || ticketFrei()) return '';
+    const l=(list||[]).filter(({m,r})=>['teilnehmer','zugesagt'].includes(m.status) && r.von && r.status!=='geloescht' && (()=>{ const d=daysUntil(r.von); const e=r.bis?daysUntil(r.bis):d; return d!==null && d<=7 && (e===null || e>=0); })()).sort((a,b)=>a.r.von.localeCompare(b.r.von));
+    if(!l.length) return ''; const r=l[0].r; const d=daysUntil(r.von); const tage=r.bis?Math.round((parseDay(r.bis)-parseDay(r.von))/864e5)+1:7; const empf=tage<=7?'Wochenkarte':'Pauschalreise';
+    const wann=d>1?`In ${d} Tagen geht es los`:d===1?'Morgen geht es los':d===0?'Heute geht es los':'Ihr seid unterwegs';
+    return `<button class="tkbtn" data-act="go" data-v="kiosk"><div class="card hot tight"><div class="row between"><b>${ic('star',14)} ${wann}: ${esc(r.titel||'Reise')}</b></div><span class="small">Möchtest du auch Fotos und Videos teilen? Mit der ${empf} geht das. Tippe, um die Tickets anzusehen.</span></div></button>`; }catch(e){ return ''; } }
 /* Ticket neben dem Profilbild (antippen = Kiosk) */
-function ticketKopf(){ try{ if(!S.ticketDa || !S.ticket) return ''; const t=S.ticket; const ab=!ticketFrei() && ticketAbgelaufen(t);
-  return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), preis:true, gueltig:ticketFrei()?'Dauerhaft gültig':ab?`Abgelaufen ${tkEnde(t.bis).replace(' Uhr','')}`:`Gültig bis ${tkEnde(t.bis).replace(' Uhr','')}`})}</div>`; }catch(e){ return ''; } }
+function ticketKopf(){ try{ if(!S.ticketDa || !S.ticket) return ''; const t=S.ticket; const ab=!ticketFrei() && t.art!=='tag' && ticketAbgelaufen(t);
+  return `<div class="tkkopf2" role="button" tabindex="0" data-act="go" data-v="kiosk" aria-label="Mein Ticket, zum Kiosk">${ticketBild(t.art,{nr:tkNr(S.uid), gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen ${tkEnde(t.bis).replace(' Uhr','')}`:`Gültig bis ${tkEnde(t.bis).replace(' Uhr','')}`})}</div>`; }catch(e){ return ''; } }
 /* Karte „Kiosk“ unter dem Kopf */
 function ticketKarte(){ try{ const t=S.ticket; let info='Tickets ansehen';
-    if(S.ticketDa && t){ info = ticketFrei() ? 'Als Oberbademeister bist du von Tickets ausgenommen.' : ticketAbgelaufen(t) ? `Deine ${ticketName(t.art)} ist abgelaufen. Du kannst nur noch ansehen.` : `${ticketName(t.art)}: ${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}`; }
-    const ab = S.ticketDa && t && !ticketFrei() && ticketAbgelaufen(t);
+    if(S.ticketDa && t){ info = ticketFrei() ? 'Als Oberbademeister bist du von Tickets ausgenommen.' : t.art==='tag' ? 'Tageskarte: gratis. Ansehen, chatten und abstimmen. Fotos, Videos und eigene Reisen gibt es mit einem Ticket.' : ticketAbgelaufen(t) ? `Deine ${ticketName(t.art)} ist abgelaufen. Es gilt wieder die Tageskarte.` : `${ticketName(t.art)}: ${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}`; }
+    const ab = S.ticketDa && t && !ticketFrei() && t.art!=='tag' && ticketAbgelaufen(t);
     return `<button class="tkbtn" data-act="go" data-v="kiosk" aria-label="Zum Kiosk"><div class="card tight"><div class="row between"><b>${ic('star',14)} Kiosk</b><span class="tiny mut">Zum Kiosk ${ic('right',14)}</span></div><span class="tiny ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${esc(info)}</span></div></button>`; }catch(e){ return ''; } }
 
 /* ---------- Admin: Tickets zuweisen ---------- */
 const ticketVon = u => KONTO.tick?.[u] || null;
-function ticketChip(u){ const t=ticketVon(u); if(!KONTO.daten) return ''; if(!t) return '<span class="tiny mut">kein Ticket</span>'; const ab=ticketAbgelaufen(t); return `<span class="tiny" style="${ab?'color:var(--pinktx)':'color:var(--yelt)'}">${esc(ticketName(t.art))} · ${ab?'abgelaufen':'bis '+fStamp(t.bis)}</span>`; }
+function ticketChip(u){ const t=ticketVon(u); if(!KONTO.daten) return ''; if(!t) return '<span class="tiny mut">kein Ticket</span>'; const ab=ticketAbgelaufen(t)&&t.art!=='tag'; return `<span class="tiny" style="${ab?'color:var(--pinktx)':'color:var(--yelt)'}">${esc(ticketName(t.art))} · ${t.art==='tag'?'gratis':ab?'abgelaufen':'bis '+fStamp(t.bis)}</span>`; }
 A.ticketAuf = el => { if(!istSuper()) return; const us = el.dataset.uid ? [el.dataset.uid] : (S.ui.ticketUs||[]); if(!us.length) return; S.form.tkArt=''; openOv('ticketZuw',{us}); };
 A.ticketAlle = ()=>{ if(!istSuper()) return; S.ui.ticketUs=(S.ui.ticketListe||[]).filter(u=>u!==S.uid); if(!S.ui.ticketUs.length) return toast('Niemand in dieser Auswahl.'); S.form.tkArt=''; openOv('ticketZuw',{us:S.ui.ticketUs}); };
-A.tkArt = el => { S.form.tkArt=el.dataset.k; renderOv(); };
+A.tkArt = el => { S.form.tkArt=el.dataset.k; S.form.tkbis=''; renderOv(); };
+const tkDatum = ms => { const d=new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const tkBisWahl = a => { if(a!=='pauschal'&&a!=='frei') return ticketBis(a); const v=S.form.tkbis; if(v){ const d=new Date(v+'T23:59:00'); if(!isNaN(d)) return d.getTime(); } return ticketBis(a); };
 OV.ticketZuw = o => { const us=o.us; const eins=us.length===1; const a=S.form.tkArt; const t=eins?ticketVon(us[0]):null;
   return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Ticket zuweisen"><h2>Ticket zuweisen</h2>
   <p class="small mut">${eins?`Für <b>${esc(nm(us[0]))}</b>${t?`. Aktuell: ${esc(ticketName(t.art))}, ${ticketAbgelaufen(t)?'abgelaufen am':'gültig bis'} ${fStamp(t.bis)}`:''}.`:`Für <b>${us.length} Mitglieder</b>.`} Die Gültigkeit beginnt jetzt und ersetzt das bisherige Ticket.</p>
-  <div class="col" style="gap:8px">${TICKETS.map(([k,n,d])=>`<button type="button" class="pfopt ${a===k?'on':''}" aria-pressed="${a===k}" data-act="tkArt" data-k="${k}"><b>${n}</b><span class="small mut">${d}${a===k?`, gültig bis ${fStamp(ticketBis(k))}`:''}</span></button>`).join('')}</div>
+  <div class="col" style="gap:8px">${TICKETS.map(([k,n,d])=>`<button type="button" class="pfopt ${a===k?'on':''}" aria-pressed="${a===k}" data-act="tkArt" data-k="${k}"><b>${n}</b><span class="small mut">${d}${a===k?`, gültig bis ${fStamp(tkBisWahl(k))}`:''}</span></button>`).join('')}</div>
+  ${a==='pauschal'||a==='frei'?`<label class="col" style="gap:4px"><span class="small"><b>Gültig bis</b> ${a==='pauschal'?'(Reiseende plus 30 Tage)':'(Testzeitraum)'}</span><input class="in" type="date" id="f_tkbis" value="${tkDatum(tkBisWahl(a))}" min="${tkDatum(now())}"></label>`:''}
   <div class="row" style="gap:8px"><button class="btn sec" data-act="closeOv">Abbrechen</button><button class="btn grow" data-act="ticketSpeichern" ${a?'':'disabled'}>Zuweisen</button></div></div>`; };
-A.ticketSpeichern = async el => { if(!istSuper()) return; const art=S.form.tkArt; if(!art) return; const us=S.ov?.us||[]; el.disabled=true; const von=now(); const bis=ticketBis(art,von);
-  try{ for(const u of us){ const d={art, von, bis, by:S.uid, at:von}; await S.db.doc(`tickets/${u}`).set(d); if(KONTO.tick) KONTO.tick[u]={id:u,...d}; if(typeof tkLog==='function') await tkLog(u,d,'zugewiesen');
+A.ticketSpeichern = async el => { if(!istSuper()) return; const art=S.form.tkArt; if(!art) return; const us=S.ov?.us||[]; el.disabled=true; const von=now(); const bis=tkBisWahl(art);
+  try{ for(const u of us){ const d={art, von, bis, by:S.uid, at:von}; await S.db.doc(`tickets/${u}`).set(d); if(!FB) await S.db.doc(`ticketart/${u}`).set({art, bis}); if(KONTO.tick) KONTO.tick[u]={id:u,...d}; if(typeof tkLog==='function') await tkLog(u,d,'zugewiesen');
       try{ await supportSend(u, `Dein Ticket wurde geändert: ${ticketName(art)}, gültig bis ${fStamp(bis)}. Viel Spaß mit Poolposition!`); }catch(e){} }
     closeOv(); toast(us.length===1?'Ticket zugewiesen':`${us.length} Tickets zugewiesen`); render(); }catch(e){ el.disabled=false; fail(e,'Zuweisen'); } };
+
+/* Ticketart eines anderen Mitglieds, neben dem Namen: für alle sichtbar (nur die Art, ohne Datum). Der Server schreibt sie nach ticketart/{uid}, Team-Mitglieder haben dort keinen Eintrag (Badeaufsicht bleibt anonym).
+   Das Team mit dem Recht „Nutzer“ sieht zusätzlich Ablaufdatum aus der Mitgliederverwaltung. */
+S.tkArt = {};
+const tkTeamNutzer = () => { try{ return !!S.rechte?.nutzer; }catch(e){ return false; } };
+function ticketNeben(u, breit){ try{ if(!u || u===S.uid || S.supportVon) return '';
+    const adm = istSuper() || tkTeamNutzer(); let t=null;
+    if(adm){ if(!KONTO.tick){ if(!KONTO.laedt && typeof kontenLaden==='function') kontenLaden(); } else t=KONTO.tick[u]||null; }
+    const x = t || S.tkArt[u];
+    if(!t && x===undefined){ S.tkArt[u]=null; S.db.doc(`ticketart/${u}`).get().then(s=>{ S.tkArt[u]=s.exists?s.data():null; render(); }).catch(()=>{}); return ''; }
+    if(!x) return '';
+    const ab = x.art!=='tag' && (x.bis||0)<=now(); const art = ab ? 'tag' : x.art;
+    const g = t && art!=='tag' ? `Gültig bis ${tkEnde(x.bis).replace(' Uhr','')}` : art==='tag' ? 'Gratis, ohne Ablauf' : undefined;
+    return `<div class="tkkopf2${breit?' breit':''}" aria-label="Ticket: ${esc(ticketName(art))}">${ticketBild(art,{nr:tkNr(u), ...(g?{gueltig:g}:{})})}</div>`; }catch(e){ return ''; } }
 /* ===================== Kiosk: Tickets ansehen =====================
    Noch ohne Funktion (Beta). Später kaufen Nutzer hier ihre Mitgliedschaft. Tageskarten sind nicht kaufbar, sie gibt es nur als Demo-Zugang.
    Die Preise sind absichtlich unkenntlich, sie werden später festgelegt. */
 const TK_INFO = {
-  tag:   {n:'TAGESKARTE',  dauer:'24 Stunden', sub:'Schnuppern im Becken', sym:'☀️'},
+  tag:   {n:'TAGESKARTE',  dauer:'gratis, ohne Ablauf', sub:'Schnuppern im Becken', sym:'☀️'},
+  pauschal:{n:'PAUSCHALREISE', dauer:'für eine Reise', sub:'Alles für eine Reise', sym:'🧳'},
   woche: {n:'WOCHENKARTE', dauer:'7 Tage',     sub:'Für den Kurztrip',      sym:'🏊'},
   monat: {n:'MONATSKARTE', dauer:'1 Monat',    sub:'Für Dauerplaner',       sym:'🛟'},
-  jahr:  {n:'JAHRESKARTE', dauer:'1 Jahr',     sub:'Für Stammgäste',        sym:'🏆'} };
+  jahr:  {n:'JAHRESKARTE', dauer:'1 Jahr',     sub:'Für Stammgäste',        sym:'🏆'},
+  frei:  {n:'FREIKARTE',   dauer:'Testzeitraum', sub:'Freier Eintritt',     sym:'🎟️'} };
 /* Enddatum mit Uhrzeit; ab einem halben Jahr Restlaufzeit mit Jahreszahl */
 const tkEnde = ms => { const d=new Date(ms); const jahr=(ms-now())>180*864e5 || d.getFullYear()!==new Date().getFullYear(); return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${jahr?d.getFullYear():''} ${fTime(ms)} Uhr`; };
 const tkNr = u => { let h=7; for(const c of String(u||'x')) h=(h*31+c.charCodeAt(0))%1000000; return String(h).padStart(6,'0'); };
@@ -4803,15 +4893,19 @@ function ticketBild(art, opt={}){ const i=TK_INFO[art]||TK_INFO.tag; const nr=op
       <span class="tksub">${i.sub}</span><span class="tkdauer">${opt.gueltig||`Gültig ${i.dauer}`}</span>
       ${opt.preis?`<span class="tkpreis" aria-label="Preis folgt"><i>00,00 €</i></span>`:''}</div>
     <div class="tkstub"><span class="tksym">${i.sym}</span><span class="tknr">Nr.<br><b>${nr}</b></span><span class="tkein">EINTRITT</span></div></div>`; }
-V.kiosk = ()=>{ const t=S.ticket; const mein = t && S.ticketDa ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketAbgelaufen(t)?`Abgelaufen am ${tkEnde(t.bis)}`:`Gültig bis ${tkEnde(t.bis)}`})}<span class="small ${ticketAbgelaufen(t)?'':'mut'}" ${ticketAbgelaufen(t)?'style="color:var(--pinktx)"':''}>${ticketAbgelaufen(t)?`Abgelaufen am ${tkEnde(t.bis)}. Du kannst nur noch ansehen.`:`${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}.`}</span></div>` : '';
+const TK_LEIST = { pauschal:'Von Kauf bis 30 Tage nach der Reise · bis 200 Fotos', woche:'7 Tage ab Aktivierung · bis 100 Fotos', monat:'1 Monat · bis 150 Fotos', jahr:'1 Jahr · bis 300 Fotos' };
+V.kiosk = ()=>{ const t=S.ticket; const ab=t && t.art!=='tag' && !ticketFrei() && ticketAbgelaufen(t);
+  const mein = t && S.ticketDa ? `<div class="col" style="gap:8px"><h3 style="margin:0">Dein Ticket</h3>${ticketBild(t.art,{nr:tkNr(S.uid), klein:true, gueltig:ticketFrei()?'Dauerhaft gültig':t.art==='tag'?'Gratis, ohne Ablauf':ab?`Abgelaufen am ${tkEnde(t.bis)}`:`Gültig bis ${tkEnde(t.bis)}`})}<span class="small ${ab?'':'mut'}" ${ab?'style="color:var(--pinktx)"':''}>${ticketFrei()?'Als Team bist du von Tickets ausgenommen.':t.art==='tag'?'Die Tageskarte ist gratis und läuft nie ab.':ab?`Abgelaufen am ${tkEnde(t.bis)}. Es gilt wieder die Tageskarte.`:`${tkRest(t.bis)}, gültig bis ${tkEnde(t.bis)}.`}</span></div>` : '';
   return `${hdrPlain('Kiosk')}${backBtn()}
   <div class="kioskdach" aria-hidden="true"></div>
   <div class="col" style="gap:2px"><h1>Der Kiosk</h1><span class="mut">Hier gibt es bald deine Mitgliedschaft. Wähle dein Ticket für Poolposition.</span></div>
-  <div class="info small">${ic('clock',16)} <b>Beta-Phase:</b> Der Kiosk hat noch keine Funktion. Du kannst dir die Tickets schon einmal ansehen. Die Preise legen wir später fest, gekauft werden kann noch nichts.</div>
+  <div class="info small">${ic('clock',16)} <b>Beta-Phase:</b> Kaufen geht noch nicht. Tickets vergibt vorerst die Badeaufsicht. Die Preise legen wir später fest.</div>
   ${mein}
+  <div class="card"><b>${ic('star',16)} Mit der Tageskarte (gratis)</b><span class="small">Alles ansehen und lesen, Einladungen folgen, chatten, abstimmen, planen, Packliste und Aufgaben, Buchungsunterlagen. Im Album siehst du kleine Vorschaubilder.</span>
+    <b class="small" style="margin-top:6px">Mit einem Ticket zusätzlich</b><span class="small">Eigene Reisen und Koffer-Konferenzen anlegen, Fotos und Videos teilen, Fotos vergrößern und herunterladen, Sprachnachrichten senden.</span></div>
   <div class="col" style="gap:14px"><h3 style="margin:0">Das gibt es bald</h3>
-    ${['woche','monat','jahr'].map(a=>`<div class="col" style="gap:8px">${ticketBild(a,{nr:'000'+({woche:'007',monat:'030',jahr:'365'})[a], preis:true})}<button class="btn sec block" disabled aria-disabled="true">Bald erhältlich</button></div>`).join('')}</div>
-  <span class="tiny mut">Mit dem Ticket bestimmst du, wie lange du Reisen planen, abstimmen und mitmachen kannst. Danach kannst du weiter alles ansehen.</span>`; };
+    ${['pauschal','woche','monat','jahr'].map(a=>`<div class="col" style="gap:8px">${ticketBild(a,{nr:'000'+({pauschal:'001',woche:'007',monat:'030',jahr:'365'})[a], preis:true, gueltig:TK_LEIST[a].split(' · ')[0]})}<span class="tiny mut">${esc(TK_LEIST[a])}${a==='pauschal'?' · für genau eine Reise, unser Tipp':''}</span><button class="btn sec block" disabled aria-disabled="true">Bald erhältlich</button></div>`).join('')}</div>
+  <span class="tiny mut">Ein Ticket schaltet die Funktionen für dich frei. Läuft es ab, gilt wieder die Tageskarte, und du kannst weiter alles ansehen und chatten.</span>`; };
 /* ===================== Mitgliederverwaltung (nur Oberbademeister) =====================
    Eigener Bereich im Adminbereich: Übersicht mit Zahlen, Mitgliederliste mit Labels/Notizen, Ticketprotokoll.
    Daten: tickets/{uid} (aktuelles Ticket), ticketlog (jede Zuweisung), mverw/{uid} (Labels + private Notiz). */
@@ -4825,8 +4919,8 @@ async function tkLog(u, d, aktion){ const e={uid:u, art:d.art, von:d.von, bis:d.
   try{ const r=await S.db.collection('ticketlog').add(e); if(MV.log) MV.log.unshift({id:r?.id||('l'+now()),...e}); }catch(x){ console.warn('ticketlog', x); } }
 const mvTage = n => now()-n*864e5;
 const mvTeam = (D,u) => { const ro=D.rollen?.[u]; return !!ro && (ro.super || Object.values(rechteVon(ro)).some(Boolean) || !!rangVon(ro)); };
-/* Ticketstatus: kein | tag|woche|monat|jahr (gültig) | abg (abgelaufen) | team (ausgenommen) */
-function mvStatus(D,u){ if(mvTeam(D,u)) return 'team'; const t=KONTO.tick?.[u]; if(!t) return 'kein'; return ticketAbgelaufen(t)?'abg':t.art; }
+/* Ticketstatus: kein | tag|pauschal|woche|monat|jahr|frei (gültig) | abg (abgelaufen) | team (ausgenommen) */
+function mvStatus(D,u){ if(mvTeam(D,u)) return 'team'; const t=KONTO.tick?.[u]; if(!t) return 'kein'; return (t.art!=='tag' && ticketAbgelaufen(t))?'abg':t.art; }
 const mvLabelsVon = u => MV.d?.[u]?.labels||[];
 const mvAlleLabels = () => [...new Set([...MV_LABELS, ...Object.values(MV.d||{}).flatMap(x=>x.labels||[])])];
 const mvBalken = (n,max,farbe='var(--yelt)') => `<span class="mvbalk"><i style="width:${max?Math.max(n?4:0,Math.round(n/max*100)):0}%;background:${farbe}"></i></span>`;
@@ -4847,11 +4941,11 @@ function mvUeb(D){ const P=Object.keys(S.profile); const h=heuteStart();
   const wmax=Math.max(1,...wo.map(x=>x.n));
   /* Tickets */
   const st=Object.fromEntries(P.map(u=>[u,mvStatus(D,u)])); const z=k=>P.filter(u=>st[u]===k).length;
-  const ohneTeam=P.filter(u=>st[u]!=='team').length; const tmax=Math.max(1,z('tag'),z('woche'),z('monat'),z('jahr'),z('abg'),z('kein'));
-  const bald=(n)=>P.filter(u=>{ const t=KONTO.tick?.[u]; return st[u]!=='team' && t && t.bis>now() && t.bis<=now()+n; }).sort((a,b)=>KONTO.tick[a].bis-KONTO.tick[b].bis);
+  const ohneTeam=P.filter(u=>st[u]!=='team').length; const tmax=Math.max(1,z('tag'),z('pauschal'),z('woche'),z('monat'),z('jahr'),z('frei'),z('abg'),z('kein'));
+  const bald=(n)=>P.filter(u=>{ const t=KONTO.tick?.[u]; return st[u]!=='team' && t && t.art!=='tag' && t.bis>now() && t.bis<=now()+n; }).sort((a,b)=>KONTO.tick[a].bis-KONTO.tick[b].bis);
   const b24=bald(864e5), b7=bald(7*864e5);
   const log=(MV.log||[]).filter(x=>x.aktion!=='entzogen'); const l30=log.filter(x=>x.at>=mvTage(30));
-  const hoch=P.filter(u=>['woche','monat','jahr'].includes(KONTO.tick?.[u]?.art) && !KONTO.tick[u].auto).length;
+  const hoch=P.filter(u=>['pauschal','woche','monat','jahr'].includes(KONTO.tick?.[u]?.art) && !KONTO.tick[u].auto).length;
   const konv=ohneTeam?Math.round(100*P.filter(u=>st[u]!=='team' && (log.some(x=>x.uid===u && x.art!=='tag') )).length/ohneTeam):0;
   /* Auffälligkeiten */
   const gesp=Object.entries(D.sperren||{}).filter(([u,s])=>s.typ==='konto'||s.bis>now()).length; const offen=D.meld.filter(m=>m.status==='offen').length;
@@ -4862,18 +4956,19 @@ function mvUeb(D){ const P=Object.keys(S.profile); const h=heuteStart();
   const mitReise=RX.d?new Set(Object.values(RX.d.mit).flat().filter(m=>m.status==='zugesagt').map(m=>m.uid)).size:null;
   const lab=mvAlleLabels().map(l=>[l,P.filter(u=>mvLabelsVon(u).includes(l)).length]).filter(x=>x[1]);
   const link=(f,txt)=>`<button class="mvlink" data-act="mvFilter" data-k="${f}">${txt}</button>`;
-  const TK=[['tag','Tageskarte'],['woche','Wochenkarte'],['monat','Monatskarte'],['jahr','Jahreskarte']];
+  const TK=[['tag','Tageskarte (gratis)'],['pauschal','Pauschalreise'],['woche','Wochenkarte'],['monat','Monatskarte'],['jahr','Jahreskarte'],['frei','Freikarte (Tester)']];
   return `<div class="mvgrid">${mvZ(P.length,'Mitglieder')}${mvZ(akt(h),'heute aktiv')}${mvZ(akt(mvTage(7)),'aktiv in 7 Tagen')}${mvZ(akt(mvTage(30)),'aktiv in 30 Tagen')}${mvZ(neu(h),'neu heute')}${mvZ(neu(mvTage(7)),'neu in 7 Tagen')}${mvZ(neu(mvTage(30)),'neu in 30 Tagen')}${mvZ(mitReise??'…','auf Reisen dabei')}</div>
   <div class="card"><b>${ic('mitgl',16)} Neue Mitglieder pro Woche</b><div class="mvkurve" role="img" aria-label="Neue Mitglieder pro Woche, letzte 12 Wochen">${wo.map(x=>`<span class="mvsp" title="${fD(isoDay(new Date(x.von)))}: ${x.n}"><i style="height:${Math.max(x.n?6:2,Math.round(x.n/wmax*100))}%"></i><em>${x.n}</em></span>`).join('')}</div><span class="tiny mut">Die letzten 12 Wochen, älteste links.</span></div>
   <div class="card"><b>${ic('star',16)} Tickets (${ohneTeam} Mitglieder ohne Team)</b>
     ${TK.map(([k,n])=>`<div class="mvzeile">${link(k,esc(n))}<span class="num">${z(k)}</span>${mvBalken(z(k),tmax)}</div>`).join('')}
-    <div class="mvzeile">${link('abg','Abgelaufen (nur ansehen)')}<span class="num">${z('abg')}</span>${mvBalken(z('abg'),tmax,'var(--pinktx)')}</div>
+    <div class="mvzeile">${link('abg','Abgelaufen (wieder Gratis)')}<span class="num">${z('abg')}</span>${mvBalken(z('abg'),tmax,'var(--pinktx)')}</div>
     <div class="mvzeile">${link('kein','Noch ohne Ticket')}<span class="num">${z('kein')}</span>${mvBalken(z('kein'),tmax,'var(--mut)')}</div>
     <span class="tiny mut">Team (Bademeister) ist von Tickets ausgenommen: ${z('team')}</span></div>
   <div class="card"><b>${ic('baro',16)} Vergebene Tickets (Protokoll)</b>
     <div class="mvgrid2">${TK.map(([k,n])=>`<div class="mvz"><b class="num">${log.filter(x=>x.art===k).length}</b><span>${n}<br><span class="tiny mut">${l30.filter(x=>x.art===k).length} in 30 Tagen</span></span></div>`).join('')}</div>
     <span class="tiny">${hoch} Mitglieder haben aktuell ein höheres Ticket · ${konv} % haben schon einmal mehr als eine Tageskarte bekommen.</span>
     <span class="tiny mut">Verkauf gibt es noch nicht, hier zählen alle Zuweisungen durch dich. Die automatische Tageskarte beim Start ist nicht enthalten. Ab dieser Version wird jede Zuweisung protokolliert.</span></div>
+  ${FB&&istSuper()?`<div class="card"><b>${ic('album',16)} Fotos aus der Zeit vor Beta 3.1</b><span class="small">Zieht alte Fotos, Videos und Sprachnachrichten in das neue geschützte Schema um und erzeugt Vorschaubilder. Kann mehrfach gestartet werden, bis nichts mehr offen ist.</span>${MV.umzug?`<span class="tiny">${esc(MV.umzug)}</span>`:''}<button class="btn sm sec" data-act="medienUmzug" ${MV.umzugLaeuft?'disabled':''}>${MV.umzugLaeuft?'Läuft …':'Umzug starten'}</button></div>`:''}
   <div class="card ${b24.length?'hinweis':''}"><b>${ic('clock',16)} Läuft bald ab</b>
     <span class="small">${b24.length} in den nächsten 24 Stunden · ${b7.length} in 7 Tagen</span>
     ${b7.slice(0,8).map(u=>`<div class="row between" style="gap:8px"><button class="mvname" data-act="mvAuf" data-uid="${u}">${av(u,26)} <span class="ell">${esc(nm(u))}</span></button><span class="tiny mut">${esc(ticketName(KONTO.tick[u].art))} bis ${fStamp(KONTO.tick[u].bis)}</span><button class="btn xs sec" data-act="mvVerl" data-uid="${u}">Verlängern</button></div>`).join('')}
@@ -4891,7 +4986,7 @@ A.mvFilter = el => { S.ui.mvTab='liste'; S.ui.mvF=el.dataset.k; S.form.mvSuche='
 
 /* ---------- Liste ---------- */
 function mvFilterFn(D){ const gesp=u=>{ const sp=D.sperren?.[u]; return !!sp && (sp.typ==='konto'||sp.bis>now()); };
-  return { alle:()=>true, tag:u=>mvStatus(D,u)==='tag', woche:u=>mvStatus(D,u)==='woche', monat:u=>mvStatus(D,u)==='monat', jahr:u=>mvStatus(D,u)==='jahr', abg:u=>mvStatus(D,u)==='abg', kein:u=>mvStatus(D,u)==='kein',
+  return { alle:()=>true, tag:u=>mvStatus(D,u)==='tag', pauschal:u=>mvStatus(D,u)==='pauschal', frei:u=>mvStatus(D,u)==='frei', woche:u=>mvStatus(D,u)==='woche', monat:u=>mvStatus(D,u)==='monat', jahr:u=>mvStatus(D,u)==='jahr', abg:u=>mvStatus(D,u)==='abg', kein:u=>mvStatus(D,u)==='kein',
     bald:u=>{ const t=KONTO.tick?.[u]; return mvStatus(D,u)!=='team' && !!t && t.bis>now() && t.bis<=now()+7*864e5; }, gesperrt:gesp,
     alt:u=>!!KONTO.daten?.[u]?.version && KONTO.daten[u].version!==APP_VERSION, still:u=>{ const a=zuletzt(u); return !!a && a<mvTage(30); }, neu:u=>beigetreten(u)>=mvTage(7), team:u=>mvStatus(D,u)==='team' }; }
 function mvListeVon(D){ const f=S.ui.mvF||'alle'; const q=(S.form.mvSuche||'').trim().toLowerCase(); const fn=mvFilterFn(D);
@@ -4902,7 +4997,7 @@ function mvListe(D){ const f=S.ui.mvF||'alle'; const fn=mvFilterFn(D); const P=O
   const chip=(k,t)=>`<button class="fchip ${f===k?'an':''}" data-act="mvFilterSet" data-k="${k}" aria-pressed="${f===k}">${t} <span class="mut">${P.filter(fn[k]).length}</span></button>`;
   const lc=mvAlleLabels().filter(x=>P.some(u=>mvLabelsVon(u).includes(x)));
   return `<input class="in" id="f_mvSuche" placeholder="Name oder Label suchen" data-live="1" autocomplete="off">
-  <div class="fchips">${chip('alle','Alle')}${chip('tag','Tageskarte')}${chip('woche','Woche')}${chip('monat','Monat')}${chip('jahr','Jahr')}${chip('bald','Läuft bald ab')}${chip('abg','Abgelaufen')}${chip('kein','Ohne Ticket')}${chip('neu','Neu (7 T.)')}${chip('still','Inaktiv 30 T.')}${chip('gesperrt','Gesperrt')}${chip('team','Team')}
+  <div class="fchips">${chip('alle','Alle')}${chip('tag','Gratis')}${chip('pauschal','Pauschal')}${chip('woche','Woche')}${chip('monat','Monat')}${chip('jahr','Jahr')}${chip('frei','Freikarte')}${chip('bald','Läuft bald ab')}${chip('abg','Abgelaufen')}${chip('kein','Ohne Ticket')}${chip('neu','Neu (7 T.)')}${chip('still','Inaktiv 30 T.')}${chip('gesperrt','Gesperrt')}${chip('team','Team')}
     ${lc.map(x=>`<button class="fchip ${f==='l:'+x?'an':''}" data-act="mvFilterSet" data-k="l:${esc(x)}" aria-pressed="${f==='l:'+x}">${ic('tag',12)} ${esc(x)} <span class="mut">${P.filter(u=>mvLabelsVon(u).includes(x)).length}</span></button>`).join('')}</div>
   <div class="row wrap" style="gap:8px"><button class="btn sm sec" data-act="mvTicketAlle" ${l.filter(u=>u!==S.uid).length?'':'disabled'}>${ic('star',14)} Ticket für Auswahl (${l.filter(u=>u!==S.uid).length})</button><button class="btn sm sec" data-act="mvLabelAlle" ${l.length?'':'disabled'}>${ic('tag',14)} Label für Auswahl</button><button class="btn sm sec" data-act="mvCsv" ${l.length?'':'disabled'}>${ic('post',14)} CSV</button></div>
   <span class="tiny mut">${l.length} ${l.length===1?'Mitglied':'Mitglieder'}, sortiert nach letzter Aktivität. Antippen für Profil, Labels und Notiz.</span>
@@ -4920,14 +5015,14 @@ A.mvCsv = async ()=>{ const D=S.ui.sys||{}; const l=S.ui.mvListe||[]; const q=v=
 const AKT = { zugewiesen:'zugewiesen', verlaengert:'verlängert' };
 function mvLog(D){ const l=MV.log||[]; const f=S.ui.mvLogF||'alle';
   const show=l.filter(x=>f==='alle'||x.art===f).slice(0,150);
-  return `<div class="fchips">${[['alle','Alle'],['tag','Tag'],['woche','Woche'],['monat','Monat'],['jahr','Jahr']].map(([k,n])=>`<button class="fchip ${f===k?'an':''}" data-act="mvLogF" data-k="${k}" aria-pressed="${f===k}">${n}</button>`).join('')}</div>
+  return `<div class="fchips">${[['alle','Alle'],['pauschal','Pauschal'],['woche','Woche'],['monat','Monat'],['jahr','Jahr'],['frei','Frei']].map(([k,n])=>`<button class="fchip ${f===k?'an':''}" data-act="mvLogF" data-k="${k}" aria-pressed="${f===k}">${n}</button>`).join('')}</div>
   <span class="tiny mut">${l.length} Einträge. Jede Zuweisung und Verlängerung wird hier festgehalten (die automatische Tageskarte nicht).</span>
   <div class="list">${show.map(x=>`<div class="li"><span class="grow col" style="gap:2px;min-width:0"><span class="small"><b>${esc(nm(x.uid))}</b> · ${esc(ticketName(x.art))} ${AKT[x.aktion]||''}</span><span class="tiny mut">gültig bis ${fStamp(x.bis)} · ${fStamp(x.at)} von ${esc(nm(x.by))}</span></span></div>`).join('')||'<div class="empty small">Noch keine Einträge. Sobald du ein Ticket vergibst, erscheint es hier.</div>'}</div>`; }
 A.mvLogF = el => { S.ui.mvLogF=el.dataset.k; render(); };
 
 /* ---------- Verlängern ---------- */
 A.mvVerl = async el => { if(!istSuper()) return; const u=el.dataset.uid; const t=KONTO.tick?.[u]; if(!t) return; el.disabled=true;
-  const von=t.von||now(); const bis=ticketBis(t.art, Math.max(now(), t.bis)); const d={art:t.art, von, bis, by:S.uid, at:now()};
+  const von=t.von||now(); const bis=ticketBis(t.art, Math.max(now(), t.bis)); const d={art:t.art, von, bis, by:S.uid, at:now()}; if(!FB) S.db.doc(`ticketart/${u}`).set({art:t.art, bis}).catch(()=>{});
   try{ await S.db.doc(`tickets/${u}`).set(d); KONTO.tick[u]={id:u,...d}; await tkLog(u,d,'verlaengert');
     try{ await supportSend(u, `Dein Ticket wurde verlängert: ${ticketName(t.art)}, gültig bis ${fStamp(bis)}.`); }catch(e){}
     toast('Verlängert'); render(); if(S.ov?.v==='mvProfil') renderOv(); }catch(e){ el.disabled=false; fail(e,'Verlängern'); } };
@@ -4984,7 +5079,7 @@ function mvNutz(D){ if(!MV.nz && !MV.nzLaedt) nzLaden(); if(!MV.nz) return '<p c
   const hs=Array.from({length:24},(_,i)=>A.h['h'+pad(i)]||0); const hmax=Math.max(1,...hs);
   const mitT=Object.values(A.pro).reduce((x,p)=>x+p.tage,0)||1;
   const ticketGr={}; users.forEach(u=>{ const k=mvStatus(D,u); (ticketGr[k]=ticketGr[k]||{n:0,sek:0}); ticketGr[k].n++; ticketGr[k].sek+=A.pro[u].sek; });
-  const TN={tag:'Tageskarte',woche:'Wochenkarte',monat:'Monatskarte',jahr:'Jahreskarte',abg:'Abgelaufen',kein:'Ohne Ticket',team:'Team'};
+  const TN={tag:'Tageskarte',pauschal:'Pauschalreise',woche:'Wochenkarte',monat:'Monatskarte',jahr:'Jahreskarte',frei:'Freikarte',abg:'Abgelaufen',kein:'Ohne Ticket',team:'Team'};
   const rk=users.map(u=>[u,A.pro[u]]).sort((a,b)=>b[1].sek-a[1].sek).slice(0,25);
   const sum=Object.keys(MV.nzSum||{}).length;
   return `<div class="fchips">${[7,30,90].map(n=>`<button class="fchip ${tage===n?'an':''}" data-act="nzTage" data-k="${n}" aria-pressed="${tage===n}">${n} Tage</button>`).join('')}</div>
@@ -5006,6 +5101,10 @@ function nzProfil(u){ if(!MV.nz) return ''; const l=(MV.nz||[]).filter(x=>x.uid=
   return `<div class="card tight"><b class="small">${ic('baro',14)} Nutzung (bis 90 Tage)</b><span class="tiny">${nzZeit(p.sek)} an ${p.tage} Tagen · ${p.starts} Starts · Ø ${nzZeit(p.sek/p.tage)} pro Tag</span>
     ${top.map(([b,v])=>`<div class="mvzeile"><span class="small">${esc(b)}</span><span class="tiny mut">${nzZeit(v)}</span>${mvBalken(v,top[0][1])}</div>`).join('')}
     <div class="mvkurve" style="height:60px" role="img" aria-label="Zeit pro Tag">${t14.map(x=>`<span class="mvsp" title="${esc(x.tag)}: ${nzZeit(x.sek)}"><i style="height:${Math.max(4,Math.round((x.sek||0)/mx*100))}%"></i></span>`).join('')}</div><span class="tiny mut">Letzte Tage mit Nutzung, älteste links.</span></div>`; }
+
+A.medienUmzug = async ()=>{ if(!FB || !istSuper() || MV.umzugLaeuft) return; MV.umzugLaeuft=true; MV.umzug=''; render();
+  try{ const r=await PPAuth.call('medienUmziehen',{}); MV.umzug=`Umgezogen: ${r.ok}, nicht mehr vorhanden: ${r.fehlt}, Fehler: ${r.fehler}, noch offen: ${r.offen}.`; }catch(e){ console.warn(e); MV.umzug='Der Umzug hat nicht geklappt. Bitte noch einmal starten.'; }
+  MV.umzugLaeuft=false; render(); };
 /* ===================== Nutzungsmessung =====================
    Misst nur Zahlen, nie Inhalte: Zeit im Vordergrund pro Bereich, Antippen von Funktionen, App-Starts.
    Zählt nur, wenn die App sichtbar ist und innerhalb der letzten 2 Minuten bedient wurde (Hintergrund und Leerlauf zählen nicht).
@@ -5052,6 +5151,16 @@ A.nzSchalter = ()=>{ saveSettings({nutzungAus:!S.settings?.nutzungAus}); render(
    NUR für den Oberbademeister (istSuper) im Admin-Dashboard. Änderungen am Adminsystem dürfen nie in „Was ist neu?“ (neues.js) oder
    in Nutzer-Texten auftauchen. Neue Einträge hier oben anfügen; je Version: kurz (t) und im Detail (d). */
 const ADMLOG = [
+  { v:'Beta 3.1', t:'Ticketmodell: Rechte, Freikarte, Pauschalreise, Medien-Sperre', d:[
+    'Tickets: neue Arten Pauschalreise (pauschal, Ende frei wählbar, Vorschlag Reiseende plus 30 Tage) und Freikarte (frei, für Tester, alle Rechte, ohne Limits, Ende frei wählbar). Zuweisung im Dialog mit Datumsfeld für diese beiden Arten. Die Tageskarte läuft nie ab (Anzeige „gratis“). Abgelaufene bezahlte Tickets gelten wie die Tageskarte.',
+    'Rechte (ticket.js): tkDarf(recht) mit foto_hoch, foto_gross, foto_laden, video, sprache, reise_anlegen, admin für bezahlt (pauschal, woche, monat, jahr, frei) und Team. Der Wächter blockiert nur noch Reise anlegen und Verwalten durch die Reiseleitung ohne Ticket. Der Hinweis „Nur ansehen“ entfällt.',
+    'Medien: neue Fotos und Videos im Chat und Album liegen als Original unter uploads/{uid}/o/ (in der Nachricht steht nur der Pfad „p:…“, die Adresse holt die App beim Anzeigen), dazu ein Vorschaubild (480 px) unter uploads/{uid}/v/ im Feld vor. Altbestand hat keine Vorschau und erscheint der Tageskarte gesperrt. Gäste einer Tagesaktivität laden weiter über den Altpfad hoch.',
+    'Speicherregeln: Originale nur mit Kennzeichen tkb (Ende des bezahlten Tickets) oder st (Team). Die Funktion claimsSelf (und die Trigger ticketKennzeichen, rollenKennzeichen in functions/claims.js) schreibt die Kennzeichen, die App ruft claimsSelf beim Start und bei Ticketänderung auf und erneuert das Token. Neu: functions/admins.json (aus konfig.py, nicht im Repo).',
+    'Datenbankregeln: ticketOk() ist nur noch „angemeldet“. Neu bezahlt(): Reise anlegen, Reiseleitung ändern und Foto-, Audio-Nachrichten verlangen ein bezahltes Ticket. Neu: kontingent/{uid} (Zähler foto, video, sprache je Ticket, tv = Beginn).',
+    'Limits (Server): Funktion medienZaehlen (functions/medien.js) zählt jedes neue Original und jede Vorschau in kontingent/{uid} (nur der Server schreibt) und löscht Überschreitungen sofort. Fotos je Ticket Pauschal 200, Woche 100, Monat 150, Jahr 300; Videos und Sprachnachrichten je 20; Freikarte und Team ohne Limit. Die App liest nur und zeigt den Hinweis erst bei 19 von 20 (Fotos: bei noch 10). Vor Reisebeginn keine Fotos und Videos (Prüfung nur in der App; Ausnahme Reiseinfos und Belege).',
+    'Altbestand: Mitgliederverwaltung, Übersicht, Karte „Fotos aus der Zeit vor Beta 3.1“ startet die Funktion medienUmziehen (nur Oberbademeister). Sie kopiert Originale nach o/, erzeugt Vorschauen (sharp, 480 px) unter v/, setzt „p:Pfad“ und vor in der Nachricht und löscht die alte Datei. Mehrfach startbar. Profilbilder und Belege bleiben im Altpfad.',
+    'Kaufangebot: Karte „Meine Reisen“ ab 7 Tage vor Reisebeginn bis Reiseende ohne bezahltes Ticket; Push eine Woche vorher (tagesErinnerung, Marker kaufAngebot). Empfehlung bis 7 Reisetage Wochenkarte, sonst Pauschalreise.',
+    'Offen: Nach dem ersten Veröffentlichen den Umzug des Altbestands starten und zwei Konten testen (Tageskarte, Freikarte). Kaufabwicklung folgt später. Die Funktion medienZaehlen nutzt die Region der Datenbank, sie muss zur Speicher-Region passen.' ] },
   { v:'Beta 2.33', t:'Begriffe: Reiseleitung und Herde', d:[
     'Wer eine Reise organisiert, heißt überall „Reiseleitung“ (bisher Admin, Gruppenadmin, Reise-Admin), auch in der Reisenliste und Mitgliederansicht der Badeaufsicht. „Admin“ steht nur noch für das Team von Poolposition.',
     'Abgelaufenes Ticket: Der Hinweis verweist auf die Badeaufsicht statt auf den Admin.' ] },
@@ -8357,10 +8466,22 @@ A.createReise = async el => { const f=S.form; if(f.modus!=='abst') return altCre
 /* „Eigene Koffer-Konferenz“ nach einer Absage: mit den übrigen Zeiträumen weitermachen */
 A.eigeneKonf = ()=>{ const r=cur(); const z=S.rt.vorschlaege.filter(v=>v.typ==='zeit'&&v.id!==r.zeitId).map(v=>({von:v.von,bis:v.bis}));
   go('neu',{form:{modus:'abst', ws:1, art:r.reiseart, titel:`${r.titel} – Plan B`, zjn:z.length?'nein':'', zmode:'zeit', zlist:z, invite:S.rt.mitglied.filter(m=>m.status==='abgesagt'&&m.uid!==S.uid).map(m=>m.uid)}}); };
+
+/* Beta 3.1: Reisen und Koffer-Konferenzen anlegen gibt es mit einem Ticket. Die Tageskarte sieht stattdessen einen Hinweis. */
+A.neuAnlegen = ()=>{ if(!tkDarf('reise_anlegen')) return go('neuTicket'); go('neu'); };
+V.neuTicket = ()=>`${hdrPlain('Urlaub anlegen')}${backBtn()}<div class="empty">${ic('lock',30)}<span><b>Eigene Reisen gibt es mit einem Ticket.</b><br>Mit der Tageskarte kannst du Einladungen folgen, Reisen ansehen, chatten, abstimmen und planen. Wer selbst eine Reise oder Koffer-Konferenz anlegt, braucht ein Ticket.</span></div><button class="btn block" data-act="go" data-v="kiosk">Tickets ansehen</button>`;
+const altNeuV = V.neu; V.neu = ()=> tkDarf('reise_anlegen') ? altNeuV() : V.neuTicket();
 /* ===================== Was ist neu? =====================
    Nach einem Update zeigt „Meine Reisen“ einmal eine kurze Karte mit den Neuerungen. Die vollständige Liste steht unter „Mein Profil“.
    Neue Mitglieder sehen die Karte nicht, für sie ist alles neu. Gemerkt wird die gesehene Version in den eigenen Einstellungen (neuGesehen). */
 const NEUES = [
+  { v:'Beta 3.1', t:'Neue Tickets: Gratis, Pauschalreise und mehr', p:[
+    'Die Tageskarte ist jetzt gratis und läuft nicht mehr ab. Du kannst weiter alles ansehen, Einladungen folgen, chatten, abstimmen, planen sowie Packliste und Aufgaben nutzen.',
+    'Mit einem Ticket (Pauschalreise, Wochenkarte, Monatskarte, Jahreskarte) legst du eigene Reisen an, teilst Fotos und Videos, vergrößerst und speicherst Fotos und sendest Sprachnachrichten.',
+    'Mit der Tageskarte siehst du Fotos als kleine Vorschau. Buchungsunterlagen wie Angebote sind für alle in voller Größe sichtbar.',
+    'Die Pauschalreise gilt für genau eine Reise. Fotos und Videos gibt es ab Reisebeginn, Angebote und Unterlagen kannst du schon vorher hochladen.',
+    'Eine Woche vor Reisebeginn zeigt dir die App, welches Ticket passt. Tester bekommen eine Freikarte.',
+  ] },
   { v:'Beta 2.33', t:'Neue Begriffe: Reiseleitung und Herde', p:[
     'Wer die Reise organisiert, heißt jetzt überall „Reiseleitung“.',
     'Ihr alle zusammen seid die „Herde“, zum Beispiel im Morgenbericht: „Guten Morgen, liebe Herde!“ Habt ihr einen eigenen Gruppennamen, bleibt er.',

@@ -11,9 +11,12 @@ service cloud.firestore {
     // Bademeister: Rechte vergibt der Oberbademeister (Superadmin) einzeln, gespeichert unter rollen/{uid}.rechte
     function rollenDoc(u) { return /databases/$(database)/documents/rollen/$(u); }
     function recht(r) { return signedIn() && exists(rollenDoc(me())) && get(rollenDoc(me())).data.get('rechte', {}).get(r, false) == true; }
-    // Tickets (Mitgliedschaft): Schreiben ist nur mit gültigem Ticket erlaubt. Oberbademeister und Badeaufsicht sind ausgenommen. Lesen bleibt immer möglich.
+    // Tickets (Beta 3.1): Die Tageskarte ist gratis und läuft nie ab, sie darf ansehen, lesen, chatten, abstimmen und planen (ticketOk = angemeldet).
+    // Bezahlte Tickets (Pauschalreise, Woche, Monat, Jahr) und die Freikarte dürfen zusätzlich Reisen anlegen und verwalten sowie Fotos, Videos und Sprachnachrichten senden (bezahlt()).
+    // Oberbademeister und Badeaufsicht sind ausgenommen.
     function ticketDoc(u) { return /databases/$(database)/documents/tickets/$(u); }
-    function ticketOk() { return isSuper() || (signedIn() && exists(ticketDoc(me())) && get(ticketDoc(me())).data.bis > request.time.toMillis()) || (signedIn() && exists(rollenDoc(me()))); }
+    function ticketOk() { return signedIn(); }
+    function bezahlt() { return isSuper() || (signedIn() && exists(rollenDoc(me()))) || (signedIn() && exists(ticketDoc(me())) && get(ticketDoc(me())).data.art in ['pauschal', 'woche', 'monat', 'jahr', 'frei'] && get(ticketDoc(me())).data.bis > request.time.toMillis()); }
     function isAdmin() { return isSuper() || recht('reisen'); }
     function isMod() { return isSuper() || recht('meldungen') || recht('verwarnen') || recht('nutzer'); }
     function mDoc(rid, uid) { return /databases/$(database)/documents/mitglied/$(rid + '_' + uid); }
@@ -50,6 +53,18 @@ service cloud.firestore {
       allow create, update, delete: if isSuper();
     }
 
+    // Ticketart (Beta 3.1): für alle Angemeldeten lesbar (Anzeige im Profil), geschrieben nur vom Server
+    match /ticketart/{uid} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Kontingente (Beta 3.1): Zähler für Fotos, Videos und Sprachnachrichten je Ticket. Führt allein der Server (Funktion medienZaehlen), die App liest nur.
+    match /kontingent/{uid} {
+      allow read: if signedIn() && (me() == uid || isSuper() || recht('nutzer'));
+      allow write: if false;
+    }
+
     // Mitgliederverwaltung: Ticketprotokoll und Labels/Notizen, nur der Oberbademeister
     match /ticketlog/{id} {
       allow read, create: if isSuper();
@@ -73,10 +88,10 @@ service cloud.firestore {
     // Reisen: lesbar für Angemeldete
     match /reisen/{rid} {
       allow read: if signedIn();
-      allow create: if ticketOk() && (signedIn() && request.resource.data.createdBy == me() && request.resource.data.admin == me());
+      allow create: if bezahlt() && (signedIn() && request.resource.data.createdBy == me() && request.resource.data.admin == me());
       // Admin der Reise und System-Admin dürfen alles (auch die Admin-Rolle übertragen).
       // Normale Mitglieder dürfen nur Vortreffen-Hinweis, neue Getränke und den Stand der Auszeichnungen eintragen – nie Admin, Sperren oder Reisedaten.
-      allow update: if ticketOk() && (isTripAdmin(rid) || isAdmin()
+      allow update: if ticketOk() && ((isTripAdmin(rid) && bezahlt()) || isAdmin()
         || (recht('ausschliessen') && onlyChanges(['gesperrt']))
         || (isMember(rid) && onlyChanges(['naechstesVortreffen', 'getraenkeKat', 'auszeichnungen']))
         // Infos der Unterkunft: alle Mitglieder, wenn der Gruppenadmin es erlaubt hat
@@ -151,7 +166,7 @@ service cloud.firestore {
       // Gäste lesen nur freigegebene Nachrichten ihrer Aktivität
       allow read: if isMember(resource.data.rid) || isAdmin()
         || (resource.data.get('gastSichtbar', false) == true && isGast(resource.data.aktId));
-      allow create: if ticketOk() && ((isMember(request.resource.data.rid) && request.resource.data.by == me()) || isAdmin()
+      allow create: if ticketOk() && ((isMember(request.resource.data.rid) && request.resource.data.by == me() && (!(request.resource.data.typ in ['bild', 'audio']) || bezahlt())) || isAdmin()
         || (recht('ausschliessen') && request.resource.data.typ == 'system' && request.resource.data.by == 'support')
         || (request.resource.data.by == me() && request.resource.data.gastSichtbar == true
             && request.resource.data.aktId is string && isGast(request.resource.data.aktId)

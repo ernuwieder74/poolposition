@@ -129,6 +129,13 @@ exports.tagesErinnerung = onSchedule({ schedule: 'every 60 minutes', region: 'eu
       if (r.von && tagPlus(jetzt.datum, 1) === r.von && r.erinnertAbreise !== r.von) {
         await d.ref.update({ erinnertAbreise: r.von }).catch(() => {});
         await senden(dabei, 'aufgaben', { title: `🧳 Morgen geht's los: ${reiseTitel(r)}`, body: 'Letzter Check: Koffer gepackt, Tickets und Ausweise griffbereit?', tag: `abreise_${d.id}`, link: '/' }); }
+      /* Kaufangebot: eine Woche vor Reisebeginn an alle ohne bezahltes Ticket (einmal pro Reise, Marker reisen/{id}.kaufAngebot) */
+      if (r.von && tagPlus(jetzt.datum, 7) === r.von && r.kaufAngebot !== r.von) {
+        await d.ref.update({ kaufAngebot: r.von }).catch(() => {});
+        const ts = await db.getAll(...dabei.map(u => db.doc(`tickets/${u}`)));
+        const ohne = ts.filter(t => { const x = t.exists ? t.data() : null; return !(x && ['pauschal', 'woche', 'monat', 'jahr', 'frei'].includes(x.art) && (x.bis || 0) > Date.parse(r.bis || r.von) ); }).map(t => t.id);
+        const tage = r.bis ? Math.round((Date.parse(r.bis) - Date.parse(r.von)) / 864e5) + 1 : 7;
+        await senden(ohne, 'aufgaben', { title: `🧳 In einer Woche geht's los: ${reiseTitel(r)}`, body: tage <= 7 ? 'Mit der Wochenkarte kannst du Fotos und Videos teilen. Tippe, um die Tickets anzusehen.' : 'Mit der Pauschalreise kannst du die ganze Reise Fotos und Videos teilen. Tippe, um die Tickets anzusehen.', tag: `kauf_${d.id}`, link: '/' }); }
       const as = await db.collection('aufgaben').where('rid', '==', d.id).get();
       for (const a of as.docs) { const x = a.data(); if (x.done || x.vorgeschlagen || !x.bis || !x.wer) continue;
         const stufe = x.bis === jetzt.datum ? 2 : x.bis === tagPlus(jetzt.datum, 2) ? 1 : 0; if (!stufe || (x.erinnert || 0) >= stufe) continue;
